@@ -10,6 +10,7 @@ let currentSpeed = 0; // La vitesse actuelle des particules
 const smoothingFactor = 0.05; // Contrôle la fluidité du mouvement (plus c'est petit, plus c'est fluide)
 let density = 100;
 let animationFrameId;
+let unsubscribeFromState = null;
 let stars = [];
 let lastTime = 0; // Pour calculer le timeDelta
 
@@ -98,7 +99,12 @@ export const opticalFlowModule = {
         sceneEl = _sceneEl;
         container = _container;
         
-        stateManager.subscribe(this.onStateChange.bind(this));
+        if (unsubscribeFromState) {
+            unsubscribeFromState();
+            unsubscribeFromState = null;
+        }
+
+        unsubscribeFromState = stateManager.subscribe(this.onStateChange.bind(this));
 
         _generateStars();
 
@@ -147,5 +153,9 @@ export const opticalFlowModule = {
         currentSpeed = 0;
         targetSpeed = 0;
         lastTime = 0;
+        if (unsubscribeFromState) {
+            unsubscribeFromState();
+            unsubscribeFromState = null;
+        }
     }
 };

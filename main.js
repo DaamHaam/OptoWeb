@@ -44,6 +44,29 @@ document.addEventListener('DOMContentLoaded', () => {
     const exerciseSelect = document.getElementById('exercise-select');
     const exerciseSubmenu = document.getElementById('exercise-submenu');
 
+    // --- FPS Counter ---
+    const fpsCounterEl = document.createElement('div');
+    fpsCounterEl.className = 'fps-counter';
+    fpsCounterEl.textContent = 'FPS: --';
+    document.body.appendChild(fpsCounterEl);
+
+    let fpsLastTime = performance.now();
+    let fpsFrameCount = 0;
+
+    function updateFps(now) {
+        fpsFrameCount += 1;
+        const elapsed = now - fpsLastTime;
+        if (elapsed >= 500) {
+            const fps = Math.round((fpsFrameCount * 1000) / elapsed);
+            fpsCounterEl.textContent = `${fps} FPS`;
+            fpsFrameCount = 0;
+            fpsLastTime = now;
+        }
+        requestAnimationFrame(updateFps);
+    }
+
+    requestAnimationFrame(updateFps);
+
     // --- State Variables ---
     let activeExerciseModule = null;
     let activeVisualModule = null;
