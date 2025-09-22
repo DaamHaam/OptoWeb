@@ -32,8 +32,20 @@ export const stateManager = {
      * @param {function} callback - La fonction à appeler chaque fois que l'état change.
      */
     subscribe(callback) {
+        if (typeof callback !== 'function') {
+            throw new TypeError('stateManager.subscribe attend une fonction en paramètre.');
+        }
+
         subscribers.push(callback);
         console.log(`Un nouveau module s'est abonné. Total abonnés: ${subscribers.length}`);
+
+        return () => {
+            const index = subscribers.indexOf(callback);
+            if (index !== -1) {
+                subscribers.splice(index, 1);
+                console.log(`Un module s'est désabonné. Total abonnés: ${subscribers.length}`);
+            }
+        };
     },
 
     /**
