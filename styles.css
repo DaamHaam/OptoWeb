@@ -1,6 +1,21 @@
 /* styles.css */
 /* Rôle: Centralise tous les styles de l'application pour une maintenance facilitée. */
 body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+.fps-counter {
+    position: fixed;
+    top: 12px;
+    left: 12px;
+    padding: 6px 10px;
+    background: rgba(0, 0, 0, 0.6);
+    color: #0f0;
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 1;
+    border-radius: 4px;
+    z-index: 1000;
+    pointer-events: none;
+    user-select: none;
+}
 .ui-panel { position: absolute; background: rgba(0, 0, 0, 0.8); padding: 15px; z-index: 10; color: white; user-select: none; -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; }
 .ui-panel label, .ui-panel span, .ui-panel button, .ui-panel select { font-weight: bold; font-size: 1.1em; padding: 5px 10px; border-radius: 5px; display: block; width: 100%; box-sizing: border-box; margin-bottom: 5px; }
 .ui-panel select, .ui-panel button { background-color: #333; color: white; border: 1px solid #555; cursor: pointer; }
