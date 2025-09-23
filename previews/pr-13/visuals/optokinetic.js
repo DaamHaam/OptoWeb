@@ -28,6 +28,10 @@ let haloTexture = null;
 let fadeAnimationId = null;
 const MAX_PALETTE_COLORS = 8;
 
+const tempCameraQuat = new THREE.Quaternion();
+const tempCameraRight = new THREE.Vector3(1, 0, 0);
+const tempCameraUp = new THREE.Vector3(0, 1, 0);
+
 const palettesUniformTemplate = Array.from({ length: MAX_PALETTE_COLORS }, () => new THREE.Color(0, 0, 0));
 
 
@@ -65,7 +69,9 @@ function _createInstancedMaterial() {
             paletteFrom: { value: palettesUniformTemplate.map(color => color.clone()) },
             paletteTo: { value: palettesUniformTemplate.map(color => color.clone()) },
             paletteFromSize: { value: 1 },
-            paletteToSize: { value: 1 }
+            paletteToSize: { value: 1 },
+            cameraRight: { value: new THREE.Vector3(1, 0, 0) },
+            cameraUp: { value: new THREE.Vector3(0, 1, 0) }
         },
         vertexShader: /* glsl */`
             attribute vec3 instanceOffset;
@@ -75,15 +81,16 @@ function _createInstancedMaterial() {
             varying vec2 vUv;
             varying float vPaletteIndex;
 
+            uniform vec3 cameraRight;
+            uniform vec3 cameraUp;
+
             void main() {
-                vec3 rightVS = vec3(modelViewMatrix[0][0], modelViewMatrix[1][0], modelViewMatrix[2][0]);
-                vec3 upVS = vec3(modelViewMatrix[0][1], modelViewMatrix[1][1], modelViewMatrix[2][1]);
-
-                vec4 mvPosition = modelViewMatrix * vec4(instanceOffset, 1.0);
-                mvPosition.xyz += rightVS * position.x * instanceScale;
-                mvPosition.xyz += upVS * position.y * instanceScale;
-
-                gl_Position = projectionMatrix * mvPosition;
+                vec4 worldPosition = modelMatrix * vec4(instanceOffset, 1.0);
+                vec3 billboardRight = cameraRight * instanceScale;
+                vec3 billboardUp = cameraUp * instanceScale;
+                vec3 displaced = worldPosition.xyz + (billboardRight * position.x) + (billboardUp * position.y);
+                vec4 viewPosition = viewMatrix * vec4(displaced, 1.0);
+                gl_Position = projectionMatrix * viewPosition;
                 vUv = uv;
                 vPaletteIndex = instancePaletteIndex;
             }
@@ -270,6 +277,14 @@ function _animate(time) {
     frameCounter++;
     const dt = (time - lastFrameTime) / 1000;
     lastFrameTime = time;
+
+    if (instancedMaterial && cameraEl) {
+        cameraEl.object3D.getWorldQuaternion(tempCameraQuat);
+        tempCameraRight.set(1, 0, 0).applyQuaternion(tempCameraQuat);
+        tempCameraUp.set(0, 1, 0).applyQuaternion(tempCameraQuat);
+        instancedMaterial.uniforms.cameraRight.value.copy(tempCameraRight);
+        instancedMaterial.uniforms.cameraUp.value.copy(tempCameraUp);
+    }
 
     if (colorTransition.isActive && instancedMaterial) {
         const elapsed = time - colorTransition.startTime;
