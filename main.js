@@ -84,6 +84,10 @@ document.addEventListener('DOMContentLoaded', () => {
             activeVisualModule.cleanup();
         }
 
+        if (skyEl) {
+            skyEl.setAttribute('color', '#000000');
+        }
+
         activeVisualModule = VisualModules[moduleName] || null;
         updateUIVisibility(moduleName);
 
