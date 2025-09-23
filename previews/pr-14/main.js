@@ -29,6 +29,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const cameraEl = document.querySelector('a-camera');
     const spheresContainer = document.getElementById('spheres');
     const visualSelect = document.getElementById('visual-select');
+    const visualSubmenu = document.getElementById('visual-submenu');
     const densitySlider = document.getElementById('density-slider');
     const densityValue = document.getElementById('density-value');
     const horizontalSpeedValue = document.getElementById('horizontal-speed-value');
@@ -43,6 +44,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const ambianceControl = document.getElementById('ambiance-control');
     const exerciseSelect = document.getElementById('exercise-select');
     const exerciseSubmenu = document.getElementById('exercise-submenu');
+    const skyEl = document.getElementById('sky');
 
     // --- State Variables ---
     let activeExerciseModule = null;
@@ -51,6 +53,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const translationSpeedIncrement = 0.5;
 
     const VisualModules = {
+        none: null,
         optokinetic: optokineticModule,
         opticalFlow: opticalFlowModule,
         rotatingCube: rotatingCubeModule,
@@ -67,11 +70,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const rotatingCubeControls = document.getElementById('rotating-cube-controls');
     const heightsControls = document.getElementById('heights-controls');
 
-        
+
         optokineticControls.style.display = (moduleName === 'optokinetic') ? 'flex' : 'none';
         opticalFlowControls.style.display = (moduleName === 'opticalFlow') ? 'flex' : 'none';
         rotatingCubeControls.style.display = (moduleName === 'rotatingCube') ? 'flex' : 'none';
         heightsControls.style.display = (moduleName === 'heights') ? 'flex' : 'none';
+
+        const shouldDisplaySubmenu = moduleName && moduleName !== 'none';
+        visualSubmenu.style.display = shouldDisplaySubmenu ? '' : 'none';
     }
 
     function setActiveVisualModule(moduleName) {
@@ -79,25 +85,43 @@ document.addEventListener('DOMContentLoaded', () => {
             activeVisualModule.cleanup();
         }
 
-        activeVisualModule = VisualModules[moduleName];
+        activeVisualModule = VisualModules[moduleName] || null;
         updateUIVisibility(moduleName);
 
-        if (activeVisualModule && typeof activeVisualModule.init === 'function') {
-            activeVisualModule.init(sceneEl, rigEl, cameraEl, spheresContainer);
-            // Reset speeds via stateManager
-            const currentState = stateManager.getState();
-            let newSpeeds = { h: 0, v: 0, t: 0, y: 0 };
-            if (moduleName === 'rotatingCube') {
-                newSpeeds.t = parseFloat(cubeSpeedSlider.value);
+        const currentState = stateManager.getState();
+        const baseVisualState = {
+            ...currentState.visual,
+            activeModule: moduleName,
+            speeds: { h: 0, v: 0, t: 0, y: 0 }
+        };
+
+        if (!activeVisualModule) {
+            if (skyEl) {
+                skyEl.setAttribute('color', '#000000');
             }
-            stateManager.setState({ 
-                visual: { 
-                    ...currentState.visual, 
-                    activeModule: moduleName,
-                    speeds: newSpeeds 
-                } 
-            });
+            horizontalSpeedValue.textContent = '0';
+            verticalSpeedValue.textContent = '0';
+            translationSpeedValue.textContent = '0.0';
+            heightSpeedValue.textContent = '0.0';
+            stateManager.setState({ visual: baseVisualState });
+            return;
         }
+
+        if (typeof activeVisualModule.init === 'function') {
+            activeVisualModule.init(sceneEl, rigEl, cameraEl, spheresContainer);
+        }
+
+        let newSpeeds = { h: 0, v: 0, t: 0, y: 0 };
+        if (moduleName === 'rotatingCube') {
+            newSpeeds.t = parseFloat(cubeSpeedSlider.value);
+        }
+
+        stateManager.setState({
+            visual: {
+                ...baseVisualState,
+                speeds: newSpeeds
+            }
+        });
     }
 
     function getHorizontalForwardQuaternion() {

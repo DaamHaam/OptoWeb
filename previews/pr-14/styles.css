@@ -150,6 +150,15 @@ body {
     gap: 8px;
 }
 
+.optokinetic-control {
+    align-items: flex-start;
+    gap: 6px;
+}
+
+.optokinetic-control .speed-display {
+    align-self: flex-start;
+}
+
 .control-item input[type="range"],
 .control-item select {
     width: 100%;
@@ -159,18 +168,31 @@ body {
     align-items: center;
     gap: 8px;
 }
-.speed-display--stacked {
-    flex-direction: column;
-    align-items: center;
-    gap: 4px;
-}
 .speed-display .arrow-icon {
     font-size: 1.4em;
 }
-.speed-display .speed-unit {
-    color: rgba(31, 45, 61, 0.6);
-    font-size: 0.9em;
+.speed-display--inline {
+    justify-content: flex-start;
+    gap: 6px;
+}
+.speed-display--inline .arrow-icon {
+    order: 0;
+    font-size: 1.6em;
+    line-height: 1;
+    color: #1f2d3d;
+}
+.speed-display--inline .speed-value {
+    order: 1;
+    line-height: 1;
+}
+.speed-display--inline .speed-unit {
+    order: 2;
+    color: rgba(31, 45, 61, 0.7);
+    font-size: 1em;
     padding: 0;
+    align-self: center;
+    line-height: 1;
+    margin-left: 2px;
 }
 .speed-value,
 #translation-speed-value,
@@ -189,12 +211,29 @@ body {
 }
 #vertical-speed-value,
 #horizontal-speed-value {
-    min-width: 42px;
+    font-size: 2.1em;
+    min-width: 62px;
+    padding: 6px 16px;
+}
+#vertical-speed-value,
+#horizontal-speed-value {
+    text-align: right;
 }
 #exercise-panel { top: 10px; right: 10px; width: 320px; }
 .submenu-item { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
 .submenu-item label { font-size: 1em; width: auto; margin-bottom: 0; }
 .submenu-item input[type="checkbox"] { width: 20px; height: 20px; }
+#movement-type-select {
+    width: auto;
+    min-width: 0;
+    max-width: 160px;
+    display: inline-block;
+    flex: 0 0 auto;
+}
+.submenu-item label[for="movement-type-select"] {
+    flex: 1 1 auto;
+    margin-right: 12px;
+}
 #version-display {
     position: absolute;
     bottom: 20px;
@@ -281,6 +320,58 @@ a-scene[vr-mode-ui] .ui-panel, a-scene[vr-mode-ui] #version-display { display: n
     display: flex;
     flex-direction: column;
     gap: 6px;
+}
+
+.submenu--go-nogo {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px 16px;
+}
+
+.submenu--go-nogo .gonogo-grid {
+    grid-column: span 2;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px 16px;
+}
+
+.submenu--go-nogo .submenu-field {
+    gap: 4px;
+}
+
+.submenu--go-nogo .submenu-field select {
+    padding: 6px 10px;
+}
+
+.submenu--go-nogo .submenu-field--wide {
+    grid-column: span 2;
+}
+
+.submenu--go-nogo .gonogo-status {
+    grid-column: span 2;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px 16px;
+}
+
+.submenu--go-nogo .submenu-item {
+    margin-bottom: 0;
+    background: rgba(42, 161, 152, 0.08);
+    border-radius: 12px;
+    padding: 8px 12px;
+    gap: 8px;
+}
+
+.submenu--go-nogo button {
+    grid-column: span 2;
+    justify-self: end;
+}
+
+.submenu--go-nogo button#go-nogo-start {
+    width: auto;
+    padding-left: 24px;
+    padding-right: 24px;
+    align-self: center;
 }
 
 .panel-section--submenu .submenu-field label {
