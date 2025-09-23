@@ -29,8 +29,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const cameraEl = document.querySelector('a-camera');
     const spheresContainer = document.getElementById('spheres');
     const visualSelect = document.getElementById('visual-select');
+    const visualSubmenu = document.getElementById('visual-submenu');
     const densitySlider = document.getElementById('density-slider');
-    const densityValue = document.getElementById('density-value');
     const horizontalSpeedValue = document.getElementById('horizontal-speed-value');
     const verticalSpeedValue = document.getElementById('vertical-speed-value');
     const translationSpeedValue = document.getElementById('translation-speed-value');
@@ -43,6 +43,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const ambianceControl = document.getElementById('ambiance-control');
     const exerciseSelect = document.getElementById('exercise-select');
     const exerciseSubmenu = document.getElementById('exercise-submenu');
+    const skyEl = document.getElementById('sky');
 
     // --- State Variables ---
     let activeExerciseModule = null;
@@ -51,6 +52,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const translationSpeedIncrement = 0.5;
 
     const VisualModules = {
+        none: null,
         optokinetic: optokineticModule,
         opticalFlow: opticalFlowModule,
         rotatingCube: rotatingCubeModule,
@@ -67,11 +69,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const rotatingCubeControls = document.getElementById('rotating-cube-controls');
     const heightsControls = document.getElementById('heights-controls');
 
-        
+
         optokineticControls.style.display = (moduleName === 'optokinetic') ? 'flex' : 'none';
         opticalFlowControls.style.display = (moduleName === 'opticalFlow') ? 'flex' : 'none';
         rotatingCubeControls.style.display = (moduleName === 'rotatingCube') ? 'flex' : 'none';
         heightsControls.style.display = (moduleName === 'heights') ? 'flex' : 'none';
+
+        const shouldDisplaySubmenu = moduleName && moduleName !== 'none';
+        visualSubmenu.style.display = shouldDisplaySubmenu ? '' : 'none';
     }
 
     function setActiveVisualModule(moduleName) {
@@ -79,25 +84,43 @@ document.addEventListener('DOMContentLoaded', () => {
             activeVisualModule.cleanup();
         }
 
-        activeVisualModule = VisualModules[moduleName];
+        activeVisualModule = VisualModules[moduleName] || null;
         updateUIVisibility(moduleName);
 
-        if (activeVisualModule && typeof activeVisualModule.init === 'function') {
-            activeVisualModule.init(sceneEl, rigEl, cameraEl, spheresContainer);
-            // Reset speeds via stateManager
-            const currentState = stateManager.getState();
-            let newSpeeds = { h: 0, v: 0, t: 0, y: 0 };
-            if (moduleName === 'rotatingCube') {
-                newSpeeds.t = parseFloat(cubeSpeedSlider.value);
+        const currentState = stateManager.getState();
+        const baseVisualState = {
+            ...currentState.visual,
+            activeModule: moduleName,
+            speeds: { h: 0, v: 0, t: 0, y: 0 }
+        };
+
+        if (!activeVisualModule) {
+            if (skyEl) {
+                skyEl.setAttribute('color', '#000000');
             }
-            stateManager.setState({ 
-                visual: { 
-                    ...currentState.visual, 
-                    activeModule: moduleName,
-                    speeds: newSpeeds 
-                } 
-            });
+            horizontalSpeedValue.textContent = '0';
+            verticalSpeedValue.textContent = '0';
+            translationSpeedValue.textContent = '0.0';
+            heightSpeedValue.textContent = '0.0';
+            stateManager.setState({ visual: baseVisualState });
+            return;
         }
+
+        if (typeof activeVisualModule.init === 'function') {
+            activeVisualModule.init(sceneEl, rigEl, cameraEl, spheresContainer);
+        }
+
+        let newSpeeds = { h: 0, v: 0, t: 0, y: 0 };
+        if (moduleName === 'rotatingCube') {
+            newSpeeds.t = parseFloat(cubeSpeedSlider.value);
+        }
+
+        stateManager.setState({
+            visual: {
+                ...baseVisualState,
+                speeds: newSpeeds
+            }
+        });
     }
 
     function getHorizontalForwardQuaternion() {
@@ -190,20 +213,23 @@ document.addEventListener('DOMContentLoaded', () => {
         e.target.blur();
     });
 
-    densitySlider.addEventListener('input', (e) => { 
-        densityValue.textContent = e.target.value; 
-    });
-
-    densitySlider.addEventListener('change', (e) => {
-        const newDensity = parseInt(e.target.value, 10);
+    const updateDensityState = (value) => {
+        const newDensity = parseInt(value, 10);
         const currentState = stateManager.getState();
-        // Mise à jour de l'état via le stateManager
         stateManager.setState({
             visual: {
                 ...currentState.visual,
                 density: newDensity
             }
         });
+    };
+
+    densitySlider.addEventListener('input', (e) => {
+        updateDensityState(e.target.value);
+    });
+
+    densitySlider.addEventListener('change', (e) => {
+        updateDensityState(e.target.value);
         e.target.blur();
     });
 
@@ -239,6 +265,23 @@ document.addEventListener('DOMContentLoaded', () => {
     cubeSpeedSlider.addEventListener('change', (e) => {
         e.target.blur();
     });
+
+    const blurActiveRange = () => {
+        const activeElement = document.activeElement;
+        if (activeElement && activeElement.matches('input[type="range"]')) {
+            activeElement.blur();
+        }
+    };
+
+    document.addEventListener('change', (event) => {
+        if (event.target && event.target.matches('input[type="range"]')) {
+            event.target.blur();
+        }
+    }, true);
+
+    document.addEventListener('pointerup', blurActiveRange);
+    document.addEventListener('touchend', blurActiveRange);
+    document.addEventListener('mouseup', blurActiveRange);
 
     document.addEventListener('keydown', (e) => {
         const key = e.key.toLowerCase();
@@ -295,7 +338,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Initialization ---
     function initialize() {
-        densityValue.textContent = densitySlider.value;
         setActiveVisualModule(visualSelect.value); // This will also call updateUIVisibility
         
         if (cameraEl.hasLoaded) {
