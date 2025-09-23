@@ -1,3 +1,9 @@
+## v0.67 (2025-10-08)
+
+* Remplacement des sphères A-Frame par un nuage instancié de halos billboarding avec shader additif pour réduire les draw calls.
+* Portage de l'interpolation de palette directement dans le shader et simplification des mises à jour côté CPU.
+* Incrément de la version affichée et du cache applicatif en 0.67.
+
 ## v0.66 (2025-10-01)
 
 * Ajout d'un réglage de taille du mot dans le Stroop Test pour adapter l'exercice à l'utilisateur.
