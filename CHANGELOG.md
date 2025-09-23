@@ -1,3 +1,7 @@
+## v0.63 (2025-09-23)
+
+* Mise à jour des métadonnées pour afficher la version 0.63 dans l'application et le service worker.
+
 ## v0.50b (2025-07-15)
 
 - **Correction de Bug:** Les vitesses pour les modules Optocinétique et Flux Optique ne fonctionnaient plus.
