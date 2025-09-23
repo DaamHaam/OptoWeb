@@ -8,51 +8,41 @@ on:
 
 permissions:
   contents: write
-  pages: write
-  id-token: write
 
 jobs:
-  # --- PROD: déploie le site quand on pousse sur main ---
-  build:
+  # PROD: copie 'main' vers la branche publiée 'gh-pages' (racine)
+  prod:
     if: github.event_name == 'push'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/upload-pages-artifact@v4
+      - name: Ensure .nojekyll
+        run: echo > .nojekyll
+      - name: Deploy production to gh-pages (root)
+        uses: JamesIves/github-pages-deploy-action@v4
         with:
-          path: '.'          # index.html à la racine
-  deploy:
-    if: github.event_name == 'push'
-    needs: build
-    runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
-      - id: deployment
-        uses: actions/deploy-pages@v4
+          branch: gh-pages
+          folder: .
+          clean: true
 
-  # --- PREVIEW: déploie chaque PR dans gh-pages/previews/pr-<num> ---
+  # PREVIEW: chaque PR dans gh-pages/previews/pr-<num>/
   preview:
     if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
-      # Déploie les fichiers de la PR dans un sous-dossier dédié
-      - name: Deploy PR preview to gh-pages
+      - name: Ensure .nojekyll
+        run: echo > .nojekyll
+      - name: Deploy PR preview
         uses: JamesIves/github-pages-deploy-action@v4
         with:
           branch: gh-pages
           folder: .
           target-folder: previews/pr-${{ github.event.number }}
           clean: false
-
-      # Construit l'URL publique de la preview et l’exporte
       - id: link
         run: |
           echo "url=https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/previews/pr-${{ github.event.number }}/" >> $GITHUB_OUTPUT
-
     environment:
       name: preview
       url: ${{ steps.link.outputs.url }}
