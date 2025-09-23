@@ -408,3 +408,35 @@ a-scene[vr-mode-ui] .ui-panel, a-scene[vr-mode-ui] #version-display { display: n
     white-space: nowrap;
     border: 0;
 }
+
+@media (max-width: 768px) {
+    .ui-panels-container {
+        position: fixed;
+        top: 10px;
+        left: 50%;
+        transform: translateX(-50%);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 12px;
+        width: calc(100% - 20px);
+        max-width: 380px;
+        max-height: calc(100vh - 20px);
+        overflow-y: auto;
+        padding-right: 4px;
+        z-index: 12;
+    }
+
+    .ui-panels-container .ui-panel {
+        position: relative;
+        width: 100%;
+        left: auto;
+        right: auto;
+        top: auto;
+    }
+
+    #visual-panel,
+    #exercise-panel {
+        width: 100%;
+    }
+}
