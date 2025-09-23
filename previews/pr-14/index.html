@@ -17,7 +17,7 @@
 
     <div id="visual-panel" class="ui-panel">
         <div class="panel-section">
-            <label for="visual-select"><span class="label-icon" aria-hidden="true">🎨</span>Stimulation</label>
+            <label for="visual-select">Stimulation</label>
             <select id="visual-select">
                 <option value="optokinetic">Optocinétique</option>
                 <option value="opticalFlow">Flux Optique</option>
@@ -25,50 +25,89 @@
                 <option value="heights">Hauteurs</option>
             </select>
         </div>
+        <div id="visual-submenu" class="panel-section panel-section--submenu">
+            <!-- Panneau de contrôle pour l'Optocinétique -->
+            <div id="optokinetic-controls" class="control-group">
+                <div id="ambiance-control" class="control-item">
+                    <label for="palette-select">Ambiance</label>
+                    <select id="palette-select">
+                        <option value="default">Défaut (Blanc)</option>
+                        <option value="none">Aucun (Noir)</option>
+                        <option value="forest">Forêt Mystique</option>
+                        <option value="sunset">Coucher de Soleil</option>
+                        <option value="ocean">Océan Profond</option>
+                        <option value="retro">Néon Rétro</option>
+                        <option value="pastel">Tons Pastel</option>
+                        <option value="autumn">Épices d'Automne</option>
+                        <option value="aurora">Aurore Boréale</option>
+                        <option value="volcanic">Volcanique</option>
+                        <option value="cyberpunk">Cyberpunk</option>
+                        <option value="auto">Changement Automatique</option>
+                    </select>
+                </div>
+                <div class="control-item optokinetic-control">
+                    <label for="density-slider">Densité</label>
+                    <input type="range" id="density-slider" min="50" max="200" value="100">
+                    <span id="density-value">100</span>
+                </div>
+                <div class="control-item optokinetic-control">
+                    <label>Horizontale</label>
+                    <div class="speed-display">
+                        <span class="arrow-icon">↔</span>
+                        <span id="horizontal-speed-value">0</span>
+                        <span>deg/s</span>
+                    </div>
+                </div>
+                <div class="control-item optokinetic-control">
+                    <label>Verticale</label>
+                    <div class="speed-display">
+                        <span class="arrow-icon">↕</span>
+                        <span id="vertical-speed-value">0</span>
+                        <span>deg/s</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Panneau de contrôle pour le Flux Optique -->
+            <div id="optical-flow-controls" class="control-group" style="display: none;">
+                <div class="control-item optical-flow-control">
+                    <label>Vitesse</label>
+                    <div class="speed-display">
+                        <span class="arrow-icon">↕</span>
+                        <span id="translation-speed-value">0.0</span>
+                        <span>m/s</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Panneau de contrôle pour le Cube Rotatif -->
+            <div id="rotating-cube-controls" class="control-group" style="display: none;">
+                <div class="control-item rotating-cube-control">
+                    <label for="cube-speed-slider">Vitesse Rotation</label>
+                    <input type="range" id="cube-speed-slider" min="0" max="5" value="0.5" step="0.1">
+                    <span id="cube-speed-value">0.5</span>
+                </div>
+            </div>
+
+            <!-- Panneau de contrôle pour les Hauteurs -->
+            <div id="heights-controls" class="control-group">
+                <div class="control-row">
+                    <span class="control-row-label">Vitesse</span>
+                    <span id="height-speed-value">0.0</span>
+                    <span class="control-row-unit">m/s</span>
+                </div>
+                <p class="instructions">Utilisez les flèches HAUT/BAS pour monter/descendre et ESPACE pour arrêter.</p>
+            </div>
+        </div>
     </div>
 
     <div id="controls" class="ui-panel">
-        
-        <!-- Panneau de contrôle pour l'Optocinétique -->
-        <div id="optokinetic-controls" class="control-group">
-            <div id="ambiance-control" class="control-item"><label for="palette-select"><span class="label-icon" aria-hidden="true">🌈</span>Ambiance</label><select id="palette-select"><option value="default">Défaut (Blanc)</option><option value="none">Aucun (Noir)</option><option value="forest">Forêt Mystique</option><option value="sunset">Coucher de Soleil</option><option value="ocean">Océan Profond</option><option value="retro">Néon Rétro</option><option value="pastel">Tons Pastel</option><option value="autumn">Épices d'Automne</option><option value="aurora">Aurore Boréale</option><option value="volcanic">Volcanique</option><option value="cyberpunk">Cyberpunk</option><option value="auto">Changement Automatique</option></select></div>
-            <div class="control-item optokinetic-control"><label for="density-slider"><span class="label-icon" aria-hidden="true">🧪</span>Densité</label><input type="range" id="density-slider" min="50" max="200" value="100"><span id="density-value">100</span></div>
-            <div class="control-item optokinetic-control"><label><span class="label-icon" aria-hidden="true">↔️</span>Horizontale</label><div class="speed-display"><span class="arrow-icon">↔</span><span id="horizontal-speed-value">0</span><span>deg/s</span></div></div>
-            <div class="control-item optokinetic-control"><label><span class="label-icon" aria-hidden="true">↕️</span>Verticale</label><div class="speed-display"><span class="arrow-icon">↕</span><span id="vertical-speed-value">0</span><span>deg/s</span></div></div>
-        </div>
-
-        <!-- Panneau de contrôle pour le Flux Optique -->
-        <div id="optical-flow-controls" class="control-group" style="display: none;">
-            <div class="control-item optical-flow-control"><label><span class="label-icon" aria-hidden="true">💨</span>Vitesse</label><div class="speed-display"><span class="arrow-icon">↕</span><span id="translation-speed-value">0.0</span><span> m/s</span></div></div>
-        </div>
-
-
-        <!-- Panneau de contrôle pour le Cube Rotatif -->
-        <div id="rotating-cube-controls" class="control-group" style="display: none;">
-            <div class="control-item rotating-cube-control">
-                <label for="cube-speed-slider"><span class="label-icon" aria-hidden="true">🌀</span>Vitesse Rotation</label>
-                <input type="range" id="cube-speed-slider" min="0" max="5" value="0.5" step="0.1">
-                <span id="cube-speed-value">0.5</span>
-            </div>
-        </div>
-
-        <!-- Panneau de contrôle pour les Hauteurs -->
-        <div id="heights-controls" class="control-group">
-            <div class="control-row">
-                <span class="control-row-label"><span class="label-icon" aria-hidden="true">🌬️</span>Vitesse</span>
-                <span id="height-speed-value">0.0</span>
-                <span class="control-row-unit">m/s</span>
-            </div>
-            <p class="instructions">Utilisez les flèches HAUT/BAS pour monter/descendre et ESPACE pour arrêter.</p>
-        </div>
-
-        <!-- Contrôles communs -->
-        <div class="control-item recenter-control"><button id="recenter-button"><span class="label-icon" aria-hidden="true">🧭</span>Recentrer (R)</button></div>
+        <button id="recenter-button">Recentrer (R)</button>
     </div>
 
     <div id="exercise-panel" class="ui-panel">
         <div class="panel-section">
-            <label for="exercise-select"><span class="label-icon" aria-hidden="true">🎯</span>Exercice</label>
+            <label for="exercise-select">Exercice</label>
             <select id="exercise-select">
                 <option value="none" selected>Aucun</option>
                 <option value="targetPointer">Cible &amp; Pointeur</option>
