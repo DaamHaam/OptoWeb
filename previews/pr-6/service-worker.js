@@ -1,5 +1,5 @@
 
-const CACHE_NAME = 'opto-vr-cache-v0.63';
+const CACHE_NAME = 'opto-vr-cache-v0.64';
 const URLS_TO_CACHE = [
   'index.html',
   'styles.css',

@@ -5,6 +5,11 @@ body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
 .ui-panel label, .ui-panel span, .ui-panel button, .ui-panel select { font-weight: bold; font-size: 1.1em; padding: 5px 10px; border-radius: 5px; display: block; width: 100%; box-sizing: border-box; margin-bottom: 5px; }
 .ui-panel select, .ui-panel button { background-color: #333; color: white; border: 1px solid #555; cursor: pointer; }
 .ui-panel button:hover { background-color: #45a049; }
+.panel-section { display: flex; flex-direction: column; gap: 8px; }
+.panel-section + .panel-section { margin-top: 12px; padding-top: 12px; border-top: 1px solid #555; }
+.panel-section--submenu:empty { display: none; }
+#visual-panel .panel-section label, #visual-panel .panel-section select,
+#exercise-panel .panel-section label, #exercise-panel .panel-section select { margin-bottom: 0; }
 #visual-panel { top: 10px; left: 10px; width: 280px; }
 #controls {
     bottom: 0;
@@ -40,8 +45,6 @@ body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
 .speed-display .arrow-icon { font-size: 1.5em; }
 #horizontal-speed-value, #vertical-speed-value { font-size: 1.8em; font-weight: bold; color: #66d9ef; min-width: 30px; text-align: center; }
 #exercise-panel { top: 10px; right: 10px; width: 280px; }
-#exercise-panel > div { margin-bottom: 15px; }
-#exercise-submenu { margin-top: 10px; padding-top: 10px; border-top: 1px solid #555; min-height: 50px; }
 .submenu-item { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
 .submenu-item label { font-size: 1em; width: auto; margin-bottom: 0; }
 .submenu-item input[type="checkbox"] { width: 20px; height: 20px; }
