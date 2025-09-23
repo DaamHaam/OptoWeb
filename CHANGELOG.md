@@ -1,3 +1,8 @@
+## v0.66 (2025-10-01)
+
+* Ajout d'un réglage de taille du mot dans le Stroop Test pour adapter l'exercice à l'utilisateur.
+* Passage de la version affichée et du cache applicatif en 0.66.
+
 ## v0.64 (2025-09-24)
 
 * Harmonisation visuelle des panneaux « Stimulation » et « Exercice » pour une présentation cohérente.
