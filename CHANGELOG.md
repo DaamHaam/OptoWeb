@@ -1,3 +1,10 @@
+## v0.70 (2025-10-??)
+
+* Ajout d'un helper commun pour récupérer l'orientation et la position horizontale de l'utilisateur afin d'aligner tous les exercices après recentrage.
+* Harmonisation des distances cible/pointeur dans l'exercice Cible-Pointeur et recentrage systématique devant l'utilisateur, y compris pour les mouvements animés.
+* Repositionnement des zones de génération du Go/No-Go sur l'utilisateur et mise à jour du pointeur intégré pour refléter la nouvelle distance de travail.
+* Mise à jour de la version affichée et du cache applicatif en 0.70.
+
 ## v0.67 (2025-10-08)
 
 * Remplacement des sphères A-Frame par un nuage instancié de halos billboarding avec shader additif pour réduire les draw calls.
