@@ -171,28 +171,21 @@ body {
 .speed-display .arrow-icon {
     font-size: 1.4em;
 }
-.speed-display--inline {
-    justify-content: flex-start;
-    gap: 6px;
+.speed-display--stacked {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
 }
-.speed-display--inline .arrow-icon {
-    order: 0;
+.speed-display--stacked .arrow-icon {
     font-size: 1.6em;
     line-height: 1;
     color: #1f2d3d;
+    align-self: flex-start;
 }
-.speed-display--inline .speed-value {
-    order: 1;
-    line-height: 1;
-}
-.speed-display--inline .speed-unit {
-    order: 2;
+.speed-display--stacked .speed-unit {
     color: rgba(31, 45, 61, 0.7);
-    font-size: 1em;
-    padding: 0;
-    align-self: center;
-    line-height: 1;
-    margin-left: 2px;
+    font-size: 0.95em;
+    line-height: 1.1;
 }
 .speed-value,
 #translation-speed-value,
@@ -200,24 +193,20 @@ body {
     font-size: 1.6em;
     font-weight: 600;
     color: #2aa198;
-    min-width: 36px;
-    text-align: center;
+    min-width: 48px;
+    text-align: left;
     background: rgba(42, 161, 152, 0.08);
     border-radius: 12px;
-    padding: 4px 10px;
+    padding: 6px 12px;
     display: inline-flex;
-    justify-content: center;
+    justify-content: flex-start;
     align-items: center;
 }
 #vertical-speed-value,
 #horizontal-speed-value {
     font-size: 2.1em;
-    min-width: 62px;
-    padding: 6px 16px;
-}
-#vertical-speed-value,
-#horizontal-speed-value {
-    text-align: right;
+    min-width: 72px;
+    padding: 8px 16px;
 }
 #exercise-panel { top: 10px; right: 10px; width: 320px; }
 .submenu-item { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
@@ -289,7 +278,6 @@ a-scene[vr-mode-ui] .ui-panel, a-scene[vr-mode-ui] #version-display { display: n
 }
 
 .value-badge,
-#density-value,
 #cube-speed-value {
     display: inline-flex;
     align-items: center;
@@ -351,15 +339,30 @@ a-scene[vr-mode-ui] .ui-panel, a-scene[vr-mode-ui] #version-display { display: n
     grid-column: span 2;
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 8px 16px;
+    gap: 12px 16px;
 }
 
-.submenu--go-nogo .submenu-item {
-    margin-bottom: 0;
+.submenu--go-nogo .status-tile {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+    padding: 10px 14px;
+    border-radius: 14px;
     background: rgba(42, 161, 152, 0.08);
-    border-radius: 12px;
-    padding: 8px 12px;
-    gap: 8px;
+}
+
+.submenu--go-nogo .status-label {
+    font-size: 0.95em;
+    font-weight: 600;
+    color: rgba(31, 45, 61, 0.75);
+    text-transform: none;
+}
+
+.submenu--go-nogo .status-value {
+    font-size: 1.5em;
+    font-weight: 700;
+    color: #1f2d3d;
 }
 
 .submenu--go-nogo button {

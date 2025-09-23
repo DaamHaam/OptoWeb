@@ -4,23 +4,23 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <title>OW v0.67</title>
+    <title>OW v0.68</title>
     <meta name="description" content="Application de rééducation vestibulaire en réalité virtuelle.">
     <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
-    <link rel="stylesheet" href="styles.css?v=0.67">
+    <link rel="stylesheet" href="styles.css?v=0.68">
         <link rel="manifest" href="manifest.json">
     </head>
     <body>
 
-        <div id="version-display">v0.67</div>
+        <div id="version-display">v0.68</div>
     <div id="vr-message">Regardez la scène dans Steam VR</div>
 
     <div id="visual-panel" class="ui-panel">
         <div class="panel-section panel-section--header">
             <label for="visual-select">Stimulation</label>
             <select id="visual-select">
+                <option value="none">Aucune</option>
                 <option value="optokinetic" selected>Optocinétique</option>
-                <option value="none">Aucun</option>
                 <option value="opticalFlow">Flux Optique</option>
                 <option value="rotatingCube">Cube Rotatif</option>
                 <option value="heights">Hauteurs</option>
@@ -49,22 +49,21 @@
                 <div class="control-item optokinetic-control">
                     <label for="density-slider">Densité</label>
                     <input type="range" id="density-slider" min="50" max="200" value="100">
-                    <span id="density-value">100</span>
                 </div>
                 <div class="control-item optokinetic-control">
-                    <div class="speed-display speed-display--inline" role="group" aria-label="Vitesse horizontale">
+                    <div class="speed-display speed-display--stacked" role="group" aria-label="Vitesse horizontale">
                         <span class="sr-only">Vitesse horizontale</span>
-                        <span class="arrow-icon" aria-hidden="true">↔</span>
                         <span id="horizontal-speed-value" class="speed-value">0</span>
                         <span class="speed-unit">deg/s</span>
+                        <span class="arrow-icon" aria-hidden="true">↔</span>
                     </div>
                 </div>
                 <div class="control-item optokinetic-control">
-                    <div class="speed-display speed-display--inline" role="group" aria-label="Vitesse verticale">
+                    <div class="speed-display speed-display--stacked" role="group" aria-label="Vitesse verticale">
                         <span class="sr-only">Vitesse verticale</span>
-                        <span class="arrow-icon" aria-hidden="true">↕</span>
                         <span id="vertical-speed-value" class="speed-value">0</span>
                         <span class="speed-unit">deg/s</span>
+                        <span class="arrow-icon" aria-hidden="true">↕</span>
                     </div>
                 </div>
             </div>
@@ -138,7 +137,7 @@
         <a-entity id="rig" position="0 0 0"><a-camera look-controls-enabled="true" wasd-controls-enabled="false"></a-camera></a-entity>
     </a-scene>
 
-    <script type="module" src="main.js?v=0.67"></script>
+    <script type="module" src="main.js?v=0.68"></script>
     <script>
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
