@@ -84,6 +84,10 @@ document.addEventListener('DOMContentLoaded', () => {
             activeVisualModule.cleanup();
         }
 
+        if (skyEl) {
+            skyEl.setAttribute('color', '#000000');
+        }
+
         activeVisualModule = VisualModules[moduleName] || null;
         updateUIVisibility(moduleName);
 
@@ -135,12 +139,28 @@ document.addEventListener('DOMContentLoaded', () => {
         return new THREE.Quaternion().setFromEuler(euler);
     }
 
+    function getUserReferenceFrame() {
+        const horizontalQuaternion = getHorizontalForwardQuaternion();
+        const cameraWorldPosition = new THREE.Vector3();
+        cameraEl.object3D.getWorldPosition(cameraWorldPosition);
+        const anchorPosition = cameraWorldPosition.clone();
+        rigEl.object3D.worldToLocal(anchorPosition);
+        const forwardVector = new THREE.Vector3(0, 0, -1).applyQuaternion(horizontalQuaternion).normalize();
+
+        return {
+            quaternion: horizontalQuaternion,
+            position: anchorPosition,
+            forward: forwardVector,
+            worldPosition: cameraWorldPosition
+        };
+    }
+
     function handleRecenter() {
         if (activeVisualModule && typeof activeVisualModule.regenerate === 'function') {
             activeVisualModule.regenerate();
         }
         if (activeExerciseModule && typeof activeExerciseModule.recenter === 'function') {
-            activeExerciseModule.recenter({ getHorizontalForwardQuaternion });
+            activeExerciseModule.recenter({ getHorizontalForwardQuaternion, getUserReferenceFrame });
         }
     }
 
@@ -173,7 +193,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 rigEl,
                 cameraEl,
                 exerciseSubmenu,
-                getHorizontalForwardQuaternion
+                getHorizontalForwardQuaternion,
+                getUserReferenceFrame
             });
         }
 

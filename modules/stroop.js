@@ -2,6 +2,8 @@
 const DEFAULT_WORD_WIDTH = 6;
 const MIN_WORD_WIDTH = 5;
 const MAX_WORD_WIDTH = 18;
+const STROOP_DISTANCE = 3;
+const STROOP_VERTICAL_OFFSET = 0;
 
 const stroopWords = [
     { word: 'ROUGE', color: '#FF0000' },
@@ -12,7 +14,10 @@ const stroopWords = [
 
 let stroopInterval;
 let textElement;
+let rigEl = null;
+let cameraEl = null;
 let getHorizontalForwardQuaternion;
+let getUserReferenceFrame = null;
 
 function getRandomItem(arr, exclude = null) {
     let item;
@@ -32,19 +37,67 @@ function updateStroop() {
     textElement.setAttribute('color', colorItem.color);
 }
 
+function resolveFrame() {
+    let quaternion = null;
+    let anchor = null;
+
+    if (getUserReferenceFrame) {
+        const frame = getUserReferenceFrame();
+        if (frame) {
+            if (frame.quaternion) {
+                quaternion = frame.quaternion.clone ? frame.quaternion.clone() : frame.quaternion;
+            }
+            if (frame.worldPosition && rigEl) {
+                anchor = frame.worldPosition.clone();
+                rigEl.object3D.worldToLocal(anchor);
+            } else if (frame.position) {
+                anchor = frame.position.clone ? frame.position.clone() : frame.position;
+            }
+        }
+    }
+
+    if (!quaternion && getHorizontalForwardQuaternion) {
+        quaternion = getHorizontalForwardQuaternion();
+    }
+
+    if ((!anchor || typeof anchor.y !== 'number') && cameraEl && rigEl) {
+        const cameraWorld = new THREE.Vector3();
+        cameraEl.object3D.getWorldPosition(cameraWorld);
+        anchor = cameraWorld.clone();
+        rigEl.object3D.worldToLocal(anchor);
+    }
+
+    if (anchor && typeof anchor.y === 'number' && cameraEl && rigEl) {
+        const cameraWorld = new THREE.Vector3();
+        cameraEl.object3D.getWorldPosition(cameraWorld);
+        const localCamera = cameraWorld.clone();
+        rigEl.object3D.worldToLocal(localCamera);
+        anchor.y = localCamera.y;
+    }
+
+    return { quaternion, anchor };
+}
+
 function positionElement() {
-    if (!textElement || !getHorizontalForwardQuaternion) return;
-    const forwardQuaternion = getHorizontalForwardQuaternion();
-    const position = new THREE.Vector3(0, 1.4, -3);
-    position.applyQuaternion(forwardQuaternion);
-    textElement.setAttribute('position', position);
-    textElement.object3D.setRotationFromQuaternion(forwardQuaternion);
+    if (!textElement) return;
+
+    const { quaternion, anchor } = resolveFrame();
+    if (!quaternion || !anchor) return;
+
+    const position = new THREE.Vector3(0, STROOP_VERTICAL_OFFSET, -STROOP_DISTANCE);
+    position.applyQuaternion(quaternion);
+    position.add(anchor);
+
+    textElement.setAttribute('position', `${position.x} ${position.y} ${position.z}`);
+    textElement.object3D.setRotationFromQuaternion(quaternion);
 }
 
 export const exerciseModule = {
     init(helpers) {
         getHorizontalForwardQuaternion = helpers.getHorizontalForwardQuaternion;
-        const rig = document.querySelector('#rig');
+        getUserReferenceFrame = helpers.getUserReferenceFrame || null;
+        rigEl = helpers.rigEl || document.querySelector('#rig');
+        cameraEl = helpers.cameraEl || document.querySelector('a-camera');
 
         // Create submenu
         const submenu = document.getElementById('exercise-submenu');
@@ -66,7 +119,7 @@ export const exerciseModule = {
         textElement.setAttribute('id', 'stroop-text');
         textElement.setAttribute('align', 'center');
         textElement.setAttribute('width', DEFAULT_WORD_WIDTH);
-        rig.appendChild(textElement);
+        rigEl.appendChild(textElement);
 
         positionElement();
 
@@ -110,10 +163,16 @@ export const exerciseModule = {
         }
         document.getElementById('exercise-submenu').innerHTML = '';
         getHorizontalForwardQuaternion = null;
+        getUserReferenceFrame = null;
+        rigEl = null;
+        cameraEl = null;
     },
 
     recenter(helpers) {
         getHorizontalForwardQuaternion = helpers.getHorizontalForwardQuaternion;
+        if (helpers.getUserReferenceFrame) {
+            getUserReferenceFrame = helpers.getUserReferenceFrame;
+        }
         positionElement();
     }
 };
