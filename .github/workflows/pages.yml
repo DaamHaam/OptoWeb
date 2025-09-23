@@ -10,7 +10,6 @@ permissions:
   contents: write
 
 jobs:
-  # PROD: copie 'main' vers la branche publiée 'gh-pages' (racine)
   prod:
     if: github.event_name == 'push'
     runs-on: ubuntu-latest
@@ -24,6 +23,8 @@ jobs:
           branch: gh-pages
           folder: .
           clean: true
+          clean-exclude: |
+            previews/**
 
   # PREVIEW: chaque PR dans gh-pages/previews/pr-<num>/
   preview:
