@@ -1,0 +1,442 @@
+/* styles.css */
+/* Rôle: Centralise tous les styles de l'application pour une maintenance facilitée. */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: #1f2d3d;
+    background: linear-gradient(160deg, #f2f6f9 0%, #e3f2f1 55%, #eaf6f2 100%);
+    background-attachment: fixed;
+    margin: 0;
+    min-height: 100vh;
+}
+.ui-panel {
+    position: absolute;
+    background: #ffffff;
+    padding: 20px;
+    z-index: 10;
+    color: #1f2d3d;
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    border-radius: 18px;
+    box-shadow: 0 12px 24px rgba(15, 50, 60, 0.15);
+    border: 1px solid rgba(42, 161, 152, 0.18);
+    backdrop-filter: blur(2px);
+}
+.ui-panel label,
+.ui-panel button,
+.ui-panel select {
+    font-weight: 600;
+    font-size: 1em;
+    padding: 6px 12px;
+    border-radius: 10px;
+    display: block;
+    width: 100%;
+    box-sizing: border-box;
+    margin-bottom: 8px;
+}
+.ui-panel label {
+    padding-left: 0;
+    padding-right: 0;
+    border-radius: 0;
+}
+.ui-panel select,
+.ui-panel button {
+    background-color: #f1f6f7;
+    color: #1f2d3d;
+    border: 1px solid #c2dedb;
+    cursor: pointer;
+    transition: background-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+    box-shadow: inset 0 -2px 0 rgba(31, 45, 61, 0.05);
+}
+.ui-panel button {
+    background-color: #2aa198;
+    color: #ffffff;
+    border: 1px solid #2aa198;
+    box-shadow: 0 6px 16px rgba(42, 161, 152, 0.25);
+    width: auto;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 24px;
+}
+.ui-panel button:hover {
+    background-color: #249286;
+    border-color: #249286;
+    box-shadow: 0 10px 24px rgba(42, 161, 152, 0.30);
+    transform: translateY(-1px);
+}
+.ui-panel button:focus,
+.ui-panel select:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(42, 161, 152, 0.28);
+}
+.panel-section {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+.panel-section--header {
+    background: linear-gradient(140deg, rgba(42, 161, 152, 0.16) 0%, rgba(42, 161, 152, 0.04) 100%);
+    margin: -20px -20px 18px;
+    padding: 18px 20px 20px;
+    border-radius: 16px 16px 12px 12px;
+    border-bottom: 1px solid rgba(42, 161, 152, 0.25);
+    box-shadow: inset 0 -1px 0 rgba(255, 255, 255, 0.6);
+}
+.panel-section--header label {
+    font-size: 1.1em;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    font-weight: 700;
+    color: #184b46;
+    margin-bottom: 6px;
+}
+.panel-section--header select {
+    margin-bottom: 0;
+    padding: 10px 14px;
+}
+.panel-section + .panel-section {
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid rgba(42, 161, 152, 0.2);
+}
+.panel-section--submenu {
+    gap: 12px;
+}
+.panel-section--submenu:empty { display: none; }
+#visual-panel .panel-section:not(.panel-section--header) label,
+#visual-panel .panel-section:not(.panel-section--header) select,
+#exercise-panel .panel-section:not(.panel-section--header) label,
+#exercise-panel .panel-section:not(.panel-section--header) select {
+    margin-bottom: 0;
+}
+#visual-panel { top: 10px; left: 10px; width: 320px; }
+#controls {
+    bottom: 16px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    background: transparent;
+    padding: 0;
+    border-radius: 0;
+    border: none;
+    box-shadow: none;
+    z-index: 9;
+}
+
+.ui-panel--floating {
+    padding: 0;
+    backdrop-filter: none;
+}
+#controls button {
+    margin: 0;
+}
+
+.control-group {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+.control-item {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+}
+
+.optokinetic-control {
+    align-items: flex-start;
+    gap: 6px;
+}
+
+.optokinetic-control .speed-display {
+    align-self: flex-start;
+}
+
+.control-item input[type="range"],
+.control-item select {
+    width: 100%;
+}
+.speed-display {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.speed-display .arrow-icon {
+    font-size: 1.4em;
+}
+.speed-display--stacked {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+}
+.speed-value-row {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 6px;
+}
+.speed-display--stacked .arrow-icon {
+    font-size: 1.6em;
+    line-height: 1;
+    color: #1f2d3d;
+    align-self: flex-start;
+}
+.speed-display--stacked .speed-unit {
+    color: rgba(31, 45, 61, 0.7);
+    font-size: 0.95em;
+    line-height: 1.1;
+}
+.speed-value,
+#translation-speed-value,
+#height-speed-value {
+    font-size: 1.6em;
+    font-weight: 600;
+    color: #2aa198;
+    min-width: 48px;
+    text-align: left;
+    background: rgba(42, 161, 152, 0.08);
+    border-radius: 12px;
+    padding: 6px 12px;
+    display: inline-flex;
+    justify-content: flex-start;
+    align-items: center;
+}
+#vertical-speed-value,
+#horizontal-speed-value {
+    font-size: 2.1em;
+    min-width: 72px;
+    padding: 8px 16px;
+}
+#exercise-panel { top: 10px; right: 10px; width: 320px; }
+.submenu-item { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+.submenu-item label { font-size: 1em; width: auto; margin-bottom: 0; }
+.submenu-item input[type="checkbox"] { width: 20px; height: 20px; }
+#movement-type-select {
+    width: auto;
+    min-width: 0;
+    max-width: 160px;
+    display: inline-block;
+    flex: 0 0 auto;
+}
+.submenu-item label[for="movement-type-select"] {
+    flex: 1 1 auto;
+    margin-right: 12px;
+}
+#version-display {
+    position: absolute;
+    bottom: 20px;
+    left: 20px;
+    color: #ffffff;
+    font-weight: 600;
+    font-size: 0.9em;
+    z-index: 11;
+    user-select: none;
+}
+#vr-message {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(255, 255, 255, 0.9);
+    padding: 24px;
+    border-radius: 16px;
+    z-index: 20;
+    font-size: 2em;
+    color: #1f2d3d;
+    text-align: center;
+    display: none;
+    user-select: none;
+    pointer-events: none;
+    box-shadow: 0 12px 24px rgba(15, 50, 60, 0.15);
+}
+a-scene[vr-mode-ui] .ui-panel, a-scene[vr-mode-ui] #version-display { display: none; }
+
+.control-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.control-row-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-weight: 600;
+}
+
+.control-row-unit {
+    color: rgba(31, 45, 61, 0.6);
+    font-size: 0.95em;
+}
+
+.control-item select,
+.control-item input[type="range"],
+.panel-section select,
+.panel-section input[type="range"] {
+    margin-top: 4px;
+}
+
+.value-badge,
+#cube-speed-value {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 4px 12px;
+    border-radius: 12px;
+    background: rgba(42, 161, 152, 0.12);
+    font-weight: 600;
+    color: #1f2d3d;
+    min-width: 48px;
+}
+
+.submenu-item label {
+    color: #1f2d3d;
+}
+
+.instructions {
+    color: rgba(31, 45, 61, 0.75);
+    font-size: 0.9em;
+    margin: 12px 0 0;
+}
+.ui-panel span {
+    display: inline-flex;
+    align-items: center;
+}
+
+.submenu-field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.submenu--go-nogo {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px 16px;
+}
+
+.submenu--go-nogo .gonogo-grid {
+    grid-column: span 2;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px 16px;
+}
+
+.submenu--go-nogo .submenu-field {
+    gap: 4px;
+}
+
+.submenu--go-nogo .submenu-field select {
+    padding: 6px 10px;
+}
+
+.submenu--go-nogo .submenu-field--wide {
+    grid-column: span 2;
+}
+
+.submenu--go-nogo .gonogo-status {
+    grid-column: span 2;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px 16px;
+}
+
+.submenu--go-nogo .status-tile {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+    padding: 10px 14px;
+    border-radius: 14px;
+    background: rgba(42, 161, 152, 0.08);
+}
+
+.submenu--go-nogo .status-label {
+    font-size: 0.95em;
+    font-weight: 600;
+    color: rgba(31, 45, 61, 0.75);
+    text-transform: none;
+}
+
+.submenu--go-nogo .status-value {
+    font-size: 1.5em;
+    font-weight: 700;
+    color: #1f2d3d;
+}
+
+.submenu--go-nogo button {
+    grid-column: span 2;
+    justify-self: end;
+}
+
+.submenu--go-nogo button#go-nogo-start {
+    width: auto;
+    padding-left: 24px;
+    padding-right: 24px;
+    align-self: center;
+}
+
+.panel-section--submenu .submenu-field label {
+    margin-bottom: 0;
+    padding-left: 0;
+    padding-right: 0;
+}
+
+.panel-section--submenu .submenu-field select {
+    margin-top: 0;
+    padding: 8px 12px;
+}
+
+.panel-section--submenu button {
+    align-self: stretch;
+}
+
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+@media (max-width: 768px) {
+    .ui-panels-container {
+        position: fixed;
+        top: 10px;
+        left: 50%;
+        transform: translateX(-50%);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 12px;
+        width: calc(100% - 20px);
+        max-width: 380px;
+        max-height: calc(100vh - 20px);
+        overflow-y: auto;
+        padding-right: 4px;
+        z-index: 12;
+    }
+
+    .ui-panels-container .ui-panel {
+        position: relative;
+        width: 100%;
+        left: auto;
+        right: auto;
+        top: auto;
+    }
+
+    #visual-panel,
+    #exercise-panel {
+        width: 100%;
+    }
+}
