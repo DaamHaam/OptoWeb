@@ -1,22 +1,92 @@
 /* styles.css */
 /* Rôle: Centralise tous les styles de l'application pour une maintenance facilitée. */
 body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-.ui-panel { position: absolute; background: rgba(0, 0, 0, 0.8); padding: 15px; z-index: 10; color: white; user-select: none; -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; }
-.ui-panel label, .ui-panel span, .ui-panel button, .ui-panel select { font-weight: bold; font-size: 1.1em; padding: 5px 10px; border-radius: 5px; display: block; width: 100%; box-sizing: border-box; margin-bottom: 5px; }
-.ui-panel select, .ui-panel button { background-color: #333; color: white; border: 1px solid #555; cursor: pointer; }
-.ui-panel button:hover { background-color: #45a049; }
-#visual-panel { top: 10px; left: 10px; width: 280px; }
+.fps-counter {
+    position: fixed;
+    top: 12px;
+    left: 12px;
+    padding: 6px 10px;
+    background: rgba(0, 0, 0, 0.6);
+    color: #0f0;
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 1;
+    border-radius: 4px;
+    z-index: 1000;
+    pointer-events: none;
+    user-select: none;
+}
+.ui-panel {
+    position: absolute;
+    background: rgba(8, 8, 12, 0.82);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 14px;
+    padding: 16px;
+    z-index: 10;
+    color: #ffffff;
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    backdrop-filter: blur(6px);
+    box-shadow: 0 18px 40px rgba(0, 0, 0, 0.35);
+}
+.ui-panel .panel-section {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+.ui-panel label {
+    font-weight: 600;
+    font-size: 0.95rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+.ui-panel select,
+.ui-panel button {
+    font-size: 1rem;
+    font-weight: 500;
+    padding: 8px 10px;
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    background: rgba(28, 30, 40, 0.9);
+    color: #ffffff;
+    box-sizing: border-box;
+    width: 100%;
+}
+.ui-panel select:focus,
+.ui-panel button:focus {
+    outline: none;
+    border-color: rgba(102, 217, 239, 0.8);
+    box-shadow: 0 0 0 2px rgba(102, 217, 239, 0.25);
+}
+.ui-panel button:hover {
+    background: rgba(69, 160, 73, 0.85);
+}
+#visual-panel,
+#exercise-panel {
+    width: 260px;
+}
+#visual-panel { top: 10px; left: 10px; }
 #controls {
     bottom: 0;
     left: 0;
     width: 100%;
     display: flex;
+    flex-direction: row;
     align-items: center;
     justify-content: space-between; /* Sépare les groupes de contrôles et le bouton recentrer */
     box-sizing: border-box;
     background: rgba(0, 0, 0, 0.8);
     z-index: 9;
     padding: 10px 20px;
+    border-radius: 0;
+    border: none;
+    box-shadow: none;
+    backdrop-filter: none;
 }
 
 .control-group {
@@ -39,9 +109,21 @@ body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
 .speed-display { display: flex; align-items: center; gap: 8px; }
 .speed-display .arrow-icon { font-size: 1.5em; }
 #horizontal-speed-value, #vertical-speed-value { font-size: 1.8em; font-weight: bold; color: #66d9ef; min-width: 30px; text-align: center; }
-#exercise-panel { top: 10px; right: 10px; width: 280px; }
-#exercise-panel > div { margin-bottom: 15px; }
-#exercise-submenu { margin-top: 10px; padding-top: 10px; border-top: 1px solid #555; min-height: 50px; }
+#exercise-panel { top: 10px; right: 10px; }
+#exercise-panel > div { margin-bottom: 0; }
+#exercise-submenu {
+    margin-top: 2px;
+    padding-top: 12px;
+    border-top: 1px solid rgba(255, 255, 255, 0.12);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+#exercise-submenu:empty {
+    display: none;
+    padding-top: 0;
+    border-top: none;
+}
 .submenu-item { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
 .submenu-item label { font-size: 1em; width: auto; margin-bottom: 0; }
 .submenu-item input[type="checkbox"] { width: 20px; height: 20px; }

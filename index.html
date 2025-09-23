@@ -12,12 +12,19 @@
     </head>
     <body>
 
-        <div id="version-display">v0.50b</div>
+        <div id="version-display">v0.62</div>
     <div id="vr-message">Regardez la scène dans Steam VR</div>
 
     <div id="visual-panel" class="ui-panel">
-        <div><label for="visual-select">Stimulation</label><select id="visual-select"><option value="optokinetic">Optocinétique</option><option value="opticalFlow">Flux Optique</option>        <option value="rotatingCube">Cube Rotatif</option>
-        <option value="heights">Hauteurs</option></select></div>
+        <div class="panel-section">
+            <label for="visual-select">Stimulation</label>
+            <select id="visual-select">
+                <option value="optokinetic">Optocinétique</option>
+                <option value="opticalFlow">Flux Optique</option>
+                <option value="rotatingCube">Cube Rotatif</option>
+                <option value="heights">Hauteurs</option>
+            </select>
+        </div>
     </div>
 
     <div id="controls" class="ui-panel">
@@ -59,7 +66,15 @@
     </div>
 
     <div id="exercise-panel" class="ui-panel">
-        <div><label for="exercise-select">Exercice</label><select id="exercise-select"><option value="none" selected>Aucun</option><option value="targetPointer">Cible & Pointeur</option><option value="goNoGo">Go / No-Go</option><option value="stroop">Stroop Test</option></select></div>
+        <div class="panel-section">
+            <label for="exercise-select">Exercice</label>
+            <select id="exercise-select">
+                <option value="none" selected>Aucun</option>
+                <option value="targetPointer">Cible & Pointeur</option>
+                <option value="goNoGo">Go / No-Go</option>
+                <option value="stroop">Stroop Test</option>
+            </select>
+        </div>
         <div id="exercise-submenu"></div>
     </div>
 
