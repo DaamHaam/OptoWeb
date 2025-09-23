@@ -1,0 +1,114 @@
+<!-- index.html    --> 
+<!-- Rôle: Point d'entrée principal de  l'application. Structure le DOM et charge les modules CSS et JS. -->
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>OW v0.67</title>
+    <meta name="description" content="Application de rééducation vestibulaire en réalité virtuelle.">
+    <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
+    <link rel="stylesheet" href="styles.css?v=0.67">
+        <link rel="manifest" href="manifest.json">
+    </head>
+    <body>
+
+        <div id="version-display">v0.67</div>
+    <div id="vr-message">Regardez la scène dans Steam VR</div>
+
+    <div id="visual-panel" class="ui-panel">
+        <div class="panel-section">
+            <label for="visual-select"><span class="label-icon" aria-hidden="true">🎨</span>Stimulation</label>
+            <select id="visual-select">
+                <option value="optokinetic">Optocinétique</option>
+                <option value="opticalFlow">Flux Optique</option>
+                <option value="rotatingCube">Cube Rotatif</option>
+                <option value="heights">Hauteurs</option>
+            </select>
+        </div>
+    </div>
+
+    <div id="controls" class="ui-panel">
+        
+        <!-- Panneau de contrôle pour l'Optocinétique -->
+        <div id="optokinetic-controls" class="control-group">
+            <div id="ambiance-control" class="control-item"><label for="palette-select"><span class="label-icon" aria-hidden="true">🌈</span>Ambiance</label><select id="palette-select"><option value="default">Défaut (Blanc)</option><option value="none">Aucun (Noir)</option><option value="forest">Forêt Mystique</option><option value="sunset">Coucher de Soleil</option><option value="ocean">Océan Profond</option><option value="retro">Néon Rétro</option><option value="pastel">Tons Pastel</option><option value="autumn">Épices d'Automne</option><option value="aurora">Aurore Boréale</option><option value="volcanic">Volcanique</option><option value="cyberpunk">Cyberpunk</option><option value="auto">Changement Automatique</option></select></div>
+            <div class="control-item optokinetic-control"><label for="density-slider"><span class="label-icon" aria-hidden="true">🧪</span>Densité</label><input type="range" id="density-slider" min="50" max="200" value="100"><span id="density-value">100</span></div>
+            <div class="control-item optokinetic-control"><label><span class="label-icon" aria-hidden="true">↔️</span>Horizontale</label><div class="speed-display"><span class="arrow-icon">↔</span><span id="horizontal-speed-value">0</span><span>deg/s</span></div></div>
+            <div class="control-item optokinetic-control"><label><span class="label-icon" aria-hidden="true">↕️</span>Verticale</label><div class="speed-display"><span class="arrow-icon">↕</span><span id="vertical-speed-value">0</span><span>deg/s</span></div></div>
+        </div>
+
+        <!-- Panneau de contrôle pour le Flux Optique -->
+        <div id="optical-flow-controls" class="control-group" style="display: none;">
+            <div class="control-item optical-flow-control"><label><span class="label-icon" aria-hidden="true">💨</span>Vitesse</label><div class="speed-display"><span class="arrow-icon">↕</span><span id="translation-speed-value">0.0</span><span> m/s</span></div></div>
+        </div>
+
+
+        <!-- Panneau de contrôle pour le Cube Rotatif -->
+        <div id="rotating-cube-controls" class="control-group" style="display: none;">
+            <div class="control-item rotating-cube-control">
+                <label for="cube-speed-slider"><span class="label-icon" aria-hidden="true">🌀</span>Vitesse Rotation</label>
+                <input type="range" id="cube-speed-slider" min="0" max="5" value="0.5" step="0.1">
+                <span id="cube-speed-value">0.5</span>
+            </div>
+        </div>
+
+        <!-- Panneau de contrôle pour les Hauteurs -->
+        <div id="heights-controls" class="control-group">
+            <div class="control-row">
+                <span class="control-row-label"><span class="label-icon" aria-hidden="true">🌬️</span>Vitesse</span>
+                <span id="height-speed-value">0.0</span>
+                <span class="control-row-unit">m/s</span>
+            </div>
+            <p class="instructions">Utilisez les flèches HAUT/BAS pour monter/descendre et ESPACE pour arrêter.</p>
+        </div>
+
+        <!-- Contrôles communs -->
+        <div class="control-item recenter-control"><button id="recenter-button"><span class="label-icon" aria-hidden="true">🧭</span>Recentrer (R)</button></div>
+    </div>
+
+    <div id="exercise-panel" class="ui-panel">
+        <div class="panel-section">
+            <label for="exercise-select"><span class="label-icon" aria-hidden="true">🎯</span>Exercice</label>
+            <select id="exercise-select">
+                <option value="none" selected>Aucun</option>
+                <option value="targetPointer">Cible &amp; Pointeur</option>
+                <option value="goNoGo">Go / No-Go</option>
+                <option value="stroop">Stroop Test</option>
+            </select>
+        </div>
+        <div id="exercise-submenu" class="panel-section panel-section--submenu"></div>
+    </div>
+
+    <a-scene id="scene" exercise-ticker fog="type: linear; color: #111; near: 5; far: 200">
+
+        <a-assets>
+            <!-- Assets restants (si nécessaire pour d'autres modules) -->
+            <a-asset-item id="decor-obj" src="decor-canyon.obj"></a-asset-item>
+            <img id="ground-texture" src="https://cdn.jsdelivr.net/gh/aframevr/aframe-registry@master/assets/images/textures/ground.jpg" crossorigin="anonymous">
+        </a-assets>
+
+        <!-- Le décor pour l'exercice Hauteur sera injecté ici par JavaScript -->
+
+        <!-- Lumières -->
+        <a-entity light="type: ambient; color: #CCC; intensity: 0.5"></a-entity>
+        <a-entity light="type: directional; color: #FFF; intensity: 0.8" position="-1 1 1"></a-entity>
+
+        <a-sky id="sky" color="#000000"></a-sky>
+        <a-entity id="spheres"></a-entity>
+        <a-entity id="rig" position="0 0 0"><a-camera look-controls-enabled="true" wasd-controls-enabled="false"></a-camera></a-entity>
+    </a-scene>
+
+    <script type="module" src="main.js?v=0.67"></script>
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/service-worker.js').then(registration => {
+                    console.log('ServiceWorker registration successful with scope: ', registration.scope);
+                }, err => {
+                    console.log('ServiceWorker registration failed: ', err);
+                });
+            });
+        }
+    </script>
+</body>
+</html>

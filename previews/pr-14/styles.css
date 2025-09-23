@@ -1,0 +1,256 @@
+/* styles.css */
+/* Rôle: Centralise tous les styles de l'application pour une maintenance facilitée. */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: #1f2d3d;
+    background: linear-gradient(160deg, #f2f6f9 0%, #e3f2f1 55%, #eaf6f2 100%);
+    background-attachment: fixed;
+    margin: 0;
+    min-height: 100vh;
+}
+.ui-panel {
+    position: absolute;
+    background: #ffffff;
+    padding: 20px;
+    z-index: 10;
+    color: #1f2d3d;
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    border-radius: 18px;
+    box-shadow: 0 12px 24px rgba(15, 50, 60, 0.15);
+    border: 1px solid rgba(42, 161, 152, 0.18);
+    backdrop-filter: blur(2px);
+}
+.ui-panel label,
+.ui-panel button,
+.ui-panel select {
+    font-weight: 600;
+    font-size: 1em;
+    padding: 6px 12px;
+    border-radius: 10px;
+    display: block;
+    width: 100%;
+    box-sizing: border-box;
+    margin-bottom: 8px;
+}
+.ui-panel label {
+    padding-left: 0;
+    padding-right: 0;
+    border-radius: 0;
+}
+.ui-panel select,
+.ui-panel button {
+    background-color: #f1f6f7;
+    color: #1f2d3d;
+    border: 1px solid #c2dedb;
+    cursor: pointer;
+    transition: background-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+    box-shadow: inset 0 -2px 0 rgba(31, 45, 61, 0.05);
+}
+.ui-panel button {
+    background-color: #2aa198;
+    color: #ffffff;
+    border: 1px solid #2aa198;
+    box-shadow: 0 6px 16px rgba(42, 161, 152, 0.25);
+    width: auto;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 10px 24px;
+}
+.ui-panel button:hover {
+    background-color: #249286;
+    border-color: #249286;
+    box-shadow: 0 10px 24px rgba(42, 161, 152, 0.30);
+    transform: translateY(-1px);
+}
+.ui-panel button:focus,
+.ui-panel select:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(42, 161, 152, 0.28);
+}
+.panel-section {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+.panel-section + .panel-section {
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid rgba(42, 161, 152, 0.2);
+}
+.panel-section--submenu:empty { display: none; }
+#visual-panel .panel-section label, #visual-panel .panel-section select,
+#exercise-panel .panel-section label, #exercise-panel .panel-section select { margin-bottom: 0; }
+#visual-panel { top: 10px; left: 10px; width: 300px; }
+#controls {
+    bottom: 0;
+    left: 20px;
+    right: 20px;
+    width: auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between; /* Sépare les groupes de contrôles et le bouton recentrer */
+    box-sizing: border-box;
+    background: #ffffff;
+    z-index: 9;
+    padding: 18px 20px;
+    border-radius: 22px 22px 0 0;
+    border: 1px solid rgba(42, 161, 152, 0.18);
+    box-shadow: 0 -10px 30px rgba(15, 50, 60, 0.12);
+}
+
+.control-group {
+    display: flex;
+    justify-content: space-around; /* Répartit l'espace à l'intérieur du groupe */
+    align-items: flex-end;
+    gap: 20px; /* Espace entre les contrôles du groupe */
+    flex-grow: 1; /* Permet au groupe de prendre l'espace central */
+    padding: 0 5%; /* Ajoute un peu de marge intérieure */
+}
+
+.control-group .control-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.recenter-control { /* N'a plus besoin de règles spéciales */ }
+#controls label {
+    margin-bottom: 8px;
+    font-size: 1em;
+    color: #1f2d3d;
+}
+.speed-display {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+}
+.speed-display .arrow-icon {
+    font-size: 1.4em;
+}
+.speed-display span:last-child {
+    color: rgba(31, 45, 61, 0.6);
+    font-size: 0.9em;
+    padding: 0;
+}
+#horizontal-speed-value,
+#vertical-speed-value,
+#translation-speed-value,
+#height-speed-value {
+    font-size: 1.6em;
+    font-weight: 600;
+    color: #2aa198;
+    min-width: 36px;
+    text-align: center;
+    background: rgba(42, 161, 152, 0.08);
+    border-radius: 12px;
+    padding: 4px 10px;
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+}
+#exercise-panel { top: 10px; right: 10px; width: 300px; }
+.submenu-item { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+.submenu-item label { font-size: 1em; width: auto; margin-bottom: 0; }
+.submenu-item input[type="checkbox"] { width: 20px; height: 20px; }
+#version-display {
+    position: absolute;
+    bottom: 20px;
+    left: 20px;
+    color: rgba(31, 45, 61, 0.6);
+    font-size: 0.85em;
+    z-index: 11;
+    user-select: none;
+}
+#vr-message {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(255, 255, 255, 0.9);
+    padding: 24px;
+    border-radius: 16px;
+    z-index: 20;
+    font-size: 2em;
+    color: #1f2d3d;
+    text-align: center;
+    display: none;
+    user-select: none;
+    pointer-events: none;
+    box-shadow: 0 12px 24px rgba(15, 50, 60, 0.15);
+}
+a-scene[vr-mode-ui] .ui-panel, a-scene[vr-mode-ui] #version-display { display: none; }
+
+.control-item .label-icon,
+.panel-section .label-icon {
+    margin-right: 6px;
+    font-size: 1.1em;
+}
+
+.control-item label,
+.panel-section label {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.control-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.control-row-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-weight: 600;
+}
+
+.control-row-unit {
+    color: rgba(31, 45, 61, 0.6);
+    font-size: 0.95em;
+}
+
+.control-item select,
+.control-item input[type="range"],
+.panel-section select,
+.panel-section input[type="range"] {
+    margin-top: 4px;
+}
+
+.control-item input[type="range"] {
+    width: 180px;
+}
+
+.value-badge,
+#density-value,
+#cube-speed-value {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 4px 12px;
+    border-radius: 12px;
+    background: rgba(42, 161, 152, 0.12);
+    font-weight: 600;
+    color: #1f2d3d;
+    min-width: 48px;
+}
+
+.submenu-item label {
+    color: #1f2d3d;
+}
+
+.instructions {
+    color: rgba(31, 45, 61, 0.75);
+    font-size: 0.9em;
+    margin: 12px 0 0;
+}
+.ui-panel span {
+    display: inline-flex;
+    align-items: center;
+}
