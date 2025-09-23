@@ -35,8 +35,8 @@ Pour créer une nouvelle version (ex: `v0.32` depuis `v0.31`), suivre **impérat
     -   Copier le `CHANGELOG.md` de la version précédente.
     -   Ajouter les nouvelles modifications en haut du fichier.
 
-5.  **Copier les Scripts de Lancement :**
-    -   S'assurer que `lancer_serveur.bat` est présent dans le nouveau répertoire.
+5.  **Scripts de Lancement :**
+    -   Vérifier que les scripts nécessaires au démarrage local de la PWA sont à jour dans la nouvelle version.
 
 ## 2. Architecture Modulaire
 
