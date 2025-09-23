@@ -12,6 +12,7 @@ let actualSpeed = 0;
 let targetSpeed = 0;
 const smoothingFactor = 2.0; // Facteur de lissage pour une décélération douce
 let lastFrameTime = 0;
+let unsubscribeFromState = null;
 
 // --- Core Logic ---
 function _createElements() {
@@ -54,7 +55,12 @@ export const heightsModule = {
         sceneEl = _sceneEl;
         rigEl = _rigEl;
 
-        stateManager.subscribe(this.onStateChange.bind(this));
+        if (unsubscribeFromState) {
+            unsubscribeFromState();
+            unsubscribeFromState = null;
+        }
+
+        unsubscribeFromState = stateManager.subscribe(this.onStateChange.bind(this));
 
         // Créer le décor via son module dédié
         heightsDecorModule.create(sceneEl);
@@ -95,15 +101,19 @@ export const heightsModule = {
         actualSpeed = 0;
         targetSpeed = 0;
         // Réinitialiser la position du rig
-        if(rigEl) {
+        if (rigEl) {
             rigEl.object3D.position.y = 0;
+        }
+        if (unsubscribeFromState) {
+            unsubscribeFromState();
+            unsubscribeFromState = null;
         }
     },
 
     regenerate() {
-        if(rigEl) {
+        if (rigEl) {
             rigEl.object3D.position.y = 0;
-            if(platformEl) platformEl.object3D.position.y = 0;
+            if (platformEl) platformEl.object3D.position.y = 0;
             actualSpeed = 0;
             targetSpeed = 0;
         }

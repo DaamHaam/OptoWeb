@@ -9,6 +9,7 @@ let sceneEl, spheresContainer, rigEl, cameraEl;
 let currentPalette = colorPalettes.default;
 let density = 150;
 let animationFrameId;
+let unsubscribeFromState = null;
 
 let targetSpeedX = 0, targetSpeedY = 0, actualSpeedX = 0, actualSpeedY = 0;
 const smoothingFactor = 1.5;
@@ -182,8 +183,14 @@ export const optokineticModule = {
         cameraEl = _cameraEl;
         spheresContainer = _spheresContainer;
 
+        // S'assurer qu'il n'existe pas d'abonnement précédent encore actif
+        if (unsubscribeFromState) {
+            unsubscribeFromState();
+            unsubscribeFromState = null;
+        }
+
         // S'abonner aux changements d'état
-        stateManager.subscribe(this.onStateChange.bind(this));
+        unsubscribeFromState = stateManager.subscribe(this.onStateChange.bind(this));
 
         // Récupérer l'état initial pour la première génération
         const initialState = stateManager.getState();
@@ -269,6 +276,9 @@ export const optokineticModule = {
         while (spheresContainer.firstChild) {
             spheresContainer.removeChild(spheresContainer.firstChild);
         }
-        // TODO: Se désabonner du stateManager
+        if (unsubscribeFromState) {
+            unsubscribeFromState();
+            unsubscribeFromState = null;
+        }
     }
 };
