@@ -50,6 +50,11 @@ export const exerciseModule = {
                 <input type="range" id="stroop-speed-slider" min="1" max="5" value="2" step="0.5">
                 <span id="stroop-speed-value">2s</span>
             </div>
+            <div>
+                <label for="stroop-size-slider">Taille du mot</label>
+                <input type="range" id="stroop-size-slider" min="0.8" max="3" value="1" step="0.1">
+                <span id="stroop-size-value">100%</span>
+            </div>
         `;
 
         // Create text element
@@ -57,6 +62,7 @@ export const exerciseModule = {
         textElement.setAttribute('id', 'stroop-text');
         textElement.setAttribute('align', 'center');
         textElement.setAttribute('width', '6');
+        textElement.setAttribute('scale', '1 1 1');
         rig.appendChild(textElement);
 
         positionElement();
@@ -69,11 +75,19 @@ export const exerciseModule = {
         // Event listener for slider
         const speedSlider = document.getElementById('stroop-speed-slider');
         const speedValue = document.getElementById('stroop-speed-value');
+        const sizeSlider = document.getElementById('stroop-size-slider');
+        const sizeValue = document.getElementById('stroop-size-value');
         speedSlider.addEventListener('input', (event) => {
             speed = event.target.value * 1000;
             speedValue.textContent = `${event.target.value}s`;
             clearInterval(stroopInterval);
             stroopInterval = setInterval(updateStroop, speed);
+        });
+
+        sizeSlider.addEventListener('input', (event) => {
+            const scale = parseFloat(event.target.value);
+            sizeValue.textContent = `${Math.round(scale * 100)}%`;
+            textElement.setAttribute('scale', `${scale} ${scale} ${scale}`);
         });
     },
 
