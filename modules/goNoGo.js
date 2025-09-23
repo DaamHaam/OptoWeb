@@ -33,7 +33,7 @@ export const exerciseModule = {
         this.exerciseSubmenu.innerHTML = `
             <div class="gonogo-grid">
                 <div class="submenu-field">
-                    <label for="go-nogo-duration">Durée Exercice</label>
+                    <label for="go-nogo-duration">Durée exercice</label>
                     <select id="go-nogo-duration">
                         <option value="30">30s</option>
                         <option value="60">1m</option>
@@ -44,7 +44,7 @@ export const exerciseModule = {
                     </select>
                 </div>
                 <div class="submenu-field">
-                    <label for="go-nogo-stimulus-duration">Durée affichage cible</label>
+                    <label for="go-nogo-stimulus-duration">Délai cible</label>
                     <select id="go-nogo-stimulus-duration">
                         <option value="2000">Lente (2s)</option>
                         <option value="1500" selected>Normale (1.5s)</option>
@@ -78,8 +78,14 @@ export const exerciseModule = {
                 </div>
             </div>
             <div class="gonogo-status">
-                <div class="submenu-item"><span>Score&nbsp;:</span><span id="go-nogo-score">0</span></div>
-                <div class="submenu-item"><span>Temps restant&nbsp;:</span><span id="go-nogo-countdown">--</span></div>
+                <div class="status-tile">
+                    <span class="status-label">Score</span>
+                    <span id="go-nogo-score" class="status-value">0</span>
+                </div>
+                <div class="status-tile">
+                    <span class="status-label">Temps restant</span>
+                    <span id="go-nogo-countdown" class="status-value">--</span>
+                </div>
             </div>
             <button id="go-nogo-start">Démarrer</button>`;
 

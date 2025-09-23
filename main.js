@@ -31,7 +31,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const visualSelect = document.getElementById('visual-select');
     const visualSubmenu = document.getElementById('visual-submenu');
     const densitySlider = document.getElementById('density-slider');
-    const densityValue = document.getElementById('density-value');
     const horizontalSpeedValue = document.getElementById('horizontal-speed-value');
     const verticalSpeedValue = document.getElementById('vertical-speed-value');
     const translationSpeedValue = document.getElementById('translation-speed-value');
@@ -214,20 +213,23 @@ document.addEventListener('DOMContentLoaded', () => {
         e.target.blur();
     });
 
-    densitySlider.addEventListener('input', (e) => { 
-        densityValue.textContent = e.target.value; 
-    });
-
-    densitySlider.addEventListener('change', (e) => {
-        const newDensity = parseInt(e.target.value, 10);
+    const updateDensityState = (value) => {
+        const newDensity = parseInt(value, 10);
         const currentState = stateManager.getState();
-        // Mise à jour de l'état via le stateManager
         stateManager.setState({
             visual: {
                 ...currentState.visual,
                 density: newDensity
             }
         });
+    };
+
+    densitySlider.addEventListener('input', (e) => {
+        updateDensityState(e.target.value);
+    });
+
+    densitySlider.addEventListener('change', (e) => {
+        updateDensityState(e.target.value);
         e.target.blur();
     });
 
@@ -263,6 +265,23 @@ document.addEventListener('DOMContentLoaded', () => {
     cubeSpeedSlider.addEventListener('change', (e) => {
         e.target.blur();
     });
+
+    const blurActiveRange = () => {
+        const activeElement = document.activeElement;
+        if (activeElement && activeElement.matches('input[type="range"]')) {
+            activeElement.blur();
+        }
+    };
+
+    document.addEventListener('change', (event) => {
+        if (event.target && event.target.matches('input[type="range"]')) {
+            event.target.blur();
+        }
+    }, true);
+
+    document.addEventListener('pointerup', blurActiveRange);
+    document.addEventListener('touchend', blurActiveRange);
+    document.addEventListener('mouseup', blurActiveRange);
 
     document.addEventListener('keydown', (e) => {
         const key = e.key.toLowerCase();
@@ -319,7 +338,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Initialization ---
     function initialize() {
-        densityValue.textContent = densitySlider.value;
         setActiveVisualModule(visualSelect.value); // This will also call updateUIVisibility
         
         if (cameraEl.hasLoaded) {
