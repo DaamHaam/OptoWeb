@@ -16,7 +16,7 @@
     <div id="vr-message">Regardez la scène dans Steam VR</div>
 
     <div id="visual-panel" class="ui-panel">
-        <div class="panel-section">
+        <div class="panel-section panel-section--header">
             <label for="visual-select">Stimulation</label>
             <select id="visual-select">
                 <option value="optokinetic">Optocinétique</option>
@@ -51,19 +51,19 @@
                     <span id="density-value">100</span>
                 </div>
                 <div class="control-item optokinetic-control">
-                    <label>Horizontale</label>
-                    <div class="speed-display">
-                        <span class="arrow-icon">↔</span>
-                        <span id="horizontal-speed-value">0</span>
-                        <span>deg/s</span>
+                    <div class="speed-display speed-display--stacked" role="group" aria-label="Vitesse horizontale">
+                        <span class="sr-only">Vitesse horizontale</span>
+                        <span id="horizontal-speed-value" class="speed-value">0</span>
+                        <span class="arrow-icon" aria-hidden="true">↔</span>
+                        <span class="speed-unit">deg/s</span>
                     </div>
                 </div>
                 <div class="control-item optokinetic-control">
-                    <label>Verticale</label>
-                    <div class="speed-display">
-                        <span class="arrow-icon">↕</span>
-                        <span id="vertical-speed-value">0</span>
-                        <span>deg/s</span>
+                    <div class="speed-display speed-display--stacked" role="group" aria-label="Vitesse verticale">
+                        <span class="sr-only">Vitesse verticale</span>
+                        <span id="vertical-speed-value" class="speed-value">0</span>
+                        <span class="arrow-icon" aria-hidden="true">↕</span>
+                        <span class="speed-unit">deg/s</span>
                     </div>
                 </div>
             </div>
@@ -101,12 +101,12 @@
         </div>
     </div>
 
-    <div id="controls" class="ui-panel">
+    <div id="controls" class="ui-panel ui-panel--floating">
         <button id="recenter-button">Recentrer (R)</button>
     </div>
 
     <div id="exercise-panel" class="ui-panel">
-        <div class="panel-section">
+        <div class="panel-section panel-section--header">
             <label for="exercise-select">Exercice</label>
             <select id="exercise-select">
                 <option value="none" selected>Aucun</option>
