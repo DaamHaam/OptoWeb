@@ -120,13 +120,28 @@ export const exerciseModule = {
         let quaternion = null;
         let position = null;
 
+        const resolveCameraAnchor = () => {
+            if (!this.cameraEl || !this.rigEl) {
+                return { localAnchor: new THREE.Vector3(), cameraWorldPos: new THREE.Vector3() };
+            }
+            const cameraWorldPos = new THREE.Vector3();
+            this.cameraEl.object3D.getWorldPosition(cameraWorldPos);
+            const localAnchor = cameraWorldPos.clone();
+            this.rigEl.object3D.worldToLocal(localAnchor);
+            return { localAnchor, cameraWorldPos };
+        };
+
         if (this.getUserReferenceFrame) {
             const frame = this.getUserReferenceFrame();
             if (frame) {
                 if (frame.quaternion) {
                     quaternion = frame.quaternion.clone ? frame.quaternion.clone() : frame.quaternion;
                 }
-                if (frame.position) {
+                if (frame.worldPosition && this.rigEl) {
+                    const localAnchor = frame.worldPosition.clone();
+                    this.rigEl.object3D.worldToLocal(localAnchor);
+                    position = localAnchor;
+                } else if (frame.position) {
                     position = frame.position.clone ? frame.position.clone() : frame.position;
                 }
             }
@@ -135,14 +150,17 @@ export const exerciseModule = {
         if (!quaternion && this.getHorizontalForwardQuaternion) {
             quaternion = this.getHorizontalForwardQuaternion();
         }
+
+        const { localAnchor, cameraWorldPos } = resolveCameraAnchor();
+
         if (!position) {
-            const cameraWorldPos = new THREE.Vector3();
-            this.cameraEl.object3D.getWorldPosition(cameraWorldPos);
-            position = cameraWorldPos.clone();
-            this.rigEl.object3D.worldToLocal(position);
+            position = localAnchor;
+        } else {
+            position = position.clone ? position.clone() : position;
+            position.y = localAnchor.y;
         }
 
-        return { quaternion, position };
+        return { quaternion, position, cameraWorldPos };
     },
 
     start: function() {
@@ -153,8 +171,12 @@ export const exerciseModule = {
         this.exerciseSubmenu.querySelectorAll('select').forEach(s => s.disabled = true);
 
         const frame = this.resolveReferenceFrame();
-        this.spawnOrientation = frame.quaternion.clone();
-        this.spawnAnchor = frame.position.clone();
+        this.spawnOrientation = (frame.quaternion && frame.quaternion.clone)
+            ? frame.quaternion.clone()
+            : new THREE.Quaternion();
+        this.spawnAnchor = (frame.position && frame.position.clone)
+            ? frame.position.clone()
+            : frame.position || new THREE.Vector3();
 
         this.pointer = document.createElement('a-sphere');
         this.pointer.setAttribute('position', `0 0 -${this.pointerDistance}`);
@@ -228,7 +250,7 @@ export const exerciseModule = {
         position.applyQuaternion(this.spawnOrientation);
         position.add(this.spawnAnchor);
 
-        stimulus.setAttribute('position', position);
+        stimulus.setAttribute('position', `${position.x} ${position.y} ${position.z}`);
         this.rigEl.appendChild(stimulus);
 
         stimulus.addEventListener('raycaster-intersected', () => { if (this.isActive) this.onHit(stimulus, isGo); });
@@ -257,8 +279,12 @@ export const exerciseModule = {
         }
         if (this.isActive) {
             const frame = this.resolveReferenceFrame();
-            this.spawnOrientation = frame.quaternion.clone();
-            this.spawnAnchor = frame.position.clone();
+            this.spawnOrientation = (frame.quaternion && frame.quaternion.clone)
+                ? frame.quaternion.clone()
+                : new THREE.Quaternion();
+            this.spawnAnchor = (frame.position && frame.position.clone)
+                ? frame.position.clone()
+                : frame.position || new THREE.Vector3();
         }
     }
 };
