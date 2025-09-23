@@ -22,6 +22,33 @@ AFRAME.registerComponent('exercise-ticker', {
     }
 });
 
+AFRAME.registerComponent('fps-counter', {
+    schema: { interval: { type: 'number', default: 500 } },
+    init: function () {
+        this.elapsed = 0;
+        this.frames = 0;
+        this.fpsDisplayEl = document.getElementById('fps-display');
+    },
+    tick: function (time, timeDelta) {
+        if (!this.fpsDisplayEl) {
+            this.fpsDisplayEl = document.getElementById('fps-display');
+            if (!this.fpsDisplayEl) {
+                return;
+            }
+        }
+
+        this.elapsed += timeDelta;
+        this.frames += 1;
+
+        if (this.elapsed >= this.data.interval) {
+            const fps = (this.frames * 1000) / this.elapsed;
+            this.fpsDisplayEl.textContent = `${Math.round(fps)} fps`;
+            this.elapsed = 0;
+            this.frames = 0;
+        }
+    }
+});
+
 document.addEventListener('DOMContentLoaded', () => {
     // --- DOM Elements ---
     const sceneEl = document.querySelector('a-scene');
