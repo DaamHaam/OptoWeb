@@ -176,6 +176,11 @@ body {
     align-items: flex-start;
     gap: 4px;
 }
+.speed-value-row {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 6px;
+}
 .speed-display--stacked .arrow-icon {
     font-size: 1.6em;
     line-height: 1;
@@ -227,7 +232,7 @@ body {
     position: absolute;
     bottom: 20px;
     left: 20px;
-    color: rgba(31, 45, 61, 0.75);
+    color: #ffffff;
     font-weight: 600;
     font-size: 0.9em;
     z-index: 11;
