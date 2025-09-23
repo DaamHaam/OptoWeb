@@ -29,14 +29,64 @@ export const exerciseModule = {
         this.getHorizontalForwardQuaternion = helpers.getHorizontalForwardQuaternion;
 
         // Create UI
+        this.exerciseSubmenu.classList.add('submenu--go-nogo');
         this.exerciseSubmenu.innerHTML = `
-            <label for="go-nogo-duration">Durée Exercice</label><select id="go-nogo-duration"><option value="30">30s</option><option value="60">1m</option><option value="120">2m</option><option value="180">3m</option><option value="240">4m</option><option value="300">5m</option></select>
-            <label for="go-nogo-stimulus-duration">Durée affichage cible</label><select id="go-nogo-stimulus-duration"><option value="2000">Lente (2s)</option><option value="1500" selected>Normale (1.5s)</option><option value="1000">Rapide (1s)</option></select>
-            <label for="go-nogo-amplitude">Amplitude</label><select id="go-nogo-amplitude"><option value="20">20°</option><option value="30">30°</option><option value="40">40°</option></select>
-            <label for="gonogo-ratio">Ratio Go/No-Go</label><select id="gonogo-ratio"><option value="0.8" selected>80% Go</option><option value="0.6">60% Go</option><option value="0.4">40% Go</option><option value="0.2">20% Go</option></select>
-            <label for="gonogo-size">Taille Cibles</label><select id="gonogo-size"><option value="0.15">Petite</option><option value="0.2" selected>Moyenne</option><option value="0.3">Grande</option></select>
-            <div class="submenu-item"><span>Score:</span><span id="go-nogo-score">0</span></div>
-            <div class="submenu-item"><span>Temps restant:</span><span id="go-nogo-countdown">--</span></div>
+            <div class="gonogo-grid">
+                <div class="submenu-field">
+                    <label for="go-nogo-duration">Durée exercice</label>
+                    <select id="go-nogo-duration">
+                        <option value="30">30s</option>
+                        <option value="60">1m</option>
+                        <option value="120">2m</option>
+                        <option value="180">3m</option>
+                        <option value="240">4m</option>
+                        <option value="300">5m</option>
+                    </select>
+                </div>
+                <div class="submenu-field">
+                    <label for="go-nogo-stimulus-duration">Délai cible</label>
+                    <select id="go-nogo-stimulus-duration">
+                        <option value="2000">Lente (2s)</option>
+                        <option value="1500" selected>Normale (1.5s)</option>
+                        <option value="1000">Rapide (1s)</option>
+                    </select>
+                </div>
+                <div class="submenu-field">
+                    <label for="go-nogo-amplitude">Amplitude</label>
+                    <select id="go-nogo-amplitude">
+                        <option value="20">20°</option>
+                        <option value="30">30°</option>
+                        <option value="40">40°</option>
+                    </select>
+                </div>
+                <div class="submenu-field">
+                    <label for="gonogo-ratio">Ratio Go/No-Go</label>
+                    <select id="gonogo-ratio">
+                        <option value="0.8" selected>80% Go</option>
+                        <option value="0.6">60% Go</option>
+                        <option value="0.4">40% Go</option>
+                        <option value="0.2">20% Go</option>
+                    </select>
+                </div>
+                <div class="submenu-field submenu-field--wide">
+                    <label for="gonogo-size">Taille Cibles</label>
+                    <select id="gonogo-size">
+                        <option value="0.15">Petite</option>
+                        <option value="0.2" selected>Moyenne</option>
+                        <option value="0.3">Grande</option>
+                    </select>
+                </div>
+            </div>
+            <div class="gonogo-status">
+                <div class="status-tile">
+                    <span class="status-label">Score</span>
+                    <span id="go-nogo-score" class="status-value">0</span>
+                </div>
+                <div class="status-tile">
+                    <span class="status-label">Temps restant</span>
+                    <span id="go-nogo-countdown" class="status-value">--</span>
+                </div>
+            </div>
             <button id="go-nogo-start">Démarrer</button>`;
 
         // Get new DOM elements
@@ -56,6 +106,7 @@ export const exerciseModule = {
 
     cleanup: function() {
         this.stop();
+        this.exerciseSubmenu.classList.remove('submenu--go-nogo');
         this.exerciseSubmenu.innerHTML = '';
     },
 
