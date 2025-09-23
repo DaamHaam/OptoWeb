@@ -1,4 +1,7 @@
 // /modules/goNoGo.js
+const STIMULUS_DISTANCE = 4;
+const POINTER_DISTANCE = STIMULUS_DISTANCE * 1.05;
+
 export const exerciseModule = {
     // --- State ---
     isActive: false,
@@ -6,8 +9,9 @@ export const exerciseModule = {
     stimulusTimer: null,
     exerciseTimer: null,
     countdownInterval: null,
-    spawnCenter: null,
-    spawnHeight: 1.6,
+    spawnOrientation: null,
+    spawnAnchor: null,
+    pointerDistance: POINTER_DISTANCE,
 
     // --- DOM Elements (passed from main.js) ---
     rigEl: null,
@@ -20,6 +24,7 @@ export const exerciseModule = {
 
     // --- Helpers (passed from main.js) ---
     getHorizontalForwardQuaternion: null,
+    getUserReferenceFrame: null,
 
     init: function(helpers) {
         // Store helpers and DOM elements
@@ -27,6 +32,7 @@ export const exerciseModule = {
         this.cameraEl = helpers.cameraEl;
         this.exerciseSubmenu = helpers.exerciseSubmenu;
         this.getHorizontalForwardQuaternion = helpers.getHorizontalForwardQuaternion;
+        this.getUserReferenceFrame = helpers.getUserReferenceFrame || null;
 
         // Create UI
         this.exerciseSubmenu.classList.add('submenu--go-nogo');
@@ -110,6 +116,35 @@ export const exerciseModule = {
         this.exerciseSubmenu.innerHTML = '';
     },
 
+    resolveReferenceFrame: function() {
+        let quaternion = null;
+        let position = null;
+
+        if (this.getUserReferenceFrame) {
+            const frame = this.getUserReferenceFrame();
+            if (frame) {
+                if (frame.quaternion) {
+                    quaternion = frame.quaternion.clone ? frame.quaternion.clone() : frame.quaternion;
+                }
+                if (frame.position) {
+                    position = frame.position.clone ? frame.position.clone() : frame.position;
+                }
+            }
+        }
+
+        if (!quaternion && this.getHorizontalForwardQuaternion) {
+            quaternion = this.getHorizontalForwardQuaternion();
+        }
+        if (!position) {
+            const cameraWorldPos = new THREE.Vector3();
+            this.cameraEl.object3D.getWorldPosition(cameraWorldPos);
+            position = cameraWorldPos.clone();
+            this.rigEl.object3D.worldToLocal(position);
+        }
+
+        return { quaternion, position };
+    },
+
     start: function() {
         this.isActive = true;
         this.score = 0;
@@ -117,11 +152,12 @@ export const exerciseModule = {
         this.startButton.textContent = "Arrêter";
         this.exerciseSubmenu.querySelectorAll('select').forEach(s => s.disabled = true);
 
-        this.spawnCenter = this.getHorizontalForwardQuaternion();
-        this.spawnHeight = this.cameraEl.object3D.position.y;
+        const frame = this.resolveReferenceFrame();
+        this.spawnOrientation = frame.quaternion.clone();
+        this.spawnAnchor = frame.position.clone();
 
         this.pointer = document.createElement('a-sphere');
-        this.pointer.setAttribute('position', '0 0 -3.75');
+        this.pointer.setAttribute('position', `0 0 -${this.pointerDistance}`);
         this.pointer.setAttribute('radius', '0.03');
         this.pointer.setAttribute('color', 'red');
         this.cameraEl.appendChild(this.pointer);
@@ -135,7 +171,8 @@ export const exerciseModule = {
 
     stop: function() {
         this.isActive = false;
-        this.spawnCenter = null;
+        this.spawnOrientation = null;
+        this.spawnAnchor = null;
         clearTimeout(this.stimulusTimer);
         clearTimeout(this.exerciseTimer);
         clearInterval(this.countdownInterval);
@@ -168,7 +205,7 @@ export const exerciseModule = {
     },
 
     spawnStimulus: function() {
-        if (!this.isActive || !this.spawnCenter) return;
+        if (!this.isActive || !this.spawnOrientation || !this.spawnAnchor) return;
 
         const ratio = parseFloat(document.getElementById('gonogo-ratio').value);
         const radius = parseFloat(document.getElementById('gonogo-size').value);
@@ -185,11 +222,11 @@ export const exerciseModule = {
         const angleY = (Math.random() - 0.5) * THREE.MathUtils.degToRad(amplitude);
         const angleX = (Math.random() - 0.5) * THREE.MathUtils.degToRad(amplitude);
 
-        const position = new THREE.Vector3(0, 0, -4);
+        const position = new THREE.Vector3(0, 0, -STIMULUS_DISTANCE);
         const randomRotation = new THREE.Quaternion().setFromEuler(new THREE.Euler(angleX, angleY, 0, 'YXZ'));
         position.applyQuaternion(randomRotation);
-        position.applyQuaternion(this.spawnCenter);
-        position.y += this.spawnHeight;
+        position.applyQuaternion(this.spawnOrientation);
+        position.add(this.spawnAnchor);
 
         stimulus.setAttribute('position', position);
         this.rigEl.appendChild(stimulus);
@@ -212,9 +249,16 @@ export const exerciseModule = {
     },
 
     recenter: function(helpers) {
-        this.getHorizontalForwardQuaternion = helpers.getHorizontalForwardQuaternion;
+        if (helpers.getHorizontalForwardQuaternion) {
+            this.getHorizontalForwardQuaternion = helpers.getHorizontalForwardQuaternion;
+        }
+        if (helpers.getUserReferenceFrame) {
+            this.getUserReferenceFrame = helpers.getUserReferenceFrame;
+        }
         if (this.isActive) {
-            this.spawnCenter = this.getHorizontalForwardQuaternion();
+            const frame = this.resolveReferenceFrame();
+            this.spawnOrientation = frame.quaternion.clone();
+            this.spawnAnchor = frame.position.clone();
         }
     }
 };
