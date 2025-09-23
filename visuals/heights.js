@@ -8,7 +8,6 @@ import { heightsDecorModule } from './decor_heights.js';
 let sceneEl, rigEl;
 let platformEl;
 let skyEl;
-let originalSkyColor = null;
 let animationFrameId;
 let actualSpeed = 0;
 let targetSpeed = 0;
@@ -157,7 +156,6 @@ export const heightsModule = {
 
         skyEl = sceneEl.querySelector('#sky');
         if (skyEl) {
-            originalSkyColor = skyEl.getAttribute('color');
             skyEl.setAttribute('color', '#8dc6ff');
         }
 
@@ -200,11 +198,10 @@ export const heightsModule = {
         if(rigEl) {
             rigEl.object3D.position.y = 0;
         }
-        if (skyEl && originalSkyColor !== null) {
-            skyEl.setAttribute('color', originalSkyColor);
+        if (skyEl) {
+            skyEl.setAttribute('color', '#000000');
         }
         skyEl = null;
-        originalSkyColor = null;
     },
 
     regenerate() {
