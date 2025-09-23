@@ -16,7 +16,9 @@ export const heightsDecorModule = {
         }
 
         this.sceneEl = sceneEl;
-        this.originalFog = sceneEl.getAttribute('fog');
+
+        const currentFog = sceneEl.getAttribute('fog');
+        this.originalFog = currentFog ? { ...currentFog } : null;
 
         this.decorRoot = document.createElement('a-entity');
         this.decorRoot.setAttribute('id', 'heights-decor-root');
