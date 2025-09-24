@@ -1,4 +1,7 @@
 // /modules/targetPointer.js
+const BASE_TARGET_DISTANCE = 4;
+const POINTER_DISTANCE = BASE_TARGET_DISTANCE * 1.05;
+
 export const exerciseModule = {
     // --- DOM Elements (passed from main.js) ---
     rigEl: null,
@@ -7,15 +10,20 @@ export const exerciseModule = {
 
     // --- Helpers (passed from main.js) ---
     getHorizontalForwardQuaternion: null,
+    getUserReferenceFrame: null,
 
     // --- Internal State ---
     targetSizes: [0.1, 0.175, 0.25, 0.325, 0.4],
     currentTargetSizeIndex: 2, // Default to 'Moyenne'
+    anchorPosition: null,
 
     // --- Animation State ---
     movementType: 'none', // 'none', 'horizontal', 'vertical', 'lemniscate', 'lemniscate-vertical'
     animationTime: 0,
     referenceQuaternion: null, // Stores the rig's orientation when movement starts
+    referenceFrame: null,
+    baseDistance: BASE_TARGET_DISTANCE,
+    pointerDistance: POINTER_DISTANCE,
 
     // Horizontal/Vertical settings
     amplitude: 20, // degrees
@@ -40,9 +48,10 @@ export const exerciseModule = {
                 const innerRadius = outerRadius * 0.8;
                 this.element.setAttribute('radius-inner', innerRadius);
                 this.element.setAttribute('radius-outer', outerRadius);
-
-                this.element.setAttribute('position', '0 1.6 -5');
                 rigEl.appendChild(this.element);
+                if (module && module.referenceQuaternion && module.anchorPosition) {
+                    module.updateTargetTransform(module.referenceQuaternion);
+                }
             }
             const t = document.getElementById('target-toggle');
             if (t) t.checked = !!this.element;
@@ -50,7 +59,7 @@ export const exerciseModule = {
     },
     pointer: {
         element: null,
-        toggle: function(cameraEl) {
+        toggle: function(cameraEl, module) {
             if (this.element) {
                 this.element.parentNode.removeChild(this.element);
                 this.element = null;
@@ -58,7 +67,8 @@ export const exerciseModule = {
                 this.element = document.createElement('a-sphere');
                 this.element.setAttribute('color', 'red');
                 this.element.setAttribute('radius', '0.015');
-                this.element.setAttribute('position', '0 0 -3.75');
+                const distance = module ? module.pointerDistance : 3.75;
+                this.element.setAttribute('position', `0 0 -${distance}`);
                 cameraEl.appendChild(this.element);
             }
             const p = document.getElementById('pointer-toggle');
@@ -89,21 +99,26 @@ export const exerciseModule = {
         this.cameraEl = helpers.cameraEl;
         this.exerciseSubmenu = helpers.exerciseSubmenu;
         this.getHorizontalForwardQuaternion = helpers.getHorizontalForwardQuaternion;
+        this.getUserReferenceFrame = helpers.getUserReferenceFrame || null;
 
         this.renderSubmenu();
         this.bindEvents();
 
+        this.recenter(helpers);
+
         if (!this.target.element) {
             this.target.toggle(this.rigEl, this);
+        } else {
+            this.updateTargetTransform();
         }
         document.getElementById('target-toggle').checked = !!this.target.element;
 
         if (!this.pointer.element) {
-            this.pointer.toggle(this.cameraEl);
+            this.pointer.toggle(this.cameraEl, this);
+        } else {
+            this.pointer.element.setAttribute('position', `0 0 -${this.pointerDistance}`);
         }
         document.getElementById('pointer-toggle').checked = !!this.pointer.element;
-
-        this.recenter(helpers);
     },
 
     renderSubmenu: function() {
@@ -172,7 +187,7 @@ export const exerciseModule = {
 
     bindEvents: function() {
         document.getElementById('target-toggle').addEventListener('change', () => this.target.toggle(this.rigEl, this));
-        document.getElementById('pointer-toggle').addEventListener('change', () => this.pointer.toggle(this.cameraEl));
+        document.getElementById('pointer-toggle').addEventListener('change', () => this.pointer.toggle(this.cameraEl, this));
         document.getElementById('target-size-slider').addEventListener('input', () => this.updateTargetSize());
         
         document.getElementById('movement-type-select').addEventListener('change', (e) => {
@@ -180,10 +195,16 @@ export const exerciseModule = {
             this.animationTime = 0;
 
             if (this.movementType !== 'none') {
-                this.referenceQuaternion = this.rigEl.object3D.quaternion.clone();
+                const frame = this.resolveReferenceFrame();
+                this.referenceFrame = frame;
+                this.referenceQuaternion = frame.quaternion.clone();
+                this.anchorPosition = frame.position.clone();
             } else {
                 this.referenceQuaternion = null;
-                this.recenter({ getHorizontalForwardQuaternion: this.getHorizontalForwardQuaternion });
+                this.recenter({
+                    getHorizontalForwardQuaternion: this.getHorizontalForwardQuaternion,
+                    getUserReferenceFrame: this.getUserReferenceFrame
+                });
             }
             this.updateMovementControls();
         });
@@ -227,45 +248,93 @@ export const exerciseModule = {
             this.target.toggle(this.rigEl, this);
         }
         if (this.pointer.element) {
-            this.pointer.toggle(this.cameraEl);
+            this.pointer.toggle(this.cameraEl, this);
         }
         this.exerciseSubmenu.innerHTML = '';
     },
 
-    recenter: function(helpers) {
-        this.getHorizontalForwardQuaternion = helpers.getHorizontalForwardQuaternion;
-        const forwardQuaternion = this.getHorizontalForwardQuaternion();
+    resolveReferenceFrame: function() {
+        let quaternion = null;
+        let position = null;
+        let forward = null;
 
-        // Mettre à jour le quaternion de référence pour le mouvement
-        this.referenceQuaternion = forwardQuaternion.clone();
+        if (this.getUserReferenceFrame) {
+            const frame = this.getUserReferenceFrame();
+            if (frame) {
+                if (frame.quaternion) {
+                    quaternion = frame.quaternion.clone ? frame.quaternion.clone() : frame.quaternion;
+                }
+                if (frame.position) {
+                    position = frame.position.clone ? frame.position.clone() : frame.position;
+                }
+                if (frame.forward) {
+                    forward = frame.forward.clone ? frame.forward.clone() : frame.forward;
+                }
+            }
+        }
+
+        if (!quaternion && this.getHorizontalForwardQuaternion) {
+            quaternion = this.getHorizontalForwardQuaternion();
+        }
+        if (!position) {
+            const cameraWorldPos = new THREE.Vector3();
+            this.cameraEl.object3D.getWorldPosition(cameraWorldPos);
+            position = cameraWorldPos.clone();
+            this.rigEl.object3D.worldToLocal(position);
+        }
+        if (!forward) {
+            forward = new THREE.Vector3(0, 0, -1).applyQuaternion(quaternion).normalize();
+        }
+
+        return { quaternion, position, forward };
+    },
+
+    updateTargetTransform: function(rotationQuaternion = this.referenceQuaternion) {
+        if (!this.target.element || !rotationQuaternion || !this.anchorPosition) return;
+        const anchor = this.anchorPosition.clone();
+        const offset = new THREE.Vector3(0, 0, -this.baseDistance).applyQuaternion(rotationQuaternion.clone());
+        const position = anchor.add(offset);
+        this.target.element.setAttribute('position', position);
+        this.target.element.object3D.setRotationFromQuaternion(rotationQuaternion);
+    },
+
+    recenter: function(helpers) {
+        if (helpers.getHorizontalForwardQuaternion) {
+            this.getHorizontalForwardQuaternion = helpers.getHorizontalForwardQuaternion;
+        }
+        if (helpers.getUserReferenceFrame) {
+            this.getUserReferenceFrame = helpers.getUserReferenceFrame;
+        }
+
+        const frame = this.resolveReferenceFrame();
+        this.referenceFrame = frame;
+        this.referenceQuaternion = frame.quaternion.clone();
+        this.anchorPosition = frame.position.clone();
         this.animationTime = 0; // Réinitialiser le temps pour que le cycle reparte du début
 
-        // Si la cible est immobile, la repositionner manuellement
-        if (this.movementType === 'none' && this.target.element) {
-            const position = new THREE.Vector3(0, 1.6, -5);
-            position.applyQuaternion(forwardQuaternion);
-            this.target.element.setAttribute('position', position);
-            this.target.element.object3D.setRotationFromQuaternion(forwardQuaternion);
+        if (this.movementType === 'none') {
+            this.updateTargetTransform(this.referenceQuaternion);
         }
         // Si la cible est en mouvement, la fonction tick() la repositionnera automatiquement
         // au bon endroit grâce au nouveau referenceQuaternion et à l'animationTime réinitialisé.
     },
 
     tick: function(time, timeDelta) {
-        if (this.movementType === 'none' || !this.target.element || !this.referenceQuaternion) return;
+        if (this.movementType === 'none' || !this.target.element || !this.referenceQuaternion || !this.anchorPosition) return;
 
         this.animationTime += timeDelta / 1000;
         const t = this.animationTime;
 
         const forwardQuaternion = this.referenceQuaternion;
-        const basePosition = new THREE.Vector3(0, 1.6, -5);
-        
+        const baseVector = new THREE.Vector3(0, 0, -this.baseDistance);
+        const anchor = this.anchorPosition.clone();
+
         switch (this.movementType) {
             case 'horizontal': {
                 const angle = THREE.MathUtils.degToRad(this.amplitude) * Math.sin(t * this.speed * Math.PI * 2);
                 const oscillationQuaternion = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), angle);
                 const finalRotation = forwardQuaternion.clone().multiply(oscillationQuaternion);
-                const finalPosition = basePosition.clone().applyQuaternion(finalRotation);
+                const finalPosition = anchor.clone().add(baseVector.clone().applyQuaternion(finalRotation));
                 this.target.element.setAttribute('position', finalPosition);
                 this.target.element.object3D.setRotationFromQuaternion(finalRotation);
                 break;
@@ -275,7 +344,7 @@ export const exerciseModule = {
                 const rigRight = new THREE.Vector3(1, 0, 0).applyQuaternion(forwardQuaternion);
                 const oscillationQuaternion = new THREE.Quaternion().setFromAxisAngle(rigRight, angle);
                 const finalRotation = forwardQuaternion.clone().multiply(oscillationQuaternion);
-                const finalPosition = basePosition.clone().applyQuaternion(finalRotation);
+                const finalPosition = anchor.clone().add(baseVector.clone().applyQuaternion(finalRotation));
                 this.target.element.setAttribute('position', finalPosition);
                 this.target.element.object3D.setRotationFromQuaternion(finalRotation);
                 break;
@@ -294,9 +363,10 @@ export const exerciseModule = {
                 if (this.movementType === 'lemniscate-vertical') {
                     [x, y] = [y, x];
                 }
-                
+
                 const offset = new THREE.Vector3(x, y, 0);
-                const finalPosition = basePosition.clone().applyQuaternion(forwardQuaternion).add(offset.applyQuaternion(forwardQuaternion));
+                const forwardOffset = baseVector.clone().applyQuaternion(forwardQuaternion);
+                const finalPosition = anchor.clone().add(forwardOffset).add(offset.applyQuaternion(forwardQuaternion));
                 this.target.element.setAttribute('position', finalPosition);
                 this.target.element.object3D.setRotationFromQuaternion(forwardQuaternion);
                 break;
@@ -309,7 +379,7 @@ export const exerciseModule = {
             this.target.toggle(this.rigEl, this);
         }
         if (key === 'p') {
-            this.pointer.toggle(this.cameraEl);
+            this.pointer.toggle(this.cameraEl, this);
         }
     }
 };

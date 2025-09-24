@@ -45,6 +45,21 @@ document.addEventListener('DOMContentLoaded', () => {
     const exerciseSubmenu = document.getElementById('exercise-submenu');
     const skyEl = document.getElementById('sky');
 
+    const defaultSkyColor = '#000000';
+    const skyColorsByVisual = {
+        heights: '#8dc6ff'
+    };
+    let lastAppliedSkyColor = null;
+
+    function applySkyColorForVisual(moduleName) {
+        const desiredColor = skyColorsByVisual[moduleName] || defaultSkyColor;
+        if (!skyEl || lastAppliedSkyColor === desiredColor) {
+            return;
+        }
+        skyEl.setAttribute('color', desiredColor);
+        lastAppliedSkyColor = desiredColor;
+    }
+
     // --- State Variables ---
     let activeExerciseModule = null;
     let activeVisualModule = null;
@@ -84,6 +99,8 @@ document.addEventListener('DOMContentLoaded', () => {
             activeVisualModule.cleanup();
         }
 
+        applySkyColorForVisual(null);
+
         activeVisualModule = VisualModules[moduleName] || null;
         updateUIVisibility(moduleName);
 
@@ -95,9 +112,7 @@ document.addEventListener('DOMContentLoaded', () => {
         };
 
         if (!activeVisualModule) {
-            if (skyEl) {
-                skyEl.setAttribute('color', '#000000');
-            }
+            applySkyColorForVisual(null);
             horizontalSpeedValue.textContent = '0';
             verticalSpeedValue.textContent = '0';
             translationSpeedValue.textContent = '0.0';
@@ -109,6 +124,8 @@ document.addEventListener('DOMContentLoaded', () => {
         if (typeof activeVisualModule.init === 'function') {
             activeVisualModule.init(sceneEl, rigEl, cameraEl, spheresContainer);
         }
+
+        applySkyColorForVisual(moduleName);
 
         let newSpeeds = { h: 0, v: 0, t: 0, y: 0 };
         if (moduleName === 'rotatingCube') {
@@ -135,12 +152,28 @@ document.addEventListener('DOMContentLoaded', () => {
         return new THREE.Quaternion().setFromEuler(euler);
     }
 
+    function getUserReferenceFrame() {
+        const horizontalQuaternion = getHorizontalForwardQuaternion();
+        const cameraWorldPosition = new THREE.Vector3();
+        cameraEl.object3D.getWorldPosition(cameraWorldPosition);
+        const anchorPosition = cameraWorldPosition.clone();
+        rigEl.object3D.worldToLocal(anchorPosition);
+        const forwardVector = new THREE.Vector3(0, 0, -1).applyQuaternion(horizontalQuaternion).normalize();
+
+        return {
+            quaternion: horizontalQuaternion,
+            position: anchorPosition,
+            forward: forwardVector,
+            worldPosition: cameraWorldPosition
+        };
+    }
+
     function handleRecenter() {
         if (activeVisualModule && typeof activeVisualModule.regenerate === 'function') {
             activeVisualModule.regenerate();
         }
         if (activeExerciseModule && typeof activeExerciseModule.recenter === 'function') {
-            activeExerciseModule.recenter({ getHorizontalForwardQuaternion });
+            activeExerciseModule.recenter({ getHorizontalForwardQuaternion, getUserReferenceFrame });
         }
     }
 
@@ -173,7 +206,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 rigEl,
                 cameraEl,
                 exerciseSubmenu,
-                getHorizontalForwardQuaternion
+                getHorizontalForwardQuaternion,
+                getUserReferenceFrame
             });
         }
 
@@ -339,6 +373,13 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- Initialization ---
     function initialize() {
         setActiveVisualModule(visualSelect.value); // This will also call updateUIVisibility
+
+        stateManager.subscribe((newState) => {
+            if (!newState || !newState.visual) {
+                return;
+            }
+            applySkyColorForVisual(newState.visual.activeModule);
+        });
         
         if (cameraEl.hasLoaded) {
             handleRecenter();
