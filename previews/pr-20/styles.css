@@ -412,33 +412,33 @@ a-scene[vr-mode-ui] .ui-panel, a-scene[vr-mode-ui] #version-display { display: n
 @media (max-width: 768px) {
     .ui-panels-container {
         position: fixed;
-        top: 10px;
+        top: 0;
+        bottom: 0;
         left: 50%;
         transform: translateX(-50%);
         display: flex;
         flex-direction: column;
-        align-items: center;
-        justify-content: flex-start;
-        gap: clamp(56px, 18vh, 140px);
-        width: calc(100% - 20px);
-        max-width: 380px;
-        height: calc(100vh - 20px);
-        overflow-y: auto;
-        padding: clamp(12px, 4vh, 28px) 8px clamp(44px, 14vh, 96px);
-        overscroll-behavior: contain;
-        -webkit-overflow-scrolling: touch;
+        justify-content: space-between;
+        align-items: stretch;
+        width: min(100%, 380px);
+        padding-inline: clamp(8px, 4vw, 16px);
+        padding-top: calc(env(safe-area-inset-top) + clamp(12px, 4vh, 24px));
+        padding-bottom: calc(env(safe-area-inset-bottom) + clamp(12px, 4vh, 24px));
+        gap: clamp(32px, 15vh, 120px);
+        min-height: 100vh;
+        overflow: hidden;
         touch-action: pan-y;
         z-index: 12;
     }
 
     .ui-panels-container .ui-panel {
         position: relative;
-        width: 100%;
         left: auto;
         right: auto;
         top: auto;
-        max-height: clamp(240px, calc(100vh - 280px), 420px);
-        flex-shrink: 0;
+        width: 100%;
+        max-height: clamp(140px, 35vh, 260px);
+        flex: 0 0 auto;
         overflow-y: auto;
         overscroll-behavior: contain;
         -webkit-overflow-scrolling: touch;
