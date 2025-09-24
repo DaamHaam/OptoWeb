@@ -418,12 +418,13 @@ a-scene[vr-mode-ui] .ui-panel, a-scene[vr-mode-ui] #version-display { display: n
         display: flex;
         flex-direction: column;
         align-items: center;
+        justify-content: flex-start;
         gap: clamp(56px, 18vh, 140px);
         width: calc(100% - 20px);
         max-width: 380px;
         height: calc(100vh - 20px);
         overflow-y: auto;
-        padding: clamp(12px, 4vh, 28px) 8px clamp(60px, 16vh, 120px);
+        padding: clamp(12px, 4vh, 28px) 8px clamp(44px, 14vh, 96px);
         overscroll-behavior: contain;
         -webkit-overflow-scrolling: touch;
         touch-action: pan-y;
@@ -436,7 +437,8 @@ a-scene[vr-mode-ui] .ui-panel, a-scene[vr-mode-ui] #version-display { display: n
         left: auto;
         right: auto;
         top: auto;
-        max-height: clamp(260px, calc(100vh - 200px), 520px);
+        max-height: clamp(240px, calc(100vh - 280px), 420px);
+        flex-shrink: 0;
         overflow-y: auto;
         overscroll-behavior: contain;
         -webkit-overflow-scrolling: touch;
