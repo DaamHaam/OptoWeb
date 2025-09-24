@@ -408,3 +408,16 @@ a-scene[vr-mode-ui] .ui-panel, a-scene[vr-mode-ui] #version-display { display: n
     white-space: nowrap;
     border: 0;
 }
+
+@media (max-width: 768px) {
+    #visual-panel {
+        max-height: clamp(160px, 45vh, 280px);
+    }
+
+    body::after {
+        content: "";
+        display: block;
+        height: clamp(140px, 40vh, 260px);
+        pointer-events: none;
+    }
+}
