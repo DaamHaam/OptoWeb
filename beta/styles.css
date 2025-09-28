@@ -1,5 +1,11 @@
 /* styles.css */
 /* Rôle: Centralise tous les styles de l'application pour une maintenance facilitée. */
+
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     color: #1f2d3d;
@@ -120,6 +126,7 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
+    flex-wrap: nowrap;
     gap: 12px;
     box-sizing: border-box;
     background: rgba(255, 255, 255, 0.92);
@@ -156,6 +163,23 @@ body {
     color: #1f2d3d;
     border: 1px solid #c2dedb;
     box-shadow: inset 0 -2px 0 rgba(31, 45, 61, 0.05);
+}
+
+.mobile-keypad {
+    display: none;
+    flex: 0 0 auto;
+    gap: 6px;
+}
+
+.mobile-keypad-button {
+    font-size: 1em;
+    font-weight: 600;
+    touch-action: manipulation;
+}
+
+.mobile-keypad-button:active {
+    background-color: #e4f0ee;
+    border-color: #b6d8d4;
 }
 
 #controls .icon-button:hover {
@@ -528,26 +552,119 @@ a-scene[vr-mode-ui] .ui-panel, a-scene[vr-mode-ui] #version-display { display: n
     border: 0;
 }
 
+.mobile-tabbar {
+    display: none;
+}
+
+.mobile-tabbutton {
+    appearance: none;
+    border: 1px solid rgba(42, 161, 152, 0.32);
+    background: rgba(255, 255, 255, 0.72);
+    color: #184b46;
+    font-weight: 600;
+    font-size: 0.95em;
+    padding: 10px 16px;
+    border-radius: 12px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+    min-width: 0;
+    text-align: center;
+}
+
+.mobile-tabbutton--toggle {
+    font-size: 0.9em;
+    padding-inline: 14px;
+    white-space: nowrap;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+}
+
+.mobile-tabbutton:hover {
+    background: rgba(255, 255, 255, 0.92);
+    border-color: rgba(42, 161, 152, 0.5);
+}
+
+.mobile-tabbutton.is-active {
+    background: #2aa198;
+    color: #ffffff;
+    border-color: #2aa198;
+    box-shadow: 0 10px 24px rgba(42, 161, 152, 0.28);
+}
+
+.mobile-tabbutton:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(42, 161, 152, 0.28);
+}
+
+.mobile-tabpanes {
+    display: contents;
+}
+
+.mobile-panels-handle {
+    position: fixed;
+    top: clamp(12px, 6vh, 24px);
+    right: clamp(12px, 6vw, 20px);
+    z-index: 18;
+    border-radius: 999px;
+    padding: 12px 18px;
+    font-weight: 600;
+    font-size: 0.95em;
+    background: rgba(42, 161, 152, 0.92);
+    color: #ffffff;
+    border: 1px solid rgba(17, 102, 96, 0.65);
+    box-shadow: 0 14px 32px rgba(17, 102, 96, 0.26);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+}
+
+.mobile-panels-handle:hover {
+    background: rgba(36, 138, 130, 0.98);
+    box-shadow: 0 18px 36px rgba(17, 102, 96, 0.3);
+}
+
+.mobile-panels-handle:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.35), 0 0 0 6px rgba(42, 161, 152, 0.65);
+}
+
 @media (max-width: 768px) {
     .ui-panels-container {
         position: fixed;
         top: 0;
         bottom: 0;
-        left: 50%;
-        transform: translateX(-50%);
+        left: 0;
+        right: 0;
+        transform: none;
+        margin: 0 auto;
         display: flex;
         flex-direction: column;
-        justify-content: space-between;
+        justify-content: flex-start;
         align-items: stretch;
-        width: min(100%, 380px);
-        padding-inline: clamp(8px, 4vw, 16px);
+        width: min(100%, 360px);
+        max-width: 360px;
+        padding-inline: clamp(8px, 3vw, 14px);
         padding-top: calc(env(safe-area-inset-top) + clamp(12px, 4vh, 24px));
-        padding-bottom: calc(env(safe-area-inset-bottom) + clamp(12px, 4vh, 24px));
-        gap: clamp(32px, 15vh, 120px);
+        padding-bottom: calc(env(safe-area-inset-bottom) + clamp(96px, 18vh, 140px));
+        gap: clamp(16px, 6vh, 28px);
         min-height: 100vh;
-        overflow: hidden;
+        overflow-y: visible;
         touch-action: pan-y;
         z-index: 12;
+    }
+
+    .mobile-tabpanes {
+        display: flex;
+        flex-direction: column;
+        gap: clamp(12px, 4vh, 20px);
     }
 
     .ui-panels-container .ui-panel {
@@ -556,15 +673,107 @@ a-scene[vr-mode-ui] .ui-panel, a-scene[vr-mode-ui] #version-display { display: n
         right: auto;
         top: auto;
         width: 100%;
-        max-height: clamp(140px, 35vh, 260px);
+        max-height: none;
         flex: 0 0 auto;
         overflow-y: auto;
         overscroll-behavior: contain;
         -webkit-overflow-scrolling: touch;
     }
 
+    .ui-panels-container .ui-panel:focus-visible {
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(42, 161, 152, 0.28);
+    }
+
+    .ui-panels-container.is-mobile-tabs {
+        overflow-y: visible;
+        gap: clamp(12px, 4vh, 24px);
+        transition: opacity 0.25s ease, visibility 0.25s ease, transform 0.25s ease;
+    }
+
+    .ui-panels-container.is-mobile-tabs .mobile-tabbar {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        grid-auto-rows: minmax(0, auto);
+        gap: 10px;
+        padding: 10px;
+        background: rgba(255, 255, 255, 0.85);
+        border-radius: 18px;
+        border: 1px solid rgba(42, 161, 152, 0.18);
+        box-shadow: 0 12px 24px rgba(15, 50, 60, 0.16);
+        backdrop-filter: blur(6px);
+    }
+
+    .ui-panels-container.is-mobile-tabs .mobile-tabbar .mobile-tabbutton {
+        width: 100%;
+    }
+
+    .ui-panels-container.is-mobile-tabs .mobile-tabbar .mobile-tabbutton--toggle {
+        grid-column: 1 / -1;
+        justify-self: stretch;
+    }
+
+    .ui-panels-container.is-mobile-tabs .mobile-tabpanes {
+        display: flex;
+        flex: 1 1 auto;
+        min-height: 0;
+    }
+
+    .ui-panels-container.is-mobile-tabs .mobile-tabpanes .ui-panel {
+        display: none;
+        pointer-events: none;
+        opacity: 0;
+        transition: opacity 0.2s ease;
+    }
+
+    .ui-panels-container.is-mobile-tabs .mobile-tabpanes .ui-panel.is-active-mobile {
+        display: flex;
+        flex-direction: column;
+        pointer-events: auto;
+        opacity: 1;
+        max-height: calc(100vh - clamp(220px, 36vh, 300px));
+        overflow-y: auto;
+    }
+
+    .ui-panels-container.is-mobile-tabs.is-mobile-hidden {
+        opacity: 0;
+        visibility: hidden;
+        transform: translateY(-24px) scale(0.98);
+        pointer-events: none;
+    }
+
     #visual-panel,
     #exercise-panel {
         width: 100%;
+    }
+
+    .mobile-panels-handle {
+        display: inline-flex;
+    }
+
+    .mobile-panels-handle[hidden] {
+        display: none;
+    }
+
+    #controls {
+        bottom: calc(env(safe-area-inset-bottom) + 18px);
+        gap: 10px;
+        padding: 10px 14px;
+    }
+
+    .mobile-keypad {
+        display: grid;
+        grid-template-columns: repeat(3, 32px);
+        grid-auto-rows: 32px;
+        justify-content: center;
+        justify-items: center;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .mobile-keypad-button {
+        width: 32px;
+        height: 32px;
+        font-size: 0.9em;
     }
 }

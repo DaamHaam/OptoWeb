@@ -47,6 +47,20 @@ document.addEventListener('DOMContentLoaded', () => {
     const shortcutButton = document.getElementById('shortcut-button');
     const shortcutOverlay = document.getElementById('shortcut-overlay');
     const shortcutCloseButton = document.getElementById('shortcut-close');
+    const uiPanelsContainer = document.querySelector('.ui-panels-container');
+    const mobileTabbar = document.querySelector('.mobile-tabbar');
+    const mobileTabButtons = mobileTabbar ? Array.from(mobileTabbar.querySelectorAll('[role="tab"]')) : [];
+    const mobilePanelsToggle = document.getElementById('mobile-panels-toggle');
+    const mobilePanelsToggleLabel = mobilePanelsToggle ? mobilePanelsToggle.querySelector('.mobile-tabbutton-label') : null;
+    const mobileKeypad = document.getElementById('mobile-keypad');
+    let mobilePanelsHandle = null;
+    let areMobilePanelsHidden = false;
+    const mobilePanels = {
+        'visual-panel': document.getElementById('visual-panel'),
+        'exercise-panel': document.getElementById('exercise-panel')
+    };
+    const mobileMediaQuery = window.matchMedia('(max-width: 768px)');
+    let activeMobileTabId = 'visual-panel';
 
     // --- State Variables ---
     let activeExerciseModule = null;
@@ -67,11 +81,10 @@ document.addEventListener('DOMContentLoaded', () => {
     function updateUIVisibility(moduleName) {
         // Gère la visibilité des contrôles spécifiques à chaque module.
         // Cache DOM elements
-    const optokineticControls = document.getElementById('optokinetic-controls');
-    const opticalFlowControls = document.getElementById('optical-flow-controls');
-    const rotatingCubeControls = document.getElementById('rotating-cube-controls');
-    const heightsControls = document.getElementById('heights-controls');
-
+        const optokineticControls = document.getElementById('optokinetic-controls');
+        const opticalFlowControls = document.getElementById('optical-flow-controls');
+        const rotatingCubeControls = document.getElementById('rotating-cube-controls');
+        const heightsControls = document.getElementById('heights-controls');
 
         optokineticControls.style.display = (moduleName === 'optokinetic') ? 'flex' : 'none';
         opticalFlowControls.style.display = (moduleName === 'opticalFlow') ? 'flex' : 'none';
@@ -229,6 +242,184 @@ document.addEventListener('DOMContentLoaded', () => {
 
     shortcutOverlay.setAttribute('aria-hidden', 'true');
 
+    const ensureMobilePanelsHandle = () => {
+        if (mobilePanelsHandle) {
+            return mobilePanelsHandle;
+        }
+        const handleButton = document.createElement('button');
+        handleButton.type = 'button';
+        handleButton.id = 'mobile-panels-handle';
+        handleButton.className = 'mobile-panels-handle';
+        handleButton.textContent = 'Afficher les menus';
+        handleButton.hidden = true;
+        handleButton.setAttribute('aria-pressed', 'false');
+        document.body.appendChild(handleButton);
+
+        handleButton.addEventListener('click', () => {
+            if (!mobileMediaQuery.matches) {
+                return;
+            }
+            areMobilePanelsHidden = false;
+            syncMobilePanelsHiddenState(true);
+            focusActiveMobileTabButton();
+        });
+
+        mobilePanelsHandle = handleButton;
+        return mobilePanelsHandle;
+    };
+
+    const focusActiveMobileTabButton = () => {
+        if (!mobileMediaQuery.matches) {
+            return;
+        }
+        const activeButton = mobileTabButtons.find((button) => button.dataset.target === activeMobileTabId);
+        if (activeButton) {
+            activeButton.focus();
+        }
+    };
+
+    const syncMobilePanelsHiddenState = (isMobile) => {
+        if (!uiPanelsContainer) {
+            return;
+        }
+
+        if (!isMobile) {
+            areMobilePanelsHidden = false;
+            uiPanelsContainer.classList.remove('is-mobile-hidden');
+            uiPanelsContainer.setAttribute('aria-hidden', 'false');
+            if (mobilePanelsToggle) {
+                mobilePanelsToggle.setAttribute('aria-pressed', 'false');
+                if (mobilePanelsToggleLabel) {
+                    mobilePanelsToggleLabel.textContent = 'Masquer';
+                }
+            }
+            if (mobilePanelsHandle) {
+                mobilePanelsHandle.hidden = true;
+                mobilePanelsHandle.setAttribute('aria-pressed', 'false');
+            }
+            return;
+        }
+
+        uiPanelsContainer.classList.toggle('is-mobile-hidden', areMobilePanelsHidden);
+        uiPanelsContainer.setAttribute('aria-hidden', areMobilePanelsHidden ? 'true' : 'false');
+
+        if (mobilePanelsToggle) {
+            mobilePanelsToggle.setAttribute('aria-pressed', areMobilePanelsHidden ? 'true' : 'false');
+            if (mobilePanelsToggleLabel) {
+                mobilePanelsToggleLabel.textContent = areMobilePanelsHidden ? 'Afficher' : 'Masquer';
+            }
+        }
+
+        const handle = ensureMobilePanelsHandle();
+        handle.hidden = !areMobilePanelsHidden;
+        handle.setAttribute('aria-pressed', areMobilePanelsHidden ? 'true' : 'false');
+
+        if (areMobilePanelsHidden) {
+            requestAnimationFrame(() => {
+                handle.focus();
+            });
+        }
+    };
+
+    const applyMobilePanelState = (isMobile) => {
+        if (!mobileTabbar || !uiPanelsContainer) {
+            return;
+        }
+
+        uiPanelsContainer.classList.toggle('is-mobile-tabs', isMobile);
+
+        mobileTabButtons.forEach((button) => {
+            const isActive = button.dataset.target === activeMobileTabId;
+            button.classList.toggle('is-active', isMobile && isActive);
+            button.setAttribute('aria-selected', isActive ? 'true' : 'false');
+            button.setAttribute('tabindex', isMobile ? (isActive ? '0' : '-1') : '0');
+        });
+
+        Object.entries(mobilePanels).forEach(([panelId, panelEl]) => {
+            if (!panelEl) {
+                return;
+            }
+            const isActive = panelId === activeMobileTabId;
+            panelEl.classList.toggle('is-active-mobile', isMobile && isActive);
+            panelEl.setAttribute('aria-hidden', isMobile ? (isActive ? 'false' : 'true') : 'false');
+        });
+
+        syncMobilePanelsHiddenState(isMobile);
+    };
+
+    const setActiveMobileTab = (targetId) => {
+        if (!mobilePanels[targetId]) {
+            return;
+        }
+        activeMobileTabId = targetId;
+        applyMobilePanelState(mobileMediaQuery.matches);
+    };
+
+    const handleMobileBreakpoint = (mqEvent) => {
+        applyMobilePanelState(mqEvent.matches);
+    };
+
+    if (mobileTabbar && uiPanelsContainer) {
+        applyMobilePanelState(mobileMediaQuery.matches);
+
+        if (typeof mobileMediaQuery.addEventListener === 'function') {
+            mobileMediaQuery.addEventListener('change', handleMobileBreakpoint);
+        } else if (typeof mobileMediaQuery.addListener === 'function') {
+            mobileMediaQuery.addListener(handleMobileBreakpoint);
+        }
+
+        mobileTabButtons.forEach((button) => {
+            button.addEventListener('click', () => {
+                setActiveMobileTab(button.dataset.target);
+                button.blur();
+            });
+
+            button.addEventListener('keydown', (event) => {
+                if (!mobileMediaQuery.matches) {
+                    return;
+                }
+                const { key } = event;
+                if (key !== 'ArrowLeft' && key !== 'ArrowRight' && key !== 'Home' && key !== 'End') {
+                    return;
+                }
+
+                event.preventDefault();
+                const currentIndex = mobileTabButtons.indexOf(button);
+                let nextIndex = currentIndex;
+
+                if (key === 'ArrowLeft') {
+                    nextIndex = (currentIndex - 1 + mobileTabButtons.length) % mobileTabButtons.length;
+                } else if (key === 'ArrowRight') {
+                    nextIndex = (currentIndex + 1) % mobileTabButtons.length;
+                } else if (key === 'Home') {
+                    nextIndex = 0;
+                } else if (key === 'End') {
+                    nextIndex = mobileTabButtons.length - 1;
+                }
+
+                const nextButton = mobileTabButtons[nextIndex];
+                if (nextButton) {
+                    nextButton.focus();
+                    setActiveMobileTab(nextButton.dataset.target);
+                }
+            });
+        });
+    }
+
+    if (mobilePanelsToggle) {
+        mobilePanelsToggle.addEventListener('click', () => {
+            if (!mobileMediaQuery.matches) {
+                return;
+            }
+            areMobilePanelsHidden = !areMobilePanelsHidden;
+            syncMobilePanelsHiddenState(true);
+
+            if (!areMobilePanelsHidden) {
+                focusActiveMobileTabButton();
+            }
+        });
+    }
+
     // --- Event Listeners ---
     visualSelect.addEventListener('change', (e) => {
         setActiveVisualModule(e.target.value);
@@ -328,8 +519,22 @@ document.addEventListener('DOMContentLoaded', () => {
     document.addEventListener('touchend', blurActiveRange);
     document.addEventListener('mouseup', blurActiveRange);
 
-    document.addEventListener('keydown', (e) => {
-        const key = e.key.toLowerCase();
+    const normalizeInputKey = (value) => {
+        if (!value) {
+            return '';
+        }
+        if (value === ' ' || value.toLowerCase() === 'space' || value.toLowerCase() === 'spacebar') {
+            return ' ';
+        }
+        return value.toLowerCase();
+    };
+
+    const handleControlInput = (inputValue) => {
+        const key = normalizeInputKey(inputValue);
+
+        if (!key) {
+            return;
+        }
 
         if (isShortcutOverlayOpen()) {
             if (key === 'escape') {
@@ -360,6 +565,8 @@ document.addEventListener('DOMContentLoaded', () => {
                         newSpeeds.v = -newSpeeds.v;
                         speedUpdated = true;
                         break;
+                    default:
+                        break;
                 }
             } else if (moduleName === 'opticalFlow') {
                 switch (key) {
@@ -370,6 +577,8 @@ document.addEventListener('DOMContentLoaded', () => {
                         newSpeeds.t = -newSpeeds.t;
                         speedUpdated = true;
                         break;
+                    default:
+                        break;
                 }
             } else if (moduleName === 'heights') {
                 if (key === 'arrowup') {
@@ -378,7 +587,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 } else if (key === 'arrowdown') {
                     newSpeeds.y = Math.max(-5, newSpeeds.y - 0.5);
                     speedUpdated = true;
-                } else if (key === ' ') { // Espace
+                } else if (key === ' ') {
                     newSpeeds.y = 0;
                     speedUpdated = true;
                 }
@@ -393,11 +602,31 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
 
-        // Exercise module controls
         if (activeExerciseModule && typeof activeExerciseModule.handleKey === 'function') {
             activeExerciseModule.handleKey(key);
         }
+    };
+
+    document.addEventListener('keydown', (event) => {
+        handleControlInput(event.key);
     });
+
+    if (mobileKeypad) {
+        mobileKeypad.addEventListener('click', (event) => {
+            const button = event.target.closest('.mobile-keypad-button');
+            if (!button) {
+                return;
+            }
+
+            const datasetKey = button.dataset.key;
+            if (!datasetKey) {
+                return;
+            }
+
+            handleControlInput(datasetKey);
+            button.blur();
+        });
+    }
 
     sceneEl.addEventListener('enter-vr', () => {
         vrMessage.style.display = 'flex';

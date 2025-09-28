@@ -4,123 +4,145 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <title>OW v0.76</title>
+    <title>OW v0.77</title>
     <meta name="description" content="Application de rééducation vestibulaire en réalité virtuelle.">
     <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
-    <link rel="stylesheet" href="styles.css?v=0.76">
+    <link rel="stylesheet" href="styles.css?v=0.77">
         <link rel="manifest" href="manifest.json">
     </head>
     <body>
 
-        <div id="version-display">v0.76</div>
+        <div id="version-display">v0.77</div>
 
-    <div class="ui-panels-container">
-        <div id="visual-panel" class="ui-panel">
-            <div class="panel-section panel-section--header">
-                <label for="visual-select">Stimulation</label>
-                <select id="visual-select">
-                    <option value="none">Aucune</option>
-                    <option value="optokinetic" selected>Optocinétique</option>
-                    <option value="opticalFlow">Flux Optique</option>
-                    <option value="rotatingCube">Cube Rotatif</option>
-                    <option value="heights">Hauteurs</option>
-                </select>
-            </div>
-            <div id="visual-submenu" class="panel-section panel-section--submenu">
-                <!-- Panneau de contrôle pour l'Optocinétique -->
-                <div id="optokinetic-controls" class="control-group">
-                    <div id="ambiance-control" class="control-item">
-                        <label for="palette-select">Ambiance</label>
-                        <select id="palette-select">
-                            <option value="default">Défaut (Blanc)</option>
-                            <option value="none">Aucun (Noir)</option>
-                            <option value="forest">Forêt Mystique</option>
-                            <option value="sunset">Coucher de Soleil</option>
-                            <option value="ocean">Océan Profond</option>
-                            <option value="retro">Néon Rétro</option>
-                            <option value="pastel">Tons Pastel</option>
-                            <option value="autumn">Épices d'Automne</option>
-                            <option value="aurora">Aurore Boréale</option>
-                            <option value="volcanic">Volcanique</option>
-                            <option value="cyberpunk">Cyberpunk</option>
-                            <option value="auto">Changement Automatique</option>
-                        </select>
-                    </div>
-                    <div class="control-item optokinetic-control">
-                        <label for="density-slider">Densité</label>
-                        <input type="range" id="density-slider" min="50" max="200" value="100">
-                    </div>
-                    <div class="control-item optokinetic-control">
-                        <div class="speed-display speed-display--stacked" role="group" aria-label="Vitesse horizontale">
-                            <span class="sr-only">Vitesse horizontale</span>
-                            <span class="speed-value-row">
-                                <span id="horizontal-speed-value" class="speed-value">0</span>
-                                <span class="speed-unit">deg/s</span>
-                            </span>
-                            <span class="arrow-icon" aria-hidden="true">↔</span>
-                        </div>
-                    </div>
-                    <div class="control-item optokinetic-control">
-                        <div class="speed-display speed-display--stacked" role="group" aria-label="Vitesse verticale">
-                            <span class="sr-only">Vitesse verticale</span>
-                            <span class="speed-value-row">
-                                <span id="vertical-speed-value" class="speed-value">0</span>
-                                <span class="speed-unit">deg/s</span>
-                            </span>
-                            <span class="arrow-icon" aria-hidden="true">↕</span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Panneau de contrôle pour le Flux Optique -->
-                <div id="optical-flow-controls" class="control-group" style="display: none;">
-                    <div class="control-item optical-flow-control">
-                        <label>Vitesse</label>
-                        <div class="speed-display">
-                            <span class="arrow-icon">↕</span>
-                            <span id="translation-speed-value">0.0</span>
-                            <span>m/s</span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Panneau de contrôle pour le Cube Rotatif -->
-                <div id="rotating-cube-controls" class="control-group" style="display: none;">
-                    <div class="control-item rotating-cube-control">
-                        <label for="cube-speed-slider">Vitesse Rotation</label>
-                        <input type="range" id="cube-speed-slider" min="0" max="5" value="0.5" step="0.1">
-                        <span id="cube-speed-value">0.5</span>
-                    </div>
-                </div>
-
-                <!-- Panneau de contrôle pour les Hauteurs -->
-                <div id="heights-controls" class="control-group">
-                    <div class="control-row">
-                        <span class="control-row-label">Vitesse</span>
-                        <span id="height-speed-value">0.0</span>
-                        <span class="control-row-unit">m/s</span>
-                    </div>
-                    <p class="instructions">Utilisez les flèches HAUT/BAS pour monter/descendre et ESPACE pour arrêter.</p>
-                </div>
-            </div>
+    <div class="ui-panels-container has-mobile-tabs">
+        <div class="mobile-tabbar" role="tablist" aria-label="Panneaux de configuration">
+            <button type="button" id="tab-visual" class="mobile-tabbutton" role="tab" aria-controls="visual-panel" aria-selected="true" data-target="visual-panel">
+                Stimulation
+            </button>
+            <button type="button" id="tab-exercise" class="mobile-tabbutton" role="tab" aria-controls="exercise-panel" aria-selected="false" data-target="exercise-panel">
+                Exercice
+            </button>
+            <button type="button" id="mobile-panels-toggle" class="mobile-tabbutton mobile-tabbutton--toggle" aria-pressed="false">
+                <span class="mobile-tabbutton-label">Masquer</span>
+                <span class="sr-only"> les menus</span>
+            </button>
         </div>
+        <div class="mobile-tabpanes">
+            <div id="visual-panel" class="ui-panel" role="tabpanel" tabindex="0" aria-labelledby="tab-visual">
+                <div class="panel-section panel-section--header">
+                    <label for="visual-select">Stimulation</label>
+                    <select id="visual-select">
+                        <option value="none">Aucune</option>
+                        <option value="optokinetic" selected>Optocinétique</option>
+                        <option value="opticalFlow">Flux Optique</option>
+                        <option value="rotatingCube">Cube Rotatif</option>
+                        <option value="heights">Hauteurs</option>
+                    </select>
+                </div>
+                <div id="visual-submenu" class="panel-section panel-section--submenu">
+                    <!-- Panneau de contrôle pour l'Optocinétique -->
+                    <div id="optokinetic-controls" class="control-group">
+                        <div id="ambiance-control" class="control-item">
+                            <label for="palette-select">Ambiance</label>
+                            <select id="palette-select">
+                                <option value="default">Défaut (Blanc)</option>
+                                <option value="none">Aucun (Noir)</option>
+                                <option value="forest">Forêt Mystique</option>
+                                <option value="sunset">Coucher de Soleil</option>
+                                <option value="ocean">Océan Profond</option>
+                                <option value="retro">Néon Rétro</option>
+                                <option value="pastel">Tons Pastel</option>
+                                <option value="autumn">Épices d'Automne</option>
+                                <option value="aurora">Aurore Boréale</option>
+                                <option value="volcanic">Volcanique</option>
+                                <option value="cyberpunk">Cyberpunk</option>
+                                <option value="auto">Changement Automatique</option>
+                            </select>
+                        </div>
+                        <div class="control-item optokinetic-control">
+                            <label for="density-slider">Densité</label>
+                            <input type="range" id="density-slider" min="50" max="200" value="100">
+                        </div>
+                        <div class="control-item optokinetic-control">
+                            <div class="speed-display speed-display--stacked" role="group" aria-label="Vitesse horizontale">
+                                <span class="sr-only">Vitesse horizontale</span>
+                                <span class="speed-value-row">
+                                    <span id="horizontal-speed-value" class="speed-value">0</span>
+                                    <span class="speed-unit">deg/s</span>
+                                </span>
+                                <span class="arrow-icon" aria-hidden="true">↔</span>
+                            </div>
+                        </div>
+                        <div class="control-item optokinetic-control">
+                            <div class="speed-display speed-display--stacked" role="group" aria-label="Vitesse verticale">
+                                <span class="sr-only">Vitesse verticale</span>
+                                <span class="speed-value-row">
+                                    <span id="vertical-speed-value" class="speed-value">0</span>
+                                    <span class="speed-unit">deg/s</span>
+                                </span>
+                                <span class="arrow-icon" aria-hidden="true">↕</span>
+                            </div>
+                        </div>
+                    </div>
 
-        <div id="exercise-panel" class="ui-panel">
-            <div class="panel-section panel-section--header">
-                <label for="exercise-select">Exercice</label>
-                <select id="exercise-select">
-                    <option value="none" selected>Aucun</option>
-                    <option value="targetPointer">Cible &amp; Pointeur</option>
-                    <option value="goNoGo">Go / No-Go</option>
-                    <option value="stroop">Stroop Test</option>
-                </select>
+                    <!-- Panneau de contrôle pour le Flux Optique -->
+                    <div id="optical-flow-controls" class="control-group" style="display: none;">
+                        <div class="control-item optical-flow-control">
+                            <label>Vitesse</label>
+                            <div class="speed-display">
+                                <span class="arrow-icon">↕</span>
+                                <span id="translation-speed-value">0.0</span>
+                                <span>m/s</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Panneau de contrôle pour le Cube Rotatif -->
+                    <div id="rotating-cube-controls" class="control-group" style="display: none;">
+                        <div class="control-item rotating-cube-control">
+                            <label for="cube-speed-slider">Vitesse Rotation</label>
+                            <input type="range" id="cube-speed-slider" min="0" max="5" value="0.5" step="0.1">
+                            <span id="cube-speed-value">0.5</span>
+                        </div>
+                    </div>
+
+                    <!-- Panneau de contrôle pour les Hauteurs -->
+                    <div id="heights-controls" class="control-group">
+                        <div class="control-row">
+                            <span class="control-row-label">Vitesse</span>
+                            <span id="height-speed-value">0.0</span>
+                            <span class="control-row-unit">m/s</span>
+                        </div>
+                        <p class="instructions">Utilisez les flèches HAUT/BAS pour monter/descendre et ESPACE pour arrêter.</p>
+                    </div>
+                </div>
             </div>
-            <div id="exercise-submenu" class="panel-section panel-section--submenu"></div>
+
+            <div id="exercise-panel" class="ui-panel" role="tabpanel" tabindex="0" aria-labelledby="tab-exercise">
+                <div class="panel-section panel-section--header">
+                    <label for="exercise-select">Exercice</label>
+                    <select id="exercise-select">
+                        <option value="none" selected>Aucun</option>
+                        <option value="targetPointer">Cible &amp; Pointeur</option>
+                        <option value="goNoGo">Go / No-Go</option>
+                        <option value="stroop">Stroop Test</option>
+                    </select>
+                </div>
+                <div id="exercise-submenu" class="panel-section panel-section--submenu"></div>
+            </div>
         </div>
     </div>
 
     <div id="controls" class="ui-panel ui-panel--floating">
         <button id="recenter-button">Recentrer (R)</button>
+        <div id="mobile-keypad" class="mobile-keypad" role="group" aria-label="Raccourcis tactiles">
+            <button type="button" class="icon-button mobile-keypad-button" data-key="arrowleft" aria-label="Flèche gauche">←</button>
+            <button type="button" class="icon-button mobile-keypad-button" data-key="arrowup" aria-label="Flèche haut">↑</button>
+            <button type="button" class="icon-button mobile-keypad-button" data-key="arrowright" aria-label="Flèche droite">→</button>
+            <button type="button" class="icon-button mobile-keypad-button" data-key="space" aria-label="Barre espace">⎵</button>
+            <button type="button" class="icon-button mobile-keypad-button" data-key="arrowdown" aria-label="Flèche bas">↓</button>
+            <button type="button" class="icon-button mobile-keypad-button" data-key="i" aria-label="Lettre I">I</button>
+        </div>
         <button id="shortcut-button" class="icon-button" aria-haspopup="dialog" aria-expanded="false" aria-controls="shortcut-overlay" title="Raccourcis clavier">?</button>
         <div id="vr-message">Regardez la scène dans SteamVR</div>
     </div>
@@ -163,7 +185,7 @@
         <a-entity id="rig" position="0 0 0"><a-camera look-controls-enabled="true" wasd-controls-enabled="false"></a-camera></a-entity>
     </a-scene>
 
-    <script type="module" src="main.js?v=0.76"></script>
+    <script type="module" src="main.js?v=0.77"></script>
     <script>
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
