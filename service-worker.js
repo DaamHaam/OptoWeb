@@ -1,5 +1,10 @@
 
-const CACHE_NAME = 'opto-vr-cache-v0.73';
+const VERSION = '0.73';
+const scopePath = new URL(self.registration.scope).pathname;
+const normalizedPath = scopePath.replace(/\/+$/, '');
+const pathSegments = normalizedPath.split('/').filter(Boolean);
+const channel = pathSegments[pathSegments.length - 1] || 'root';
+const CACHE_NAME = `opto-vr-${channel}-v${VERSION}`;
 const URLS_TO_CACHE = [
   'index.html',
   'styles.css',
