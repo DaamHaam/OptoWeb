@@ -49,7 +49,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const shortcutCloseButton = document.getElementById('shortcut-close');
     const uiPanelsContainer = document.querySelector('.ui-panels-container');
     const mobileTabbar = document.querySelector('.mobile-tabbar');
-    const mobileTabButtons = mobileTabbar ? Array.from(mobileTabbar.querySelectorAll('.mobile-tabbutton')) : [];
+    const mobileTabButtons = mobileTabbar ? Array.from(mobileTabbar.querySelectorAll('[role="tab"]')) : [];
+    const mobilePanelsToggle = document.getElementById('mobile-panels-toggle');
+    const mobilePanelsToggleLabel = mobilePanelsToggle ? mobilePanelsToggle.querySelector('.mobile-tabbutton-label') : null;
+    let mobilePanelsHandle = null;
+    let areMobilePanelsHidden = false;
     const mobilePanels = {
         'visual-panel': document.getElementById('visual-panel'),
         'exercise-panel': document.getElementById('exercise-panel')
@@ -237,6 +241,85 @@ document.addEventListener('DOMContentLoaded', () => {
 
     shortcutOverlay.setAttribute('aria-hidden', 'true');
 
+    const ensureMobilePanelsHandle = () => {
+        if (mobilePanelsHandle) {
+            return mobilePanelsHandle;
+        }
+        const handleButton = document.createElement('button');
+        handleButton.type = 'button';
+        handleButton.id = 'mobile-panels-handle';
+        handleButton.className = 'mobile-panels-handle';
+        handleButton.textContent = 'Afficher les menus';
+        handleButton.hidden = true;
+        handleButton.setAttribute('aria-pressed', 'false');
+        document.body.appendChild(handleButton);
+
+        handleButton.addEventListener('click', () => {
+            if (!mobileMediaQuery.matches) {
+                return;
+            }
+            areMobilePanelsHidden = false;
+            syncMobilePanelsHiddenState(true);
+            focusActiveMobileTabButton();
+        });
+
+        mobilePanelsHandle = handleButton;
+        return mobilePanelsHandle;
+    };
+
+    const focusActiveMobileTabButton = () => {
+        if (!mobileMediaQuery.matches) {
+            return;
+        }
+        const activeButton = mobileTabButtons.find((button) => button.dataset.target === activeMobileTabId);
+        if (activeButton) {
+            activeButton.focus();
+        }
+    };
+
+    const syncMobilePanelsHiddenState = (isMobile) => {
+        if (!uiPanelsContainer) {
+            return;
+        }
+
+        if (!isMobile) {
+            areMobilePanelsHidden = false;
+            uiPanelsContainer.classList.remove('is-mobile-hidden');
+            uiPanelsContainer.setAttribute('aria-hidden', 'false');
+            if (mobilePanelsToggle) {
+                mobilePanelsToggle.setAttribute('aria-pressed', 'false');
+                if (mobilePanelsToggleLabel) {
+                    mobilePanelsToggleLabel.textContent = 'Masquer';
+                }
+            }
+            if (mobilePanelsHandle) {
+                mobilePanelsHandle.hidden = true;
+                mobilePanelsHandle.setAttribute('aria-pressed', 'false');
+            }
+            return;
+        }
+
+        uiPanelsContainer.classList.toggle('is-mobile-hidden', areMobilePanelsHidden);
+        uiPanelsContainer.setAttribute('aria-hidden', areMobilePanelsHidden ? 'true' : 'false');
+
+        if (mobilePanelsToggle) {
+            mobilePanelsToggle.setAttribute('aria-pressed', areMobilePanelsHidden ? 'true' : 'false');
+            if (mobilePanelsToggleLabel) {
+                mobilePanelsToggleLabel.textContent = areMobilePanelsHidden ? 'Afficher' : 'Masquer';
+            }
+        }
+
+        const handle = ensureMobilePanelsHandle();
+        handle.hidden = !areMobilePanelsHidden;
+        handle.setAttribute('aria-pressed', areMobilePanelsHidden ? 'true' : 'false');
+
+        if (areMobilePanelsHidden) {
+            requestAnimationFrame(() => {
+                handle.focus();
+            });
+        }
+    };
+
     const applyMobilePanelState = (isMobile) => {
         if (!mobileTabbar || !uiPanelsContainer) {
             return;
@@ -259,6 +342,8 @@ document.addEventListener('DOMContentLoaded', () => {
             panelEl.classList.toggle('is-active-mobile', isMobile && isActive);
             panelEl.setAttribute('aria-hidden', isMobile ? (isActive ? 'false' : 'true') : 'false');
         });
+
+        syncMobilePanelsHiddenState(isMobile);
     };
 
     const setActiveMobileTab = (targetId) => {
@@ -317,6 +402,20 @@ document.addEventListener('DOMContentLoaded', () => {
                     setActiveMobileTab(nextButton.dataset.target);
                 }
             });
+        });
+    }
+
+    if (mobilePanelsToggle) {
+        mobilePanelsToggle.addEventListener('click', () => {
+            if (!mobileMediaQuery.matches) {
+                return;
+            }
+            areMobilePanelsHidden = !areMobilePanelsHidden;
+            syncMobilePanelsHiddenState(true);
+
+            if (!areMobilePanelsHidden) {
+                focusActiveMobileTabButton();
+            }
         });
     }
 

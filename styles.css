@@ -545,6 +545,16 @@ a-scene[vr-mode-ui] .ui-panel, a-scene[vr-mode-ui] #version-display { display: n
     transition: background-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
 }
 
+.mobile-tabbutton--toggle {
+    font-size: 0.9em;
+    padding-inline: 14px;
+    white-space: nowrap;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+}
+
 .mobile-tabbutton:hover {
     background: rgba(255, 255, 255, 0.92);
     border-color: rgba(42, 161, 152, 0.5);
@@ -566,6 +576,37 @@ a-scene[vr-mode-ui] .ui-panel, a-scene[vr-mode-ui] #version-display { display: n
     display: contents;
 }
 
+.mobile-panels-handle {
+    position: fixed;
+    top: clamp(12px, 6vh, 24px);
+    right: clamp(12px, 6vw, 20px);
+    z-index: 18;
+    border-radius: 999px;
+    padding: 12px 18px;
+    font-weight: 600;
+    font-size: 0.95em;
+    background: rgba(42, 161, 152, 0.92);
+    color: #ffffff;
+    border: 1px solid rgba(17, 102, 96, 0.65);
+    box-shadow: 0 14px 32px rgba(17, 102, 96, 0.26);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+}
+
+.mobile-panels-handle:hover {
+    background: rgba(36, 138, 130, 0.98);
+    box-shadow: 0 18px 36px rgba(17, 102, 96, 0.3);
+}
+
+.mobile-panels-handle:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.35), 0 0 0 6px rgba(42, 161, 152, 0.65);
+}
+
 @media (max-width: 768px) {
     .ui-panels-container {
         position: fixed;
@@ -577,13 +618,14 @@ a-scene[vr-mode-ui] .ui-panel, a-scene[vr-mode-ui] #version-display { display: n
         flex-direction: column;
         justify-content: flex-start;
         align-items: stretch;
-        width: min(100%, 380px);
+        width: min(92vw, 320px);
+        max-width: 320px;
         padding-inline: clamp(8px, 4vw, 16px);
         padding-top: calc(env(safe-area-inset-top) + clamp(12px, 4vh, 24px));
         padding-bottom: calc(env(safe-area-inset-bottom) + clamp(12px, 4vh, 24px));
         gap: clamp(16px, 6vh, 28px);
         min-height: 100vh;
-        overflow-y: auto;
+        overflow-y: visible;
         touch-action: pan-y;
         z-index: 12;
     }
@@ -613,13 +655,14 @@ a-scene[vr-mode-ui] .ui-panel, a-scene[vr-mode-ui] #version-display { display: n
     }
 
     .ui-panels-container.is-mobile-tabs {
-        overflow-y: hidden;
+        overflow-y: visible;
         gap: clamp(12px, 4vh, 24px);
+        transition: opacity 0.25s ease, visibility 0.25s ease, transform 0.25s ease;
     }
 
     .ui-panels-container.is-mobile-tabs .mobile-tabbar {
         display: grid;
-        grid-template-columns: repeat(2, minmax(0, 1fr));
+        grid-template-columns: repeat(2, minmax(0, 1fr)) auto;
         gap: 8px;
         padding: 8px;
         background: rgba(255, 255, 255, 0.8);
@@ -632,6 +675,7 @@ a-scene[vr-mode-ui] .ui-panel, a-scene[vr-mode-ui] #version-display { display: n
     .ui-panels-container.is-mobile-tabs .mobile-tabpanes {
         display: flex;
         flex: 1 1 auto;
+        min-height: 0;
     }
 
     .ui-panels-container.is-mobile-tabs .mobile-tabpanes .ui-panel {
@@ -646,10 +690,27 @@ a-scene[vr-mode-ui] .ui-panel, a-scene[vr-mode-ui] #version-display { display: n
         flex-direction: column;
         pointer-events: auto;
         opacity: 1;
+        max-height: calc(100vh - clamp(168px, 32vh, 240px));
+        overflow-y: auto;
+    }
+
+    .ui-panels-container.is-mobile-tabs.is-mobile-hidden {
+        opacity: 0;
+        visibility: hidden;
+        transform: translate(-50%, -24px) scale(0.98);
+        pointer-events: none;
     }
 
     #visual-panel,
     #exercise-panel {
         width: 100%;
+    }
+
+    .mobile-panels-handle {
+        display: inline-flex;
+    }
+
+    .mobile-panels-handle[hidden] {
+        display: none;
     }
 }
