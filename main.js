@@ -185,18 +185,16 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     
     function updateSpeedDisplay() {
-        if (!activeVisualModule || typeof activeVisualModule.getActualSpeed !== 'function') return;
-
         const moduleName = visualSelect.value;
-        const speeds = activeVisualModule.getActualSpeed();
+        const { visual: { speeds } } = stateManager.getState();
 
         if (moduleName === 'optokinetic') {
             horizontalSpeedValue.textContent = Math.round(speeds.h);
             verticalSpeedValue.textContent = Math.round(speeds.v);
         } else if (moduleName === 'opticalFlow') {
-            translationSpeedValue.textContent = speeds.t.toFixed(1);
+            translationSpeedValue.textContent = Number(speeds.t).toFixed(1);
         } else if (moduleName === 'heights') {
-            heightSpeedValue.textContent = speeds.v.toFixed(1);
+            heightSpeedValue.textContent = Number(speeds.y).toFixed(1);
         }
 
         requestAnimationFrame(updateSpeedDisplay);
@@ -327,8 +325,8 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    sceneEl.addEventListener('enter-vr', () => { 
-        vrMessage.style.display = 'block'; 
+    sceneEl.addEventListener('enter-vr', () => {
+        vrMessage.style.display = 'flex';
         handleRecenter(); 
     });
 
