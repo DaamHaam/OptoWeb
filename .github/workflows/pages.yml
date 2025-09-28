@@ -28,6 +28,7 @@ jobs:
           clean-exclude: |
             previews/**
             versions/**
+            beta/**
 
   # PREVIEW (inchangé)
   preview:
