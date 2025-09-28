@@ -1,3 +1,8 @@
+## v0.74 (2025-09-28)
+
+* Correction du recentrage de l'exercice des hauteurs pour replacer le rig et la plateforme au centre lors d'un reset.
+* Passage de la version affichée et du cache applicatif en 0.74.
+
 ## v0.67 (2025-10-08)
 
 * Remplacement des sphères A-Frame par un nuage instancié de halos billboarding avec shader additif pour réduire les draw calls.
