@@ -1,17 +1,20 @@
-name: Pages (prod & PR previews)
+name: Pages (prod & PR previews & archives)
 
 on:
   push:
-    branches: [ main ]
+    branches: [ main ]         # prod quand tu merges/pousses sur main
+    tags:
+      - 'v*'                   # archive quand tu crées/Push un tag vX.Y
   pull_request:
-    branches: [ main ]
+    branches: [ main ]         # preview pour chaque PR
 
 permissions:
   contents: write
 
 jobs:
+  # PROD : copie main -> gh-pages (racine) en préservant previews/ et versions/
   prod:
-    if: github.event_name == 'push'
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/heads/')
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -25,8 +28,9 @@ jobs:
           clean: true
           clean-exclude: |
             previews/**
+            versions/**
 
-  # PREVIEW: chaque PR dans gh-pages/previews/pr-<num>/
+  # PREVIEW : chaque PR dans gh-pages/previews/pr-<num>/
   preview:
     if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
@@ -47,3 +51,19 @@ jobs:
     environment:
       name: preview
       url: ${{ steps.link.outputs.url }}
+
+  # ARCHIVE : lors d'un push de tag v* -> copie vers gh-pages/versions/<tag>/
+  archive:
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Ensure .nojekyll
+        run: echo > .nojekyll
+      - name: Deploy archived version to versions/<tag>
+        uses: JamesIves/github-pages-deploy-action@v4
+        with:
+          branch: gh-pages
+          folder: .
+          target-folder: versions/${{ github.ref_name }}   # ex: v0.73
+          clean: false
