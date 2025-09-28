@@ -565,6 +565,9 @@ a-scene[vr-mode-ui] .ui-panel, a-scene[vr-mode-ui] #version-display { display: n
     font-size: 0.95em;
     padding: 10px 16px;
     border-radius: 12px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     cursor: pointer;
     transition: background-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
     min-width: 0;
@@ -638,15 +641,17 @@ a-scene[vr-mode-ui] .ui-panel, a-scene[vr-mode-ui] #version-display { display: n
         position: fixed;
         top: 0;
         bottom: 0;
-        left: 50%;
-        transform: translateX(-50%);
+        left: 0;
+        right: 0;
+        transform: none;
+        margin: 0 auto;
         display: flex;
         flex-direction: column;
         justify-content: flex-start;
         align-items: stretch;
-        width: min(90vw, 300px);
-        max-width: 300px;
-        padding-inline: clamp(8px, 4vw, 16px);
+        width: min(100%, 360px);
+        max-width: 360px;
+        padding-inline: clamp(8px, 3vw, 14px);
         padding-top: calc(env(safe-area-inset-top) + clamp(12px, 4vh, 24px));
         padding-bottom: calc(env(safe-area-inset-bottom) + clamp(96px, 18vh, 140px));
         gap: clamp(16px, 6vh, 28px);
@@ -688,14 +693,24 @@ a-scene[vr-mode-ui] .ui-panel, a-scene[vr-mode-ui] #version-display { display: n
 
     .ui-panels-container.is-mobile-tabs .mobile-tabbar {
         display: grid;
-        grid-template-columns: repeat(2, minmax(0, 1fr)) auto;
-        gap: 8px;
-        padding: 8px;
-        background: rgba(255, 255, 255, 0.8);
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        grid-auto-rows: minmax(0, auto);
+        gap: 10px;
+        padding: 10px;
+        background: rgba(255, 255, 255, 0.85);
         border-radius: 18px;
         border: 1px solid rgba(42, 161, 152, 0.18);
         box-shadow: 0 12px 24px rgba(15, 50, 60, 0.16);
         backdrop-filter: blur(6px);
+    }
+
+    .ui-panels-container.is-mobile-tabs .mobile-tabbar .mobile-tabbutton {
+        width: 100%;
+    }
+
+    .ui-panels-container.is-mobile-tabs .mobile-tabbar .mobile-tabbutton--toggle {
+        grid-column: 1 / -1;
+        justify-self: stretch;
     }
 
     .ui-panels-container.is-mobile-tabs .mobile-tabpanes {
@@ -723,7 +738,7 @@ a-scene[vr-mode-ui] .ui-panel, a-scene[vr-mode-ui] #version-display { display: n
     .ui-panels-container.is-mobile-tabs.is-mobile-hidden {
         opacity: 0;
         visibility: hidden;
-        transform: translate(-50%, -24px) scale(0.98);
+        transform: translateY(-24px) scale(0.98);
         pointer-events: none;
     }
 
@@ -748,16 +763,17 @@ a-scene[vr-mode-ui] .ui-panel, a-scene[vr-mode-ui] #version-display { display: n
 
     .mobile-keypad {
         display: grid;
-        grid-template-columns: repeat(3, 36px);
-        grid-auto-rows: 36px;
+        grid-template-columns: repeat(3, 32px);
+        grid-auto-rows: 32px;
         justify-content: center;
         justify-items: center;
         align-items: center;
+        gap: 6px;
     }
 
     .mobile-keypad-button {
-        width: 36px;
-        height: 36px;
-        font-size: 0.95em;
+        width: 32px;
+        height: 32px;
+        font-size: 0.9em;
     }
 }
