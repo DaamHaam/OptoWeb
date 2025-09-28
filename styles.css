@@ -8,7 +8,7 @@ body {
     margin: 0;
     min-height: 100vh;
 }
-.ui-panel {
+.ui-panel { 
     position: absolute;
     background: #ffffff;
     padding: 20px;
@@ -528,6 +528,44 @@ a-scene[vr-mode-ui] .ui-panel, a-scene[vr-mode-ui] #version-display { display: n
     border: 0;
 }
 
+.mobile-tabbar {
+    display: none;
+}
+
+.mobile-tabbutton {
+    appearance: none;
+    border: 1px solid rgba(42, 161, 152, 0.32);
+    background: rgba(255, 255, 255, 0.72);
+    color: #184b46;
+    font-weight: 600;
+    font-size: 0.95em;
+    padding: 10px 16px;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: background-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.mobile-tabbutton:hover {
+    background: rgba(255, 255, 255, 0.92);
+    border-color: rgba(42, 161, 152, 0.5);
+}
+
+.mobile-tabbutton.is-active {
+    background: #2aa198;
+    color: #ffffff;
+    border-color: #2aa198;
+    box-shadow: 0 10px 24px rgba(42, 161, 152, 0.28);
+}
+
+.mobile-tabbutton:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(42, 161, 152, 0.28);
+}
+
+.mobile-tabpanes {
+    display: contents;
+}
+
 @media (max-width: 768px) {
     .ui-panels-container {
         position: fixed;
@@ -537,17 +575,23 @@ a-scene[vr-mode-ui] .ui-panel, a-scene[vr-mode-ui] #version-display { display: n
         transform: translateX(-50%);
         display: flex;
         flex-direction: column;
-        justify-content: space-between;
+        justify-content: flex-start;
         align-items: stretch;
         width: min(100%, 380px);
         padding-inline: clamp(8px, 4vw, 16px);
         padding-top: calc(env(safe-area-inset-top) + clamp(12px, 4vh, 24px));
         padding-bottom: calc(env(safe-area-inset-bottom) + clamp(12px, 4vh, 24px));
-        gap: clamp(32px, 15vh, 120px);
+        gap: clamp(16px, 6vh, 28px);
         min-height: 100vh;
-        overflow: hidden;
+        overflow-y: auto;
         touch-action: pan-y;
         z-index: 12;
+    }
+
+    .mobile-tabpanes {
+        display: flex;
+        flex-direction: column;
+        gap: clamp(12px, 4vh, 20px);
     }
 
     .ui-panels-container .ui-panel {
@@ -556,11 +600,52 @@ a-scene[vr-mode-ui] .ui-panel, a-scene[vr-mode-ui] #version-display { display: n
         right: auto;
         top: auto;
         width: 100%;
-        max-height: clamp(140px, 35vh, 260px);
+        max-height: none;
         flex: 0 0 auto;
         overflow-y: auto;
         overscroll-behavior: contain;
         -webkit-overflow-scrolling: touch;
+    }
+
+    .ui-panels-container .ui-panel:focus-visible {
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(42, 161, 152, 0.28);
+    }
+
+    .ui-panels-container.is-mobile-tabs {
+        overflow-y: hidden;
+        gap: clamp(12px, 4vh, 24px);
+    }
+
+    .ui-panels-container.is-mobile-tabs .mobile-tabbar {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 8px;
+        padding: 8px;
+        background: rgba(255, 255, 255, 0.8);
+        border-radius: 18px;
+        border: 1px solid rgba(42, 161, 152, 0.18);
+        box-shadow: 0 12px 24px rgba(15, 50, 60, 0.16);
+        backdrop-filter: blur(6px);
+    }
+
+    .ui-panels-container.is-mobile-tabs .mobile-tabpanes {
+        display: flex;
+        flex: 1 1 auto;
+    }
+
+    .ui-panels-container.is-mobile-tabs .mobile-tabpanes .ui-panel {
+        display: none;
+        pointer-events: none;
+        opacity: 0;
+        transition: opacity 0.2s ease;
+    }
+
+    .ui-panels-container.is-mobile-tabs .mobile-tabpanes .ui-panel.is-active-mobile {
+        display: flex;
+        flex-direction: column;
+        pointer-events: auto;
+        opacity: 1;
     }
 
     #visual-panel,
