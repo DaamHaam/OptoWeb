@@ -4,16 +4,15 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <title>OW v0.72</title>
+    <title>OW v0.73</title>
     <meta name="description" content="Application de rééducation vestibulaire en réalité virtuelle.">
     <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
-    <link rel="stylesheet" href="styles.css?v=0.72">
+    <link rel="stylesheet" href="styles.css?v=0.73">
         <link rel="manifest" href="manifest.json">
     </head>
     <body>
 
-        <div id="version-display">v0.72</div>
-    <div id="vr-message">Regardez la scène dans Steam VR</div>
+        <div id="version-display">v0.73</div>
 
     <div class="ui-panels-container">
         <div id="visual-panel" class="ui-panel">
@@ -122,6 +121,7 @@
 
     <div id="controls" class="ui-panel ui-panel--floating">
         <button id="recenter-button">Recentrer (R)</button>
+        <div id="vr-message">Regardez la scène dans SteamVR</div>
     </div>
 
     <a-scene id="scene" exercise-ticker fog="type: linear; color: #111; near: 5; far: 200">
@@ -143,7 +143,7 @@
         <a-entity id="rig" position="0 0 0"><a-camera look-controls-enabled="true" wasd-controls-enabled="false"></a-camera></a-entity>
     </a-scene>
 
-    <script type="module" src="main.js?v=0.72"></script>
+    <script type="module" src="main.js?v=0.73"></script>
     <script>
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
