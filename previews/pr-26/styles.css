@@ -1,5 +1,11 @@
 /* styles.css */
 /* Rôle: Centralise tous les styles de l'application pour une maintenance facilitée. */
+
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     color: #1f2d3d;
@@ -8,7 +14,7 @@ body {
     margin: 0;
     min-height: 100vh;
 }
-.ui-panel { 
+.ui-panel {
     position: absolute;
     background: #ffffff;
     padding: 20px;
@@ -120,6 +126,7 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
+    flex-wrap: nowrap;
     gap: 12px;
     box-sizing: border-box;
     background: rgba(255, 255, 255, 0.92);
@@ -156,6 +163,23 @@ body {
     color: #1f2d3d;
     border: 1px solid #c2dedb;
     box-shadow: inset 0 -2px 0 rgba(31, 45, 61, 0.05);
+}
+
+.mobile-keypad {
+    display: none;
+    flex: 0 0 auto;
+    gap: 6px;
+}
+
+.mobile-keypad-button {
+    font-size: 1em;
+    font-weight: 600;
+    touch-action: manipulation;
+}
+
+.mobile-keypad-button:active {
+    background-color: #e4f0ee;
+    border-color: #b6d8d4;
 }
 
 #controls .icon-button:hover {
@@ -543,6 +567,8 @@ a-scene[vr-mode-ui] .ui-panel, a-scene[vr-mode-ui] #version-display { display: n
     border-radius: 12px;
     cursor: pointer;
     transition: background-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+    min-width: 0;
+    text-align: center;
 }
 
 .mobile-tabbutton--toggle {
@@ -618,11 +644,11 @@ a-scene[vr-mode-ui] .ui-panel, a-scene[vr-mode-ui] #version-display { display: n
         flex-direction: column;
         justify-content: flex-start;
         align-items: stretch;
-        width: min(92vw, 320px);
-        max-width: 320px;
+        width: min(90vw, 300px);
+        max-width: 300px;
         padding-inline: clamp(8px, 4vw, 16px);
         padding-top: calc(env(safe-area-inset-top) + clamp(12px, 4vh, 24px));
-        padding-bottom: calc(env(safe-area-inset-bottom) + clamp(12px, 4vh, 24px));
+        padding-bottom: calc(env(safe-area-inset-bottom) + clamp(96px, 18vh, 140px));
         gap: clamp(16px, 6vh, 28px);
         min-height: 100vh;
         overflow-y: visible;
@@ -690,7 +716,7 @@ a-scene[vr-mode-ui] .ui-panel, a-scene[vr-mode-ui] #version-display { display: n
         flex-direction: column;
         pointer-events: auto;
         opacity: 1;
-        max-height: calc(100vh - clamp(168px, 32vh, 240px));
+        max-height: calc(100vh - clamp(220px, 36vh, 300px));
         overflow-y: auto;
     }
 
@@ -712,5 +738,26 @@ a-scene[vr-mode-ui] .ui-panel, a-scene[vr-mode-ui] #version-display { display: n
 
     .mobile-panels-handle[hidden] {
         display: none;
+    }
+
+    #controls {
+        bottom: calc(env(safe-area-inset-bottom) + 18px);
+        gap: 10px;
+        padding: 10px 14px;
+    }
+
+    .mobile-keypad {
+        display: grid;
+        grid-template-columns: repeat(3, 36px);
+        grid-auto-rows: 36px;
+        justify-content: center;
+        justify-items: center;
+        align-items: center;
+    }
+
+    .mobile-keypad-button {
+        width: 36px;
+        height: 36px;
+        font-size: 0.95em;
     }
 }

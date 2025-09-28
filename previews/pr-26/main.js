@@ -52,6 +52,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const mobileTabButtons = mobileTabbar ? Array.from(mobileTabbar.querySelectorAll('[role="tab"]')) : [];
     const mobilePanelsToggle = document.getElementById('mobile-panels-toggle');
     const mobilePanelsToggleLabel = mobilePanelsToggle ? mobilePanelsToggle.querySelector('.mobile-tabbutton-label') : null;
+    const mobileKeypad = document.getElementById('mobile-keypad');
     let mobilePanelsHandle = null;
     let areMobilePanelsHidden = false;
     const mobilePanels = {
@@ -518,8 +519,22 @@ document.addEventListener('DOMContentLoaded', () => {
     document.addEventListener('touchend', blurActiveRange);
     document.addEventListener('mouseup', blurActiveRange);
 
-    document.addEventListener('keydown', (e) => {
-        const key = e.key.toLowerCase();
+    const normalizeInputKey = (value) => {
+        if (!value) {
+            return '';
+        }
+        if (value === ' ' || value.toLowerCase() === 'space' || value.toLowerCase() === 'spacebar') {
+            return ' ';
+        }
+        return value.toLowerCase();
+    };
+
+    const handleControlInput = (inputValue) => {
+        const key = normalizeInputKey(inputValue);
+
+        if (!key) {
+            return;
+        }
 
         if (isShortcutOverlayOpen()) {
             if (key === 'escape') {
@@ -550,6 +565,8 @@ document.addEventListener('DOMContentLoaded', () => {
                         newSpeeds.v = -newSpeeds.v;
                         speedUpdated = true;
                         break;
+                    default:
+                        break;
                 }
             } else if (moduleName === 'opticalFlow') {
                 switch (key) {
@@ -560,6 +577,8 @@ document.addEventListener('DOMContentLoaded', () => {
                         newSpeeds.t = -newSpeeds.t;
                         speedUpdated = true;
                         break;
+                    default:
+                        break;
                 }
             } else if (moduleName === 'heights') {
                 if (key === 'arrowup') {
@@ -568,7 +587,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 } else if (key === 'arrowdown') {
                     newSpeeds.y = Math.max(-5, newSpeeds.y - 0.5);
                     speedUpdated = true;
-                } else if (key === ' ') { // Espace
+                } else if (key === ' ') {
                     newSpeeds.y = 0;
                     speedUpdated = true;
                 }
@@ -583,11 +602,31 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
 
-        // Exercise module controls
         if (activeExerciseModule && typeof activeExerciseModule.handleKey === 'function') {
             activeExerciseModule.handleKey(key);
         }
+    };
+
+    document.addEventListener('keydown', (event) => {
+        handleControlInput(event.key);
     });
+
+    if (mobileKeypad) {
+        mobileKeypad.addEventListener('click', (event) => {
+            const button = event.target.closest('.mobile-keypad-button');
+            if (!button) {
+                return;
+            }
+
+            const datasetKey = button.dataset.key;
+            if (!datasetKey) {
+                return;
+            }
+
+            handleControlInput(datasetKey);
+            button.blur();
+        });
+    }
 
     sceneEl.addEventListener('enter-vr', () => {
         vrMessage.style.display = 'flex';
