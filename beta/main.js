@@ -44,6 +44,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const exerciseSelect = document.getElementById('exercise-select');
     const exerciseSubmenu = document.getElementById('exercise-submenu');
     const skyEl = document.getElementById('sky');
+    const shortcutButton = document.getElementById('shortcut-button');
+    const shortcutOverlay = document.getElementById('shortcut-overlay');
+    const shortcutCloseButton = document.getElementById('shortcut-close');
 
     // --- State Variables ---
     let activeExerciseModule = null;
@@ -200,6 +203,32 @@ document.addEventListener('DOMContentLoaded', () => {
         requestAnimationFrame(updateSpeedDisplay);
     }
 
+    const isShortcutOverlayOpen = () => !shortcutOverlay.hidden;
+
+    const openShortcutOverlay = () => {
+        if (isShortcutOverlayOpen()) {
+            return;
+        }
+        shortcutOverlay.hidden = false;
+        shortcutOverlay.setAttribute('aria-hidden', 'false');
+        shortcutButton.setAttribute('aria-expanded', 'true');
+        requestAnimationFrame(() => {
+            shortcutCloseButton.focus();
+        });
+    };
+
+    const closeShortcutOverlay = () => {
+        if (!isShortcutOverlayOpen()) {
+            return;
+        }
+        shortcutOverlay.hidden = true;
+        shortcutOverlay.setAttribute('aria-hidden', 'true');
+        shortcutButton.setAttribute('aria-expanded', 'false');
+        shortcutButton.focus();
+    };
+
+    shortcutOverlay.setAttribute('aria-hidden', 'true');
+
     // --- Event Listeners ---
     visualSelect.addEventListener('change', (e) => {
         setActiveVisualModule(e.target.value);
@@ -248,11 +277,29 @@ document.addEventListener('DOMContentLoaded', () => {
         e.target.blur();
     });
 
-    cubeSpeedSlider.addEventListener('input', (e) => { 
-        cubeSpeedValue.textContent = e.target.value; 
+    shortcutButton.addEventListener('click', () => {
+        if (isShortcutOverlayOpen()) {
+            closeShortcutOverlay();
+        } else {
+            openShortcutOverlay();
+        }
+    });
+
+    shortcutCloseButton.addEventListener('click', () => {
+        closeShortcutOverlay();
+    });
+
+    shortcutOverlay.addEventListener('click', (event) => {
+        if (event.target === shortcutOverlay) {
+            closeShortcutOverlay();
+        }
+    });
+
+    cubeSpeedSlider.addEventListener('input', (e) => {
+        cubeSpeedValue.textContent = e.target.value;
         const newSpeed = parseFloat(e.target.value);
         const currentState = stateManager.getState();
-        stateManager.setState({ 
+        stateManager.setState({
             visual: { 
                 ...currentState.visual, 
                 speeds: { ...currentState.visual.speeds, t: newSpeed } 
@@ -283,36 +330,63 @@ document.addEventListener('DOMContentLoaded', () => {
 
     document.addEventListener('keydown', (e) => {
         const key = e.key.toLowerCase();
+
+        if (isShortcutOverlayOpen()) {
+            if (key === 'escape') {
+                closeShortcutOverlay();
+            }
+            return;
+        }
+
+        if (key === 'escape') {
+            return;
+        }
+
         const moduleName = visualSelect.value;
         const currentState = stateManager.getState();
         let newSpeeds = { ...currentState.visual.speeds };
+        let speedUpdated = false;
 
         if (activeVisualModule) {
             if (moduleName === 'optokinetic') {
                 switch (key) {
-                    case 'arrowup': newSpeeds.v += speedIncrement; break;
-                    case 'arrowdown': newSpeeds.v -= speedIncrement; break;
-                    case 'arrowleft': newSpeeds.h -= speedIncrement; break;
-                    case 'arrowright': newSpeeds.h += speedIncrement; break;
-                    case ' ': newSpeeds.h = 0; newSpeeds.v = 0; break;
+                    case 'arrowup': newSpeeds.v += speedIncrement; speedUpdated = true; break;
+                    case 'arrowdown': newSpeeds.v -= speedIncrement; speedUpdated = true; break;
+                    case 'arrowleft': newSpeeds.h -= speedIncrement; speedUpdated = true; break;
+                    case 'arrowright': newSpeeds.h += speedIncrement; speedUpdated = true; break;
+                    case ' ': newSpeeds.h = 0; newSpeeds.v = 0; speedUpdated = true; break;
+                    case 'i':
+                        newSpeeds.h = -newSpeeds.h;
+                        newSpeeds.v = -newSpeeds.v;
+                        speedUpdated = true;
+                        break;
                 }
             } else if (moduleName === 'opticalFlow') {
                 switch (key) {
-                    case 'arrowup': newSpeeds.t += translationSpeedIncrement; break;
-                    case 'arrowdown': newSpeeds.t -= translationSpeedIncrement; break;
-                    case ' ': newSpeeds.t = 0; break;
+                    case 'arrowup': newSpeeds.t += translationSpeedIncrement; speedUpdated = true; break;
+                    case 'arrowdown': newSpeeds.t -= translationSpeedIncrement; speedUpdated = true; break;
+                    case ' ': newSpeeds.t = 0; speedUpdated = true; break;
+                    case 'i':
+                        newSpeeds.t = -newSpeeds.t;
+                        speedUpdated = true;
+                        break;
                 }
             } else if (moduleName === 'heights') {
                 if (key === 'arrowup') {
                     newSpeeds.y = Math.min(5, newSpeeds.y + 0.5);
+                    speedUpdated = true;
                 } else if (key === 'arrowdown') {
                     newSpeeds.y = Math.max(-5, newSpeeds.y - 0.5);
+                    speedUpdated = true;
                 } else if (key === ' ') { // Espace
                     newSpeeds.y = 0;
+                    speedUpdated = true;
                 }
             }
 
-            stateManager.setState({ visual: { ...currentState.visual, speeds: newSpeeds } });
+            if (speedUpdated) {
+                stateManager.setState({ visual: { ...currentState.visual, speeds: newSpeeds } });
+            }
 
             if (key === 'r') {
                 handleRecenter();

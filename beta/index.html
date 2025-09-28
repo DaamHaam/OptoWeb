@@ -4,15 +4,15 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <title>OW v0.75</title>
+    <title>OW v0.76</title>
     <meta name="description" content="Application de rééducation vestibulaire en réalité virtuelle.">
     <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
-    <link rel="stylesheet" href="styles.css?v=0.75">
+    <link rel="stylesheet" href="styles.css?v=0.76">
         <link rel="manifest" href="manifest.json">
     </head>
     <body>
 
-        <div id="version-display">v0.75</div>
+        <div id="version-display">v0.76</div>
 
     <div class="ui-panels-container">
         <div id="visual-panel" class="ui-panel">
@@ -121,7 +121,27 @@
 
     <div id="controls" class="ui-panel ui-panel--floating">
         <button id="recenter-button">Recentrer (R)</button>
+        <button id="shortcut-button" class="icon-button" aria-haspopup="dialog" aria-expanded="false" aria-controls="shortcut-overlay" title="Raccourcis clavier">?</button>
         <div id="vr-message">Regardez la scène dans SteamVR</div>
+    </div>
+
+    <div id="shortcut-overlay" class="shortcut-overlay" role="dialog" aria-modal="true" aria-labelledby="shortcut-title" hidden>
+        <div class="shortcut-dialog" role="document">
+            <header class="shortcut-header">
+                <h2 id="shortcut-title">Raccourcis clavier</h2>
+                <button id="shortcut-close" class="icon-button" type="button" aria-label="Fermer la fenêtre">×</button>
+            </header>
+            <div class="shortcut-content">
+                <p>Utilisez ces raccourcis pour ajuster rapidement la stimulation :</p>
+                <ul>
+                    <li><strong>Flèches</strong> &ndash; Ajuster les vitesses (horizontal/vertical en optocinétique, translation dans le flux optique, altitude dans les hauteurs).</li>
+                    <li><strong>Barre espace</strong> &ndash; Arrêter le mouvement actif.</li>
+                    <li><strong>I</strong> &ndash; Inverser le sens de rotation ou de translation.</li>
+                    <li><strong>R</strong> &ndash; Recentrer la scène.</li>
+                    <li><strong>&Eacute;chap</strong> &ndash; Fermer cette fenêtre.</li>
+                </ul>
+            </div>
+        </div>
     </div>
 
     <a-scene id="scene" exercise-ticker fog="type: linear; color: #111; near: 5; far: 200">
@@ -143,7 +163,7 @@
         <a-entity id="rig" position="0 0 0"><a-camera look-controls-enabled="true" wasd-controls-enabled="false"></a-camera></a-entity>
     </a-scene>
 
-    <script type="module" src="main.js?v=0.75"></script>
+    <script type="module" src="main.js?v=0.76"></script>
     <script>
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
