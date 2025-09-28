@@ -1,18 +1,18 @@
-<!-- index.html    --> 
+<!-- index.html      --> 
 <!-- Rôle: Point d'entrée principal de  l'application. Structure le DOM et charge les modules CSS et JS. -->
 <!DOCTYPE html>
 <html>
 <head>
     <meta charset="utf-8">
-    <title>OW v0.73</title>
+    <title>OW v0.75</title>
     <meta name="description" content="Application de rééducation vestibulaire en réalité virtuelle.">
     <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
-    <link rel="stylesheet" href="styles.css?v=0.73">
+    <link rel="stylesheet" href="styles.css?v=0.75">
         <link rel="manifest" href="manifest.json">
     </head>
     <body>
 
-        <div id="version-display">v0.73</div>
+        <div id="version-display">v0.75</div>
 
     <div class="ui-panels-container">
         <div id="visual-panel" class="ui-panel">
@@ -143,11 +143,12 @@
         <a-entity id="rig" position="0 0 0"><a-camera look-controls-enabled="true" wasd-controls-enabled="false"></a-camera></a-entity>
     </a-scene>
 
-    <script type="module" src="main.js?v=0.73"></script>
+    <script type="module" src="main.js?v=0.75"></script>
     <script>
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/service-worker.js').then(registration => {
+                const swUrl = new URL('service-worker.js', window.location.href);
+                navigator.serviceWorker.register(swUrl.href).then(registration => {
                     console.log('ServiceWorker registration successful with scope: ', registration.scope);
                 }, err => {
                     console.log('ServiceWorker registration failed: ', err);
