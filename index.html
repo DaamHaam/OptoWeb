@@ -4,15 +4,15 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <title>OW v0.76</title>
+    <title>OW v0.77</title>
     <meta name="description" content="Application de rééducation vestibulaire en réalité virtuelle.">
     <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
-    <link rel="stylesheet" href="styles.css?v=0.76">
+    <link rel="stylesheet" href="styles.css?v=0.77">
         <link rel="manifest" href="manifest.json">
     </head>
     <body>
 
-        <div id="version-display">v0.76</div>
+        <div id="version-display">v0.77</div>
 
     <div class="ui-panels-container has-mobile-tabs">
         <div class="mobile-tabbar" role="tablist" aria-label="Panneaux de configuration">
@@ -135,6 +135,14 @@
 
     <div id="controls" class="ui-panel ui-panel--floating">
         <button id="recenter-button">Recentrer (R)</button>
+        <div id="mobile-keypad" class="mobile-keypad" role="group" aria-label="Raccourcis tactiles">
+            <button type="button" class="icon-button mobile-keypad-button" data-key="arrowleft" aria-label="Flèche gauche">←</button>
+            <button type="button" class="icon-button mobile-keypad-button" data-key="arrowup" aria-label="Flèche haut">↑</button>
+            <button type="button" class="icon-button mobile-keypad-button" data-key="arrowright" aria-label="Flèche droite">→</button>
+            <button type="button" class="icon-button mobile-keypad-button" data-key="space" aria-label="Barre espace">⎵</button>
+            <button type="button" class="icon-button mobile-keypad-button" data-key="arrowdown" aria-label="Flèche bas">↓</button>
+            <button type="button" class="icon-button mobile-keypad-button" data-key="i" aria-label="Lettre I">I</button>
+        </div>
         <button id="shortcut-button" class="icon-button" aria-haspopup="dialog" aria-expanded="false" aria-controls="shortcut-overlay" title="Raccourcis clavier">?</button>
         <div id="vr-message">Regardez la scène dans SteamVR</div>
     </div>
@@ -177,7 +185,7 @@
         <a-entity id="rig" position="0 0 0"><a-camera look-controls-enabled="true" wasd-controls-enabled="false"></a-camera></a-entity>
     </a-scene>
 
-    <script type="module" src="main.js?v=0.76"></script>
+    <script type="module" src="main.js?v=0.77"></script>
     <script>
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
