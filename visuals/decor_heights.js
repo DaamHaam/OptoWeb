@@ -28,17 +28,16 @@ export const heightsDecorModule = {
         mainPlate.setAttribute('radius', '60');
         mainPlate.setAttribute('color', '#f0e3c0');
         mainPlate.setAttribute('rotation', '-90 0 0');
-        mainPlate.setAttribute('position', '0 -1.2 -2');
+        mainPlate.setAttribute('position', '0 -1.3 -2');
         mainPlate.setAttribute('material', 'shader: flat; roughness: 0.8');
         this.decorRoot.appendChild(mainPlate);
 
-        const plateRim = document.createElement('a-ring');
-        plateRim.setAttribute('radius-inner', '48');
-        plateRim.setAttribute('radius-outer', '60');
-        plateRim.setAttribute('color', '#d7c5a3');
+        // Bordure marquée légèrement en contrebas pour supprimer le scintillement
+        const plateRim = document.createElement('a-entity');
+        plateRim.setAttribute('geometry', 'primitive: torus; radius: 54; radiusTubular: 2.5; segmentsRadial: 12; segmentsTubular: 32');
         plateRim.setAttribute('rotation', '-90 0 0');
-        plateRim.setAttribute('position', '0 -1.19 -2');
-        plateRim.setAttribute('material', 'shader: flat');
+        plateRim.setAttribute('position', '0 -1.9 -2');
+        plateRim.setAttribute('material', 'shader: flat; color: #d7c5a3');
         this.decorRoot.appendChild(plateRim);
 
         // Terrasses inférieures pour créer de la profondeur
@@ -70,10 +69,12 @@ export const heightsDecorModule = {
 
         // Piliers stylisés placés à différentes distances
         const pillarPositions = [
-            { x: 12, z: -10, height: 12 },
-            { x: -15, z: -6, height: 16 },
-            { x: 18, z: 8, height: 14 },
-            { x: -9, z: 14, height: 10 }
+            { x: 12, z: -10, height: 16 },
+            { x: -15, z: -6, height: 22 },
+            { x: 18, z: 8, height: 20 },
+            { x: -9, z: 14, height: 14 },
+            { x: 6, z: 18, height: 26 },
+            { x: -22, z: -18, height: 30 }
         ];
 
         pillarPositions.forEach((pillar) => {
@@ -87,11 +88,31 @@ export const heightsDecorModule = {
             this.decorRoot.appendChild(pillarEl);
         });
 
+        // Piliers supérieurs élancés pour les hautes altitudes
+        const tallSpireData = [
+            { x: 10, z: -24, height: 45 },
+            { x: -18, z: 20, height: 52 },
+            { x: 25, z: 4, height: 48 }
+        ];
+
+        tallSpireData.forEach((spire) => {
+            const spireEl = document.createElement('a-cylinder');
+            spireEl.setAttribute('radius', '1.4');
+            spireEl.setAttribute('height', spire.height);
+            spireEl.setAttribute('color', '#6f8196');
+            spireEl.setAttribute('position', `${spire.x} ${spire.height / 2 - 1.2} ${spire.z - 2}`);
+            spireEl.setAttribute('material', 'shader: flat');
+            this.decorRoot.appendChild(spireEl);
+        });
+
         // Plates-formes flottantes simples
         const floatingPlatforms = [
             { x: 6, y: -1, z: -10, scale: '2 0.1 2' },
             { x: -8, y: -0.5, z: -14, scale: '1.5 0.1 1.5' },
-            { x: 10, y: 1, z: 12, scale: '1.8 0.1 1.8' }
+            { x: 10, y: 1, z: 12, scale: '1.8 0.1 1.8' },
+            { x: -4, y: 8, z: -18, scale: '1.2 0.08 1.2' },
+            { x: 14, y: 15, z: 16, scale: '1.6 0.08 1.6' },
+            { x: -16, y: 22, z: 6, scale: '1.1 0.08 1.1' }
         ];
 
         floatingPlatforms.forEach((platform) => {
@@ -107,7 +128,10 @@ export const heightsDecorModule = {
         const cloudData = [
             { x: 8, y: 6, z: -12, scale: '3 1.4 1.4', delay: 0 },
             { x: -10, y: 7, z: 14, scale: '2.5 1.2 1.2', delay: 2000 },
-            { x: -4, y: 5, z: -16, scale: '3.4 1.5 1.5', delay: 4000 }
+            { x: -4, y: 5, z: -16, scale: '3.4 1.5 1.5', delay: 4000 },
+            { x: 6, y: 18, z: -20, scale: '2.4 1.1 1.1', delay: 1000 },
+            { x: -14, y: 24, z: 10, scale: '2.8 1.2 1.2', delay: 2500 },
+            { x: 4, y: 32, z: 6, scale: '2 0.9 0.9', delay: 5000 }
         ];
 
         cloudData.forEach((cloud) => {
@@ -119,6 +143,24 @@ export const heightsDecorModule = {
             cloudEl.setAttribute('material', 'shader: flat');
             cloudEl.setAttribute('animation__float', `property: position; dir: alternate; dur: 12000; easing: easeInOutSine; loop: true; to: ${cloud.x} ${cloud.y + 0.8} ${cloud.z}; delay: ${cloud.delay}`);
             this.decorRoot.appendChild(cloudEl);
+        });
+
+        // Balises lumineuses pour matérialiser les altitudes élevées
+        const altitudeMarkers = [
+            { x: 3, y: 28, z: -8 },
+            { x: -6, y: 34, z: 12 },
+            { x: 9, y: 40, z: 4 }
+        ];
+
+        altitudeMarkers.forEach((marker) => {
+            const markerEl = document.createElement('a-entity');
+            markerEl.setAttribute('geometry', 'primitive: octahedron');
+            markerEl.setAttribute('color', '#f6f1d3');
+            markerEl.setAttribute('scale', '1 1.8 1');
+            markerEl.setAttribute('position', `${marker.x} ${marker.y} ${marker.z}`);
+            markerEl.setAttribute('material', 'shader: flat');
+            markerEl.setAttribute('animation__pulse', 'property: scale; dir: alternate; dur: 1600; easing: easeInOutSine; loop: true; to: 1.2 2 1.2');
+            this.decorRoot.appendChild(markerEl);
         });
 
         sceneEl.appendChild(this.decorRoot);
