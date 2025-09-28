@@ -357,10 +357,17 @@ export const heightsModule = {
 
     regenerate() {
         if (rigEl) {
-            _setHeight(MIN_HEIGHT);
-            actualSpeed = 0;
-            targetSpeed = 0;
+            rigEl.object3D.position.set(0, MIN_HEIGHT, -2);
+            rigEl.object3D.rotation.set(0, 0, 0);
         }
+
+        if (platformEl) {
+            platformEl.object3D.position.set(0, MIN_HEIGHT, -2);
+        }
+
+        _setHeight(MIN_HEIGHT);
+        actualSpeed = 0;
+        targetSpeed = 0;
         _applyPlatformScale();
         _syncSpeedState(0);
     },
