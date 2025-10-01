@@ -31,6 +31,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const visualSelect = document.getElementById('visual-select');
     const visualSubmenu = document.getElementById('visual-submenu');
     const densitySlider = document.getElementById('density-slider');
+    const opticalFlowDensitySlider = document.getElementById('optical-flow-density-slider');
     const horizontalSpeedValue = document.getElementById('horizontal-speed-value');
     const verticalSpeedValue = document.getElementById('vertical-speed-value');
     const translationSpeedValue = document.getElementById('translation-speed-value');
@@ -38,6 +39,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const cubeSpeedSlider = document.getElementById('cube-speed-slider');
     const cubeSpeedValue = document.getElementById('cube-speed-value');
     const paletteSelect = document.getElementById('palette-select');
+    const opticalFlowPaletteSelect = document.getElementById('optical-flow-palette-select');
     const recenterButton = document.getElementById('recenter-button');
     const vrMessage = document.getElementById('vr-message');
     const ambianceControl = document.getElementById('ambiance-control');
@@ -431,8 +433,21 @@ document.addEventListener('DOMContentLoaded', () => {
         e.target.blur();
     });
 
+    const syncDensityControls = (value) => {
+        if (densitySlider) {
+            densitySlider.value = value;
+        }
+        if (opticalFlowDensitySlider) {
+            opticalFlowDensitySlider.value = value;
+        }
+    };
+
     const updateDensityState = (value) => {
         const newDensity = parseInt(value, 10);
+        if (Number.isNaN(newDensity)) {
+            return;
+        }
+        syncDensityControls(newDensity);
         const currentState = stateManager.getState();
         stateManager.setState({
             visual: {
@@ -442,26 +457,65 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     };
 
-    densitySlider.addEventListener('input', (e) => {
-        updateDensityState(e.target.value);
-    });
+    if (densitySlider) {
+        densitySlider.addEventListener('input', (e) => {
+            updateDensityState(e.target.value);
+        });
 
-    densitySlider.addEventListener('change', (e) => {
-        updateDensityState(e.target.value);
-        e.target.blur();
-    });
+        densitySlider.addEventListener('change', (e) => {
+            updateDensityState(e.target.value);
+            e.target.blur();
+        });
+    }
 
-    paletteSelect.addEventListener('change', (e) => {
-        const newPalette = e.target.value;
+    if (opticalFlowDensitySlider) {
+        opticalFlowDensitySlider.addEventListener('input', (e) => {
+            updateDensityState(e.target.value);
+        });
+
+        opticalFlowDensitySlider.addEventListener('change', (e) => {
+            updateDensityState(e.target.value);
+            e.target.blur();
+        });
+    }
+
+    const syncPaletteControls = (value) => {
+        if (paletteSelect && paletteSelect.value !== value) {
+            paletteSelect.value = value;
+        }
+        if (opticalFlowPaletteSelect && opticalFlowPaletteSelect.value !== value) {
+            opticalFlowPaletteSelect.value = value;
+        }
+    };
+
+    const updatePaletteState = (value, target) => {
+        if (!value) {
+            return;
+        }
+        syncPaletteControls(value);
         const currentState = stateManager.getState();
         stateManager.setState({
             visual: {
                 ...currentState.visual,
-                palette: newPalette
+                palette: value
             }
         });
-        e.target.blur();
-    });
+        if (target) {
+            target.blur();
+        }
+    };
+
+    if (paletteSelect) {
+        paletteSelect.addEventListener('change', (e) => {
+            updatePaletteState(e.target.value, e.target);
+        });
+    }
+
+    if (opticalFlowPaletteSelect) {
+        opticalFlowPaletteSelect.addEventListener('change', (e) => {
+            updatePaletteState(e.target.value, e.target);
+        });
+    }
 
     recenterButton.addEventListener('click', (e) => {
         handleRecenter();
@@ -639,8 +693,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Initialization ---
     function initialize() {
+        const { visual } = stateManager.getState();
+        syncDensityControls(visual.density);
+        syncPaletteControls(visual.palette);
+
         setActiveVisualModule(visualSelect.value); // This will also call updateUIVisibility
-        
+
         if (cameraEl.hasLoaded) {
             handleRecenter();
         } else {

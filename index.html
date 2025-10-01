@@ -88,6 +88,27 @@
                     <!-- Panneau de contrôle pour le Flux Optique -->
                     <div id="optical-flow-controls" class="control-group" style="display: none;">
                         <div class="control-item optical-flow-control">
+                            <label for="optical-flow-palette-select">Ambiance</label>
+                            <select id="optical-flow-palette-select">
+                                <option value="default">Défaut (Blanc)</option>
+                                <option value="none">Aucun (Noir)</option>
+                                <option value="forest">Forêt Mystique</option>
+                                <option value="sunset">Coucher de Soleil</option>
+                                <option value="ocean">Océan Profond</option>
+                                <option value="retro">Néon Rétro</option>
+                                <option value="pastel">Tons Pastel</option>
+                                <option value="autumn">Épices d'Automne</option>
+                                <option value="aurora">Aurore Boréale</option>
+                                <option value="volcanic">Volcanique</option>
+                                <option value="cyberpunk">Cyberpunk</option>
+                                <option value="auto">Changement Automatique</option>
+                            </select>
+                        </div>
+                        <div class="control-item optical-flow-control">
+                            <label for="optical-flow-density-slider">Densité</label>
+                            <input type="range" id="optical-flow-density-slider" min="30" max="300" value="100">
+                        </div>
+                        <div class="control-item optical-flow-control">
                             <label>Vitesse</label>
                             <div class="speed-display">
                                 <span class="arrow-icon">↕</span>
