@@ -91,7 +91,8 @@ function _randomPositionForLayer(layer, direction = 0) {
         // Défilement inverse: privilégier l'avant immédiat.
         t = 0.75 + Math.random() * 0.25;
     } else {
-        t = Math.random();
+        // Génération initiale : garder les particules au loin pour éviter les apparitions trop proches.
+        t = Math.random() * 0.35;
     }
 
     const z = minZ + (maxZ - minZ) * t;
