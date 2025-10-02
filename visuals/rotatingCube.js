@@ -9,6 +9,7 @@ let sceneEl;
 let cubeEl;
 let animationFrameId;
 let rotationSpeed = 0.5; // Vitesse de rotation en degrés par frame
+let unsubscribeFromState = null;
 
 // --- Core Logic ---
 
@@ -32,7 +33,10 @@ function _animate() {
 export const rotatingCubeModule = {
     init(_sceneEl, _rigEl, _cameraEl, _container) {
         sceneEl = _sceneEl;
-        stateManager.subscribe(this.onStateChange.bind(this));
+        if (unsubscribeFromState) {
+            unsubscribeFromState();
+        }
+        unsubscribeFromState = stateManager.subscribe(this.onStateChange.bind(this));
         _createCube();
         _animate();
     },
@@ -44,6 +48,10 @@ export const rotatingCubeModule = {
     },
 
     cleanup() {
+        if (unsubscribeFromState) {
+            unsubscribeFromState();
+            unsubscribeFromState = null;
+        }
         if (animationFrameId) {
             cancelAnimationFrame(animationFrameId);
         }

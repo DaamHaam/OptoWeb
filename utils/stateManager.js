@@ -35,6 +35,19 @@ export const stateManager = {
     subscribe(callback) {
         subscribers.push(callback);
         console.log(`Un nouveau module s'est abonné. Total abonnés: ${subscribers.length}`);
+
+        let isActive = true;
+        return () => {
+            if (!isActive) {
+                return;
+            }
+            isActive = false;
+            const index = subscribers.indexOf(callback);
+            if (index !== -1) {
+                subscribers.splice(index, 1);
+                console.log(`Un module s'est désabonné. Total abonnés: ${subscribers.length}`);
+            }
+        };
     },
 
     /**
