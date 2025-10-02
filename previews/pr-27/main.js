@@ -36,6 +36,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const verticalSpeedValue = document.getElementById('vertical-speed-value');
     const translationSpeedValue = document.getElementById('translation-speed-value');
     const heightSpeedValue = document.getElementById('height-speed-value');
+    const heightAltitudeValue = document.getElementById('height-altitude-value');
+    const heightAltitudeRange = document.getElementById('height-altitude-range');
     const cubeSpeedSlider = document.getElementById('cube-speed-slider');
     const cubeSpeedValue = document.getElementById('cube-speed-value');
     const paletteSelect = document.getElementById('palette-select');
@@ -95,6 +97,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const shouldDisplaySubmenu = moduleName && moduleName !== 'none';
         visualSubmenu.style.display = shouldDisplaySubmenu ? '' : 'none';
+
+        if (moduleName !== 'heights') {
+            if (heightAltitudeValue) {
+                heightAltitudeValue.textContent = '0.0';
+            }
+            if (heightAltitudeRange) {
+                heightAltitudeRange.textContent = '';
+            }
+        }
     }
 
     function setActiveVisualModule(moduleName) {
@@ -109,6 +120,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const baseVisualState = {
             ...currentState.visual,
             activeModule: moduleName,
+            altitude: moduleName === 'heights' ? (currentState.visual.altitude ?? 0) : 0,
             speeds: { h: 0, v: 0, t: 0, y: 0 }
         };
 
@@ -120,6 +132,12 @@ document.addEventListener('DOMContentLoaded', () => {
             verticalSpeedValue.textContent = '0';
             translationSpeedValue.textContent = '0.0';
             heightSpeedValue.textContent = '0.0';
+            if (heightAltitudeValue) {
+                heightAltitudeValue.textContent = '0.0';
+            }
+            if (heightAltitudeRange) {
+                heightAltitudeRange.textContent = '';
+            }
             stateManager.setState({ visual: baseVisualState });
             return;
         }
@@ -204,7 +222,7 @@ document.addEventListener('DOMContentLoaded', () => {
     
     function updateSpeedDisplay() {
         const moduleName = visualSelect.value;
-        const { visual: { speeds } } = stateManager.getState();
+        const { visual: { speeds, altitude = 0 } } = stateManager.getState();
 
         if (moduleName === 'optokinetic') {
             horizontalSpeedValue.textContent = Math.round(speeds.h);
@@ -213,6 +231,11 @@ document.addEventListener('DOMContentLoaded', () => {
             translationSpeedValue.textContent = Number(speeds.t).toFixed(1);
         } else if (moduleName === 'heights') {
             heightSpeedValue.textContent = Number(speeds.y).toFixed(1);
+            if (heightAltitudeValue) {
+                heightAltitudeValue.textContent = Number(altitude).toFixed(1);
+            }
+        } else if (heightAltitudeValue) {
+            heightAltitudeValue.textContent = Number(altitude).toFixed(1);
         }
 
         requestAnimationFrame(updateSpeedDisplay);
