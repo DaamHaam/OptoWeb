@@ -6,7 +6,8 @@ const state = {
         activeModule: 'optokinetic', // Le module visuel actuellement sélectionné
         density: 100,             // Densité pour l'optocinétique
         palette: 'default',         // Ambiance de couleur
-        speeds: { 
+        altitude: 0,              // Altitude courante (utilisée par l'exercice Hauteurs)
+        speeds: {
             h: 0,                 // Vitesse horizontale (optocinétique)
             v: 0,                 // Vitesse verticale (optocinétique)
             t: 0,                 // Vitesse de translation (flux optique)
