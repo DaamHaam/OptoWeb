@@ -15,6 +15,7 @@ const smoothingFactor = 2.0; // Facteur de lissage pour une décélération douc
 let lastFrameTime = 0;
 let currentAltitude = 0;
 let lastReportedAltitude = null;
+let unsubscribeFromState = null;
 
 const MIN_ALTITUDE = -5;
 const MAX_ALTITUDE = 25;
@@ -191,7 +192,10 @@ export const heightsModule = {
         sceneEl = _sceneEl;
         rigEl = _rigEl;
 
-        stateManager.subscribe(this.onStateChange.bind(this));
+        if (unsubscribeFromState) {
+            unsubscribeFromState();
+        }
+        unsubscribeFromState = stateManager.subscribe(this.onStateChange.bind(this));
 
         // Créer le décor via son module dédié
         heightsDecorModule.create(sceneEl);
@@ -228,6 +232,10 @@ export const heightsModule = {
     },
 
     cleanup() {
+        if (unsubscribeFromState) {
+            unsubscribeFromState();
+            unsubscribeFromState = null;
+        }
         // Nettoyer le décor via son module dédié
         heightsDecorModule.cleanup();
 

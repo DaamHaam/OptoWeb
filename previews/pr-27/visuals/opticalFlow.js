@@ -17,9 +17,10 @@ let selectedPaletteId = 'default';
 let activePaletteColors = colorPalettes.default;
 let autoPaletteInterval = null;
 let autoPaletteIndex = 0;
+let unsubscribeFromState = null;
 
 const MIN_TOTAL_STARS = 30;
-const AUTO_PALETTE_KEYS = Object.keys(colorPalettes);
+let autoPaletteKeys = [];
 
 const layerConfigs = [
     {
@@ -119,6 +120,17 @@ function _applyColorToStar(starData, forceNewIndex = false) {
     _applyMaterial(starData.element, color, starData.layer.emissiveIntensity);
 }
 
+function _refreshAutoPaletteKeys() {
+    autoPaletteKeys = Object.keys(colorPalettes)
+        .filter((key) => key !== 'none' && Array.isArray(colorPalettes[key]) && colorPalettes[key].length > 0);
+
+    const defaultIndex = autoPaletteKeys.indexOf('default');
+    if (defaultIndex > -1 && autoPaletteKeys.length > 1) {
+        autoPaletteKeys.splice(defaultIndex, 1);
+        autoPaletteKeys.push('default');
+    }
+}
+
 function _alignContainerToCamera() {
     if (!container || !cameraEl) {
         return;
@@ -144,16 +156,17 @@ function _stopAutoPalette() {
         clearInterval(autoPaletteInterval);
         autoPaletteInterval = null;
     }
+    autoPaletteKeys = [];
 }
 
 function _cycleAutoPalette() {
-    if (!AUTO_PALETTE_KEYS.length) {
+    if (!autoPaletteKeys.length) {
         activePaletteColors = ['#FFFFFF'];
         return;
     }
 
-    const paletteKey = AUTO_PALETTE_KEYS[autoPaletteIndex % AUTO_PALETTE_KEYS.length];
-    autoPaletteIndex = (autoPaletteIndex + 1) % AUTO_PALETTE_KEYS.length;
+    const paletteKey = autoPaletteKeys[autoPaletteIndex % autoPaletteKeys.length];
+    autoPaletteIndex = (autoPaletteIndex + 1) % autoPaletteKeys.length;
     const palette = colorPalettes[paletteKey];
     if (Array.isArray(palette) && palette.length > 0) {
         activePaletteColors = palette;
@@ -165,6 +178,12 @@ function _cycleAutoPalette() {
 
 function _startAutoPalette() {
     _stopAutoPalette();
+    _refreshAutoPaletteKeys();
+    if (!autoPaletteKeys.length) {
+        activePaletteColors = ['#FFFFFF'];
+        _applyPaletteToStars(true);
+        return;
+    }
     autoPaletteIndex = 0;
     _cycleAutoPalette();
     autoPaletteInterval = setInterval(_cycleAutoPalette, 10000);
@@ -307,7 +326,10 @@ export const opticalFlowModule = {
         selectedPaletteId = null;
         activePaletteColors = colorPalettes.default;
 
-        stateManager.subscribe(this.onStateChange.bind(this));
+        if (unsubscribeFromState) {
+            unsubscribeFromState();
+        }
+        unsubscribeFromState = stateManager.subscribe(this.onStateChange.bind(this));
 
         _generateStars();
 
@@ -377,6 +399,10 @@ export const opticalFlowModule = {
     },
 
     cleanup() {
+        if (unsubscribeFromState) {
+            unsubscribeFromState();
+            unsubscribeFromState = null;
+        }
         if (animationFrameId) {
             cancelAnimationFrame(animationFrameId);
             animationFrameId = null;
