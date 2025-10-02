@@ -79,6 +79,23 @@ function _pickRadius([min, max]) {
     return _randomInRange(min, max);
 }
 
+function _clearContainerChildren() {
+    if (!container) {
+        return;
+    }
+
+    while (container.firstChild) {
+        container.removeChild(container.firstChild);
+    }
+
+    const object3D = container.object3D;
+    if (object3D) {
+        for (let i = object3D.children.length - 1; i >= 0; i -= 1) {
+            object3D.remove(object3D.children[i]);
+        }
+    }
+}
+
 function _randomPositionForLayer(layer, direction = 0) {
     const { horizontalSpread, verticalSpread, depthRange } = layer;
     const minZ = Math.min(depthRange.near, depthRange.far);
@@ -159,9 +176,10 @@ function _stopAutoPalette() {
     autoPaletteKeys = [];
 }
 
-function _cycleAutoPalette() {
+function _applyAutoPalette() {
     if (!autoPaletteKeys.length) {
         activePaletteColors = ['#FFFFFF'];
+        _applyPaletteToStars(true);
         return;
     }
 
@@ -169,7 +187,7 @@ function _cycleAutoPalette() {
     autoPaletteIndex = (autoPaletteIndex + 1) % autoPaletteKeys.length;
     const palette = colorPalettes[paletteKey];
     if (Array.isArray(palette) && palette.length > 0) {
-        activePaletteColors = palette;
+        activePaletteColors = palette.slice();
     } else {
         activePaletteColors = ['#FFFFFF'];
     }
@@ -179,14 +197,11 @@ function _cycleAutoPalette() {
 function _startAutoPalette() {
     _stopAutoPalette();
     _refreshAutoPaletteKeys();
-    if (!autoPaletteKeys.length) {
-        activePaletteColors = ['#FFFFFF'];
-        _applyPaletteToStars(true);
-        return;
-    }
     autoPaletteIndex = 0;
-    _cycleAutoPalette();
-    autoPaletteInterval = setInterval(_cycleAutoPalette, 10000);
+    _applyAutoPalette();
+    if (autoPaletteKeys.length) {
+        autoPaletteInterval = setInterval(_applyAutoPalette, 10000);
+    }
 }
 
 function _applyPaletteToStars(forceNewIndex = false) {
@@ -261,9 +276,7 @@ function _generateStars() {
 
     _alignContainerToCamera();
 
-    while (container.firstChild) {
-        container.removeChild(container.firstChild);
-    }
+    _clearContainerChildren();
     stars = [];
 
     const totalStars = Math.max(MIN_TOTAL_STARS, density);
@@ -409,9 +422,7 @@ export const opticalFlowModule = {
         }
         _stopAutoPalette();
         if (container) {
-            while (container.firstChild) {
-                container.removeChild(container.firstChild);
-            }
+            _clearContainerChildren();
         }
         stars = [];
         currentSpeed = 0;
