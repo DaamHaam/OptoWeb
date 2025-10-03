@@ -26,40 +26,43 @@ const layerConfigs = [
     {
         key: 'near',
         weight: 0.28,
-        speedFactor: 1.6,
+        speedFactor: 1.5,
         radiusRange: [0.18, 0.32],
-        horizontalSpread: 22,
-        verticalSpread: 16,
-        spawnDepth: { min: -32, max: -10 },
-        recycleNear: -0.9,
-        recycleFar: -38,
-        spawnBiasPower: 2.8,
+        horizontalSpread: 24,
+        verticalSpread: 18,
+        spawnDepth: { min: -240, max: -140 },
+        recycleNear: 1,
+        recycleFar: -260,
+        spawnBiasPower: 3.4,
+        fadeRange: { start: -6, end: 1.2 },
         emissiveIntensity: 2.2
     },
     {
         key: 'mid',
         weight: 0.44,
-        speedFactor: 1.0,
+        speedFactor: 0.9,
         radiusRange: [0.11, 0.22],
-        horizontalSpread: 34,
-        verticalSpread: 24,
-        spawnDepth: { min: -72, max: -28 },
-        recycleNear: -3.6,
-        recycleFar: -82,
-        spawnBiasPower: 2.1,
+        horizontalSpread: 36,
+        verticalSpread: 26,
+        spawnDepth: { min: -320, max: -200 },
+        recycleNear: 1,
+        recycleFar: -340,
+        spawnBiasPower: 2.6,
+        fadeRange: { start: -4.5, end: 1.2 },
         emissiveIntensity: 1.8
     },
     {
         key: 'far',
         weight: 0.28,
-        speedFactor: 0.55,
+        speedFactor: 0.5,
         radiusRange: [0.06, 0.15],
-        horizontalSpread: 48,
-        verticalSpread: 32,
-        spawnDepth: { min: -180, max: -96 },
-        recycleNear: -8.5,
-        recycleFar: -196,
-        spawnBiasPower: 1.8,
+        horizontalSpread: 50,
+        verticalSpread: 34,
+        spawnDepth: { min: -520, max: -320 },
+        recycleNear: 1,
+        recycleFar: -540,
+        spawnBiasPower: 2.2,
+        fadeRange: { start: -3.5, end: 1.2 },
         emissiveIntensity: 1.3
     }
 ];
@@ -143,7 +146,7 @@ function _randomPositionForLayer(layer, direction = 0) {
 function _applyMaterial(starElement, color, intensity) {
     starElement.setAttribute(
         'material',
-        `shader: flat; color: ${color}; emissive: ${color}; emissiveIntensity: ${intensity}`
+        `shader: flat; color: ${color}; emissive: ${color}; emissiveIntensity: ${intensity}; transparent: true; opacity: 1`
     );
 }
 
@@ -255,7 +258,8 @@ function _createStar(layer) {
         element: star,
         layer,
         speedFactor: layer.speedFactor,
-        colorIndex: Math.floor(Math.random() * _getActivePaletteColors().length)
+        colorIndex: Math.floor(Math.random() * _getActivePaletteColors().length),
+        currentOpacity: 1
     };
 
     _applyColorToStar(starData);
@@ -267,6 +271,10 @@ function _resetStar(starData, direction = 0) {
     const { x, y, z } = _randomPositionForLayer(starData.layer, direction);
     starData.element.object3D.position.set(x, y, z);
     starData.element.setAttribute('position', `${x} ${y} ${z}`);
+    if (starData.currentOpacity !== 1) {
+        starData.element.setAttribute('material', 'opacity', 1);
+        starData.currentOpacity = 1;
+    }
     _applyColorToStar(starData, true);
 }
 
@@ -331,6 +339,30 @@ function _animate(time) {
         for (const starData of stars) {
             const position = starData.element.object3D.position;
             position.z += currentSpeed * deltaSeconds * starData.speedFactor;
+
+            if (currentSpeed >= 0) {
+                const { fadeRange } = starData.layer;
+                if (fadeRange && typeof fadeRange.start === 'number' && typeof fadeRange.end === 'number' && fadeRange.end > fadeRange.start) {
+                    if (position.z >= fadeRange.start) {
+                        const fadeProgress = (position.z - fadeRange.start) / (fadeRange.end - fadeRange.start);
+                        const fadeFactor = Math.max(0, Math.min(1, 1 - fadeProgress));
+                        const clamped = fadeFactor;
+                        if (Math.abs(clamped - starData.currentOpacity) > 0.01) {
+                            starData.element.setAttribute('material', 'opacity', clamped);
+                            starData.currentOpacity = clamped;
+                        }
+                    } else if (starData.currentOpacity !== 1) {
+                        starData.element.setAttribute('material', 'opacity', 1);
+                        starData.currentOpacity = 1;
+                    }
+                } else if (starData.currentOpacity !== 1) {
+                    starData.element.setAttribute('material', 'opacity', 1);
+                    starData.currentOpacity = 1;
+                }
+            } else if (starData.currentOpacity !== 1) {
+                starData.element.setAttribute('material', 'opacity', 1);
+                starData.currentOpacity = 1;
+            }
 
             const { min: spawnMin, max: spawnMax } = _getSpawnRange(starData.layer);
             const resetBuffer = typeof starData.layer.resetBuffer === 'number' ? starData.layer.resetBuffer : 0;
