@@ -17,7 +17,8 @@ let currentAltitude = 0;
 let lastReportedAltitude = null;
 let unsubscribeFromState = null;
 
-const MIN_ALTITUDE = -5;
+const BASE_ALTITUDE = 1;
+const MIN_ALTITUDE = BASE_ALTITUDE;
 const MAX_ALTITUDE = 25;
 const ALTITUDE_REPORT_THRESHOLD = 0.02;
 
@@ -34,7 +35,7 @@ function _createElements() {
     // Conteneur principal de la plateforme et de ses éléments décoratifs
     platformEl = document.createElement('a-entity');
     platformEl.setAttribute('id', 'height-platform');
-    platformEl.setAttribute('position', '0 0 -2');
+    platformEl.setAttribute('position', `0 ${BASE_ALTITUDE} -2`);
 
     // Socle principal (base large)
     const baseEl = document.createElement('a-cylinder');
@@ -197,13 +198,16 @@ export const heightsModule = {
 
         // Réinitialiser la position et la rotation du rig pour cet exercice.
         if (rigEl) {
-            rigEl.object3D.position.set(0, 0, -2);
+            rigEl.object3D.position.set(0, BASE_ALTITUDE, -2);
             rigEl.object3D.rotation.set(0, 0, 0);
         }
 
         _createElements();
+        if (platformEl) {
+            platformEl.object3D.position.y = BASE_ALTITUDE;
+        }
         lastFrameTime = performance.now();
-        currentAltitude = rigEl ? rigEl.object3D.position.y : 0;
+        currentAltitude = rigEl ? rigEl.object3D.position.y : BASE_ALTITUDE;
         lastReportedAltitude = null;
         _reportAltitude(true);
 
@@ -252,11 +256,11 @@ export const heightsModule = {
 
     regenerate() {
         if(rigEl) {
-            rigEl.object3D.position.y = 0;
-            if(platformEl) platformEl.object3D.position.y = 0;
+            rigEl.object3D.position.y = BASE_ALTITUDE;
+            if(platformEl) platformEl.object3D.position.y = BASE_ALTITUDE;
             actualSpeed = 0;
             targetSpeed = 0;
-            currentAltitude = 0;
+            currentAltitude = BASE_ALTITUDE;
             lastReportedAltitude = null;
         }
         _reportAltitude(true);
