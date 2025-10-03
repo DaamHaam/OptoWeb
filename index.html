@@ -4,15 +4,15 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <title>OW v0.77</title>
+    <title>OW v0.79</title>
     <meta name="description" content="Application de rééducation vestibulaire en réalité virtuelle.">
     <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
-    <link rel="stylesheet" href="styles.css?v=0.77">
+    <link rel="stylesheet" href="styles.css?v=0.79">
         <link rel="manifest" href="manifest.json">
     </head>
     <body>
 
-        <div id="version-display">v0.77</div>
+        <div id="version-display">v0.79</div>
 
     <div class="ui-panels-container has-mobile-tabs">
         <div class="mobile-tabbar" role="tablist" aria-label="Panneaux de configuration">
@@ -88,6 +88,27 @@
                     <!-- Panneau de contrôle pour le Flux Optique -->
                     <div id="optical-flow-controls" class="control-group" style="display: none;">
                         <div class="control-item optical-flow-control">
+                            <label for="optical-flow-palette-select">Ambiance</label>
+                            <select id="optical-flow-palette-select">
+                                <option value="default">Défaut (Blanc)</option>
+                                <option value="none">Aucun (Noir)</option>
+                                <option value="forest">Forêt Mystique</option>
+                                <option value="sunset">Coucher de Soleil</option>
+                                <option value="ocean">Océan Profond</option>
+                                <option value="retro">Néon Rétro</option>
+                                <option value="pastel">Tons Pastel</option>
+                                <option value="autumn">Épices d'Automne</option>
+                                <option value="aurora">Aurore Boréale</option>
+                                <option value="volcanic">Volcanique</option>
+                                <option value="cyberpunk">Cyberpunk</option>
+                                <option value="auto">Changement Automatique</option>
+                            </select>
+                        </div>
+                        <div class="control-item optical-flow-control">
+                            <label for="optical-flow-density-slider">Densité</label>
+                            <input type="range" id="optical-flow-density-slider" min="30" max="300" value="100">
+                        </div>
+                        <div class="control-item optical-flow-control">
                             <label>Vitesse</label>
                             <div class="speed-display">
                                 <span class="arrow-icon">↕</span>
@@ -113,6 +134,12 @@
                             <span id="height-speed-value">0.0</span>
                             <span class="control-row-unit">m/s</span>
                         </div>
+                        <div class="control-row">
+                            <span class="control-row-label">Altitude</span>
+                            <span id="height-altitude-value">0.0</span>
+                            <span class="control-row-unit">m</span>
+                        </div>
+                        <p class="control-note" id="height-altitude-range"></p>
                         <p class="instructions">Utilisez les flèches HAUT/BAS pour monter/descendre et ESPACE pour arrêter.</p>
                     </div>
                 </div>
@@ -185,7 +212,7 @@
         <a-entity id="rig" position="0 0 0"><a-camera look-controls-enabled="true" wasd-controls-enabled="false"></a-camera></a-entity>
     </a-scene>
 
-    <script type="module" src="main.js?v=0.77"></script>
+    <script type="module" src="main.js?v=0.79"></script>
     <script>
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {

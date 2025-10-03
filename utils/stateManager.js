@@ -6,7 +6,8 @@ const state = {
         activeModule: 'optokinetic', // Le module visuel actuellement sélectionné
         density: 100,             // Densité pour l'optocinétique
         palette: 'default',         // Ambiance de couleur
-        speeds: { 
+        altitude: 0,              // Altitude courante (utilisée par l'exercice Hauteurs)
+        speeds: {
             h: 0,                 // Vitesse horizontale (optocinétique)
             v: 0,                 // Vitesse verticale (optocinétique)
             t: 0,                 // Vitesse de translation (flux optique)
@@ -34,6 +35,19 @@ export const stateManager = {
     subscribe(callback) {
         subscribers.push(callback);
         console.log(`Un nouveau module s'est abonné. Total abonnés: ${subscribers.length}`);
+
+        let isActive = true;
+        return () => {
+            if (!isActive) {
+                return;
+            }
+            isActive = false;
+            const index = subscribers.indexOf(callback);
+            if (index !== -1) {
+                subscribers.splice(index, 1);
+                console.log(`Un module s'est désabonné. Total abonnés: ${subscribers.length}`);
+            }
+        };
     },
 
     /**

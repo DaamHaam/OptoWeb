@@ -31,13 +31,17 @@ document.addEventListener('DOMContentLoaded', () => {
     const visualSelect = document.getElementById('visual-select');
     const visualSubmenu = document.getElementById('visual-submenu');
     const densitySlider = document.getElementById('density-slider');
+    const opticalFlowDensitySlider = document.getElementById('optical-flow-density-slider');
     const horizontalSpeedValue = document.getElementById('horizontal-speed-value');
     const verticalSpeedValue = document.getElementById('vertical-speed-value');
     const translationSpeedValue = document.getElementById('translation-speed-value');
     const heightSpeedValue = document.getElementById('height-speed-value');
+    const heightAltitudeValue = document.getElementById('height-altitude-value');
+    const heightAltitudeRange = document.getElementById('height-altitude-range');
     const cubeSpeedSlider = document.getElementById('cube-speed-slider');
     const cubeSpeedValue = document.getElementById('cube-speed-value');
     const paletteSelect = document.getElementById('palette-select');
+    const opticalFlowPaletteSelect = document.getElementById('optical-flow-palette-select');
     const recenterButton = document.getElementById('recenter-button');
     const vrMessage = document.getElementById('vr-message');
     const ambianceControl = document.getElementById('ambiance-control');
@@ -93,6 +97,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const shouldDisplaySubmenu = moduleName && moduleName !== 'none';
         visualSubmenu.style.display = shouldDisplaySubmenu ? '' : 'none';
+
+        if (moduleName !== 'heights') {
+            if (heightAltitudeValue) {
+                heightAltitudeValue.textContent = '0.0';
+            }
+            if (heightAltitudeRange) {
+                heightAltitudeRange.textContent = '';
+            }
+        }
     }
 
     function setActiveVisualModule(moduleName) {
@@ -107,6 +120,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const baseVisualState = {
             ...currentState.visual,
             activeModule: moduleName,
+            altitude: moduleName === 'heights' ? (currentState.visual.altitude ?? 0) : 0,
             speeds: { h: 0, v: 0, t: 0, y: 0 }
         };
 
@@ -118,6 +132,12 @@ document.addEventListener('DOMContentLoaded', () => {
             verticalSpeedValue.textContent = '0';
             translationSpeedValue.textContent = '0.0';
             heightSpeedValue.textContent = '0.0';
+            if (heightAltitudeValue) {
+                heightAltitudeValue.textContent = '0.0';
+            }
+            if (heightAltitudeRange) {
+                heightAltitudeRange.textContent = '';
+            }
             stateManager.setState({ visual: baseVisualState });
             return;
         }
@@ -202,7 +222,7 @@ document.addEventListener('DOMContentLoaded', () => {
     
     function updateSpeedDisplay() {
         const moduleName = visualSelect.value;
-        const { visual: { speeds } } = stateManager.getState();
+        const { visual: { speeds, altitude = 0 } } = stateManager.getState();
 
         if (moduleName === 'optokinetic') {
             horizontalSpeedValue.textContent = Math.round(speeds.h);
@@ -211,6 +231,11 @@ document.addEventListener('DOMContentLoaded', () => {
             translationSpeedValue.textContent = Number(speeds.t).toFixed(1);
         } else if (moduleName === 'heights') {
             heightSpeedValue.textContent = Number(speeds.y).toFixed(1);
+            if (heightAltitudeValue) {
+                heightAltitudeValue.textContent = Number(altitude).toFixed(1);
+            }
+        } else if (heightAltitudeValue) {
+            heightAltitudeValue.textContent = Number(altitude).toFixed(1);
         }
 
         requestAnimationFrame(updateSpeedDisplay);
@@ -431,8 +456,21 @@ document.addEventListener('DOMContentLoaded', () => {
         e.target.blur();
     });
 
+    const syncDensityControls = (value) => {
+        if (densitySlider) {
+            densitySlider.value = value;
+        }
+        if (opticalFlowDensitySlider) {
+            opticalFlowDensitySlider.value = value;
+        }
+    };
+
     const updateDensityState = (value) => {
         const newDensity = parseInt(value, 10);
+        if (Number.isNaN(newDensity)) {
+            return;
+        }
+        syncDensityControls(newDensity);
         const currentState = stateManager.getState();
         stateManager.setState({
             visual: {
@@ -442,26 +480,65 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     };
 
-    densitySlider.addEventListener('input', (e) => {
-        updateDensityState(e.target.value);
-    });
+    if (densitySlider) {
+        densitySlider.addEventListener('input', (e) => {
+            updateDensityState(e.target.value);
+        });
 
-    densitySlider.addEventListener('change', (e) => {
-        updateDensityState(e.target.value);
-        e.target.blur();
-    });
+        densitySlider.addEventListener('change', (e) => {
+            updateDensityState(e.target.value);
+            e.target.blur();
+        });
+    }
 
-    paletteSelect.addEventListener('change', (e) => {
-        const newPalette = e.target.value;
+    if (opticalFlowDensitySlider) {
+        opticalFlowDensitySlider.addEventListener('input', (e) => {
+            updateDensityState(e.target.value);
+        });
+
+        opticalFlowDensitySlider.addEventListener('change', (e) => {
+            updateDensityState(e.target.value);
+            e.target.blur();
+        });
+    }
+
+    const syncPaletteControls = (value) => {
+        if (paletteSelect && paletteSelect.value !== value) {
+            paletteSelect.value = value;
+        }
+        if (opticalFlowPaletteSelect && opticalFlowPaletteSelect.value !== value) {
+            opticalFlowPaletteSelect.value = value;
+        }
+    };
+
+    const updatePaletteState = (value, target) => {
+        if (!value) {
+            return;
+        }
+        syncPaletteControls(value);
         const currentState = stateManager.getState();
         stateManager.setState({
             visual: {
                 ...currentState.visual,
-                palette: newPalette
+                palette: value
             }
         });
-        e.target.blur();
-    });
+        if (target) {
+            target.blur();
+        }
+    };
+
+    if (paletteSelect) {
+        paletteSelect.addEventListener('change', (e) => {
+            updatePaletteState(e.target.value, e.target);
+        });
+    }
+
+    if (opticalFlowPaletteSelect) {
+        opticalFlowPaletteSelect.addEventListener('change', (e) => {
+            updatePaletteState(e.target.value, e.target);
+        });
+    }
 
     recenterButton.addEventListener('click', (e) => {
         handleRecenter();
@@ -639,8 +716,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Initialization ---
     function initialize() {
+        const { visual } = stateManager.getState();
+        syncDensityControls(visual.density);
+        syncPaletteControls(visual.palette);
+
         setActiveVisualModule(visualSelect.value); // This will also call updateUIVisibility
-        
+
         if (cameraEl.hasLoaded) {
             handleRecenter();
         } else {
