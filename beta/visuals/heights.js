@@ -13,6 +13,31 @@ let actualSpeed = 0;
 let targetSpeed = 0;
 const smoothingFactor = 2.0; // Facteur de lissage pour une décélération douce
 let lastFrameTime = 0;
+let currentAltitude = 0;
+let lastReportedAltitude = null;
+let unsubscribeFromState = null;
+
+const MIN_ALTITUDE = -5;
+const MAX_ALTITUDE = 25;
+const ALTITUDE_REPORT_THRESHOLD = 0.02;
+let altitudeRangeEl = null;
+
+function _reportAltitude(force = false) {
+    if (!force && lastReportedAltitude !== null && Math.abs(currentAltitude - lastReportedAltitude) < ALTITUDE_REPORT_THRESHOLD) {
+        return;
+    }
+    lastReportedAltitude = currentAltitude;
+    stateManager.setState({ visual: { altitude: currentAltitude } });
+}
+
+function _syncAltitudeRangeLabel() {
+    if (!altitudeRangeEl) {
+        altitudeRangeEl = document.getElementById('height-altitude-range');
+    }
+    if (altitudeRangeEl) {
+        altitudeRangeEl.textContent = `Plage: ${MIN_ALTITUDE.toFixed(0)} m à ${MAX_ALTITUDE.toFixed(0)} m`;
+    }
+}
 
 // --- Core Logic ---
 function _createElements() {
@@ -135,11 +160,29 @@ function _animate(time) {
     }
 
     if (rigEl && platformEl && Math.abs(actualSpeed) > 0) {
-        const newY = rigEl.object3D.position.y + actualSpeed * dt; // Vitesse par seconde
-        rigEl.object3D.position.y = newY;
-        platformEl.object3D.position.y = newY;
+        const desiredY = rigEl.object3D.position.y + actualSpeed * dt; // Vitesse par seconde
+        const clampedY = Math.min(MAX_ALTITUDE, Math.max(MIN_ALTITUDE, desiredY));
+
+        if (clampedY !== desiredY) {
+            actualSpeed = 0;
+            targetSpeed = 0;
+        }
+
+        rigEl.object3D.position.y = clampedY;
+        platformEl.object3D.position.y = clampedY;
+
+        currentAltitude = clampedY;
+        _reportAltitude();
     }
-    
+
+    if (rigEl) {
+        const rigY = rigEl.object3D.position.y;
+        if (Math.abs(actualSpeed) < 0.01 && Math.abs(currentAltitude - rigY) > 0.001) {
+            currentAltitude = rigY;
+            _reportAltitude(true);
+        }
+    }
+
     animationFrameId = requestAnimationFrame(_animate);
 }
 
@@ -149,7 +192,10 @@ export const heightsModule = {
         sceneEl = _sceneEl;
         rigEl = _rigEl;
 
-        stateManager.subscribe(this.onStateChange.bind(this));
+        if (unsubscribeFromState) {
+            unsubscribeFromState();
+        }
+        unsubscribeFromState = stateManager.subscribe(this.onStateChange.bind(this));
 
         // Créer le décor via son module dédié
         heightsDecorModule.create(sceneEl);
@@ -167,7 +213,11 @@ export const heightsModule = {
 
         _createElements();
         lastFrameTime = performance.now();
-        
+        currentAltitude = rigEl ? rigEl.object3D.position.y : 0;
+        lastReportedAltitude = null;
+        _syncAltitudeRangeLabel();
+        _reportAltitude(true);
+
         // Lancer correctement la boucle d'animation
         if (animationFrameId) {
             cancelAnimationFrame(animationFrameId);
@@ -182,6 +232,10 @@ export const heightsModule = {
     },
 
     cleanup() {
+        if (unsubscribeFromState) {
+            unsubscribeFromState();
+            unsubscribeFromState = null;
+        }
         // Nettoyer le décor via son module dédié
         heightsDecorModule.cleanup();
 
@@ -194,10 +248,17 @@ export const heightsModule = {
         platformEl = null;
         actualSpeed = 0;
         targetSpeed = 0;
+        currentAltitude = 0;
+        lastReportedAltitude = null;
         // Réinitialiser la position du rig
         if(rigEl) {
             rigEl.object3D.position.y = 0;
         }
+        if (altitudeRangeEl) {
+            altitudeRangeEl.textContent = '';
+        }
+        altitudeRangeEl = null;
+        stateManager.setState({ visual: { altitude: 0 } });
         if (skyEl) {
             skyEl.setAttribute('color', '#000000');
         }
@@ -210,7 +271,11 @@ export const heightsModule = {
             if(platformEl) platformEl.object3D.position.y = 0;
             actualSpeed = 0;
             targetSpeed = 0;
+            currentAltitude = 0;
+            lastReportedAltitude = null;
         }
+        _syncAltitudeRangeLabel();
+        _reportAltitude(true);
     },
 
     // --- Fonctions pour les contrôles ---

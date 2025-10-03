@@ -27,6 +27,7 @@ let instancedMaterial = null;
 let haloTexture = null;
 let fadeAnimationId = null;
 const MAX_PALETTE_COLORS = 8;
+let unsubscribeFromState = null;
 
 const tempCameraQuat = new THREE.Quaternion();
 const tempCameraRight = new THREE.Vector3(1, 0, 0);
@@ -375,7 +376,10 @@ export const optokineticModule = {
         spheresContainer = _spheresContainer;
 
         // S'abonner aux changements d'état
-        stateManager.subscribe(this.onStateChange.bind(this));
+        if (unsubscribeFromState) {
+            unsubscribeFromState();
+        }
+        unsubscribeFromState = stateManager.subscribe(this.onStateChange.bind(this));
 
         // Récupérer l'état initial pour la première génération
         const initialState = stateManager.getState();
@@ -478,12 +482,15 @@ export const optokineticModule = {
     },
 
     cleanup() {
+        if (unsubscribeFromState) {
+            unsubscribeFromState();
+            unsubscribeFromState = null;
+        }
         if (animationFrameId) {
             cancelAnimationFrame(animationFrameId);
             animationFrameId = null;
         }
         _stopAutoColorCycle();
         _disposeInstancedResources();
-        // TODO: Se désabonner du stateManager
     }
 };
