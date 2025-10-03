@@ -37,7 +37,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const translationSpeedValue = document.getElementById('translation-speed-value');
     const heightSpeedValue = document.getElementById('height-speed-value');
     const heightAltitudeValue = document.getElementById('height-altitude-value');
-    const heightAltitudeRange = document.getElementById('height-altitude-range');
     const cubeSpeedSlider = document.getElementById('cube-speed-slider');
     const cubeSpeedValue = document.getElementById('cube-speed-value');
     const paletteSelect = document.getElementById('palette-select');
@@ -98,13 +97,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const shouldDisplaySubmenu = moduleName && moduleName !== 'none';
         visualSubmenu.style.display = shouldDisplaySubmenu ? '' : 'none';
 
-        if (moduleName !== 'heights') {
-            if (heightAltitudeValue) {
-                heightAltitudeValue.textContent = '0.0';
-            }
-            if (heightAltitudeRange) {
-                heightAltitudeRange.textContent = '';
-            }
+        if (moduleName !== 'heights' && heightAltitudeValue) {
+            heightAltitudeValue.textContent = '0.0';
         }
     }
 
@@ -135,9 +129,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (heightAltitudeValue) {
                 heightAltitudeValue.textContent = '0.0';
             }
-            if (heightAltitudeRange) {
-                heightAltitudeRange.textContent = '';
-            }
+            
             stateManager.setState({ visual: baseVisualState });
             return;
         }

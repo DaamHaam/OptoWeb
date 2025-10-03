@@ -129,17 +129,22 @@
 
                     <!-- Panneau de contrôle pour les Hauteurs -->
                     <div id="heights-controls" class="control-group">
-                        <div class="control-row">
-                            <span class="control-row-label">Vitesse</span>
-                            <span id="height-speed-value">0.0</span>
-                            <span class="control-row-unit">m/s</span>
+                        <div class="control-item heights-control">
+                            <span class="heights-control-label">Vitesse</span>
+                            <div class="speed-display" role="group" aria-label="Vitesse verticale">
+                                <span class="arrow-icon" aria-hidden="true">↕</span>
+                                <span id="height-speed-value">0.0</span>
+                                <span class="speed-unit">m/s</span>
+                            </div>
                         </div>
-                        <div class="control-row">
-                            <span class="control-row-label">Altitude</span>
-                            <span id="height-altitude-value">0.0</span>
-                            <span class="control-row-unit">m</span>
+                        <div class="control-item heights-control">
+                            <span class="heights-control-label">Altitude</span>
+                            <div class="speed-display" role="group" aria-label="Altitude actuelle">
+                                <span class="arrow-icon" aria-hidden="true">⬆</span>
+                                <span id="height-altitude-value">0.0</span>
+                                <span class="speed-unit">m</span>
+                            </div>
                         </div>
-                        <p class="control-note" id="height-altitude-range"></p>
                         <p class="instructions">Utilisez les flèches HAUT/BAS pour monter/descendre et ESPACE pour arrêter.</p>
                     </div>
                 </div>

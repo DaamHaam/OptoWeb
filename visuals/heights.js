@@ -20,7 +20,6 @@ let unsubscribeFromState = null;
 const MIN_ALTITUDE = -5;
 const MAX_ALTITUDE = 25;
 const ALTITUDE_REPORT_THRESHOLD = 0.02;
-let altitudeRangeEl = null;
 
 function _reportAltitude(force = false) {
     if (!force && lastReportedAltitude !== null && Math.abs(currentAltitude - lastReportedAltitude) < ALTITUDE_REPORT_THRESHOLD) {
@@ -28,15 +27,6 @@ function _reportAltitude(force = false) {
     }
     lastReportedAltitude = currentAltitude;
     stateManager.setState({ visual: { altitude: currentAltitude } });
-}
-
-function _syncAltitudeRangeLabel() {
-    if (!altitudeRangeEl) {
-        altitudeRangeEl = document.getElementById('height-altitude-range');
-    }
-    if (altitudeRangeEl) {
-        altitudeRangeEl.textContent = `Plage: ${MIN_ALTITUDE.toFixed(0)} m à ${MAX_ALTITUDE.toFixed(0)} m`;
-    }
 }
 
 // --- Core Logic ---
@@ -215,7 +205,6 @@ export const heightsModule = {
         lastFrameTime = performance.now();
         currentAltitude = rigEl ? rigEl.object3D.position.y : 0;
         lastReportedAltitude = null;
-        _syncAltitudeRangeLabel();
         _reportAltitude(true);
 
         // Lancer correctement la boucle d'animation
@@ -254,10 +243,6 @@ export const heightsModule = {
         if(rigEl) {
             rigEl.object3D.position.y = 0;
         }
-        if (altitudeRangeEl) {
-            altitudeRangeEl.textContent = '';
-        }
-        altitudeRangeEl = null;
         stateManager.setState({ visual: { altitude: 0 } });
         if (skyEl) {
             skyEl.setAttribute('color', '#000000');
@@ -274,7 +259,6 @@ export const heightsModule = {
             currentAltitude = 0;
             lastReportedAltitude = null;
         }
-        _syncAltitudeRangeLabel();
         _reportAltitude(true);
     },
 

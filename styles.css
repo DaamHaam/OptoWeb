@@ -302,6 +302,10 @@ body {
 .speed-display .arrow-icon {
     font-size: 1.4em;
 }
+.speed-display .speed-unit {
+    color: rgba(31, 45, 61, 0.7);
+    font-size: 0.95em;
+}
 .speed-display--stacked {
     flex-direction: column;
     align-items: flex-start;
@@ -325,7 +329,8 @@ body {
 }
 .speed-value,
 #translation-speed-value,
-#height-speed-value {
+#height-speed-value,
+#height-altitude-value {
     font-size: 1.6em;
     font-weight: 600;
     color: #2aa198;
@@ -400,22 +405,15 @@ body {
 }
 a-scene[vr-mode-ui] .ui-panel, a-scene[vr-mode-ui] #version-display { display: none; }
 
-.control-row {
+.heights-control {
     display: flex;
-    align-items: center;
-    gap: 12px;
-}
-
-.control-row-label {
-    display: inline-flex;
-    align-items: center;
+    flex-direction: column;
     gap: 6px;
-    font-weight: 600;
 }
 
-.control-row-unit {
-    color: rgba(31, 45, 61, 0.6);
-    font-size: 0.95em;
+.heights-control-label {
+    font-weight: 600;
+    color: #1f2d3d;
 }
 
 .control-item select,
