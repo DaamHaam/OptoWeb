@@ -1,3 +1,9 @@
+## v0.79 (2025-10-16)
+
+* Les trois couches du flux optique génèrent désormais toutes leurs particules très loin en amont et les laissent traverser l'utilisateur avant recyclage pour éviter toute apparition à bout portant.
+* Ajout d'un fondu progressif proche de la caméra afin que les particules disparaissent en douceur une fois qu'elles ont dépassé le patient.
+* Mise à jour des références de version (interface et cache service worker) en 0.79.
+
 ## v0.78 (2025-10-15)
 
 * Refonte du flux optique pour une immersion immédiate : tunnel aligné sur la caméra, parallax multi-couches, palettes manuelles ou automatiques et purge complète avant régénération pour éviter le retour des sphères optocinétiques.
