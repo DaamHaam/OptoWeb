@@ -30,8 +30,10 @@ const layerConfigs = [
         radiusRange: [0.18, 0.32],
         horizontalSpread: 22,
         verticalSpread: 16,
-        depthRange: { near: -2.5, far: -18 },
-        resetBuffer: 1.5,
+        spawnDepth: { min: -32, max: -10 },
+        recycleNear: -0.9,
+        recycleFar: -38,
+        spawnBiasPower: 2.8,
         emissiveIntensity: 2.2
     },
     {
@@ -41,8 +43,10 @@ const layerConfigs = [
         radiusRange: [0.11, 0.22],
         horizontalSpread: 34,
         verticalSpread: 24,
-        depthRange: { near: -16, far: -55 },
-        resetBuffer: 2,
+        spawnDepth: { min: -72, max: -28 },
+        recycleNear: -3.6,
+        recycleFar: -82,
+        spawnBiasPower: 2.1,
         emissiveIntensity: 1.8
     },
     {
@@ -52,8 +56,10 @@ const layerConfigs = [
         radiusRange: [0.06, 0.15],
         horizontalSpread: 48,
         verticalSpread: 32,
-        depthRange: { near: -45, far: -140 },
-        resetBuffer: 3,
+        spawnDepth: { min: -180, max: -96 },
+        recycleNear: -8.5,
+        recycleFar: -196,
+        spawnBiasPower: 1.8,
         emissiveIntensity: 1.3
     }
 ];
@@ -96,24 +102,38 @@ function _clearContainerChildren() {
     }
 }
 
-function _randomPositionForLayer(layer, direction = 0) {
-    const { horizontalSpread, verticalSpread, depthRange } = layer;
-    const minZ = Math.min(depthRange.near, depthRange.far);
-    const maxZ = Math.max(depthRange.near, depthRange.far);
-    let t;
-
-    if (direction > 0) {
-        // Défilement vers l'utilisateur: privilégier les profondeurs lointaines.
-        t = Math.random() * 0.25;
-    } else if (direction < 0) {
-        // Défilement inverse: privilégier l'avant immédiat.
-        t = 0.75 + Math.random() * 0.25;
-    } else {
-        // Génération initiale : garder les particules au loin pour éviter les apparitions trop proches.
-        t = Math.random() * 0.35;
+function _getSpawnRange(layer) {
+    if (layer.spawnDepth && typeof layer.spawnDepth.min === 'number' && typeof layer.spawnDepth.max === 'number') {
+        const min = Math.min(layer.spawnDepth.min, layer.spawnDepth.max);
+        const max = Math.max(layer.spawnDepth.min, layer.spawnDepth.max);
+        return { min, max };
     }
 
-    const z = minZ + (maxZ - minZ) * t;
+    if (layer.depthRange && typeof layer.depthRange.near === 'number' && typeof layer.depthRange.far === 'number') {
+        const min = Math.min(layer.depthRange.near, layer.depthRange.far);
+        const max = Math.max(layer.depthRange.near, layer.depthRange.far);
+        return { min, max };
+    }
+
+    return { min: -20, max: -5 };
+}
+
+function _randomPositionForLayer(layer, direction = 0) {
+    const { horizontalSpread, verticalSpread } = layer;
+    const { min: minZ, max: maxZ } = _getSpawnRange(layer);
+
+    const biasPower = direction < 0
+        ? layer.backwardSpawnBiasPower || 1.2
+        : layer.spawnBiasPower || 1.6;
+
+    let randomValue = Math.random();
+    if (direction < 0) {
+        randomValue = 1 - Math.pow(1 - randomValue, biasPower);
+    } else {
+        randomValue = Math.pow(randomValue, biasPower);
+    }
+
+    const z = minZ + (maxZ - minZ) * randomValue;
     const x = (Math.random() - 0.5) * horizontalSpread;
     const y = (Math.random() - 0.5) * verticalSpread;
 
@@ -312,9 +332,14 @@ function _animate(time) {
             const position = starData.element.object3D.position;
             position.z += currentSpeed * deltaSeconds * starData.speedFactor;
 
-            const { near, far } = starData.layer.depthRange;
-            const nearLimit = Math.max(near, far) + starData.layer.resetBuffer;
-            const farLimit = Math.min(near, far) - starData.layer.resetBuffer;
+            const { min: spawnMin, max: spawnMax } = _getSpawnRange(starData.layer);
+            const resetBuffer = typeof starData.layer.resetBuffer === 'number' ? starData.layer.resetBuffer : 0;
+            const nearLimit = typeof starData.layer.recycleNear === 'number'
+                ? starData.layer.recycleNear
+                : spawnMax + resetBuffer;
+            const farLimit = typeof starData.layer.recycleFar === 'number'
+                ? starData.layer.recycleFar
+                : spawnMin - resetBuffer;
 
             if (currentSpeed >= 0 && position.z >= nearLimit) {
                 _resetStar(starData, 1);
