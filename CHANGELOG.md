@@ -1,3 +1,9 @@
+## v0.78 (2025-10-15)
+
+* Refonte du flux optique pour une immersion immédiate : tunnel aligné sur la caméra, parallax multi-couches, palettes manuelles ou automatiques et purge complète avant régénération pour éviter le retour des sphères optocinétiques.
+* Encadrement de l'exercice des hauteurs avec bornes d'altitude, affichage en temps réel et décor animé (piliers lumineux, nuages et vents lointains).
+* Ajout de la désinscription des modules visuels inactifs via le `stateManager` et montée de version affichée/service worker en 0.78.
+
 ## v0.67 (2025-10-08)
 
 * Remplacement des sphères A-Frame par un nuage instancié de halos billboarding avec shader additif pour réduire les draw calls.
