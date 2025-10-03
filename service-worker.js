@@ -1,5 +1,5 @@
 
-const VERSION = '0.77';
+const VERSION = '0.78';
 const scopePath = new URL(self.registration.scope).pathname;
 const normalizedPath = scopePath.replace(/\/+$/, '');
 const pathSegments = normalizedPath.split('/').filter(Boolean);
