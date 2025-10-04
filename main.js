@@ -37,6 +37,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const translationSpeedValue = document.getElementById('translation-speed-value');
     const heightSpeedValue = document.getElementById('height-speed-value');
     const heightAltitudeValue = document.getElementById('height-altitude-value');
+    const heightPlatformSizeSelect = document.getElementById('height-platform-size');
     const cubeSpeedSlider = document.getElementById('cube-speed-slider');
     const cubeSpeedValue = document.getElementById('cube-speed-value');
     const paletteSelect = document.getElementById('palette-select');
@@ -101,6 +102,11 @@ document.addEventListener('DOMContentLoaded', () => {
         if (moduleName !== 'heights' && heightAltitudeValue) {
             heightAltitudeValue.textContent = '0.0';
         }
+
+        if (moduleName === 'heights' && heightPlatformSizeSelect) {
+            const { visual: { platformScale = 1 } } = stateManager.getState();
+            heightPlatformSizeSelect.value = platformScale.toString();
+        }
     }
 
     function setActiveVisualModule(moduleName) {
@@ -116,6 +122,7 @@ document.addEventListener('DOMContentLoaded', () => {
             ...currentState.visual,
             activeModule: moduleName,
             altitude: moduleName === 'heights' ? (currentState.visual.altitude ?? 0) : 0,
+            platformScale: currentState.visual.platformScale ?? 1,
             speeds: { h: 0, v: 0, t: 0, y: 0 }
         };
 
@@ -712,6 +719,10 @@ document.addEventListener('DOMContentLoaded', () => {
         const { visual } = stateManager.getState();
         syncDensityControls(visual.density);
         syncPaletteControls(visual.palette);
+        if (heightPlatformSizeSelect) {
+            const initialScale = visual.platformScale ?? 1;
+            heightPlatformSizeSelect.value = initialScale.toString();
+        }
 
         setActiveVisualModule(visualSelect.value); // This will also call updateUIVisibility
 
@@ -725,6 +736,31 @@ document.addEventListener('DOMContentLoaded', () => {
         handleExerciseChange(exerciseSelect.value);
         
         requestAnimationFrame(updateSpeedDisplay);
+    }
+
+    if (heightPlatformSizeSelect) {
+        heightPlatformSizeSelect.addEventListener('change', () => {
+            const selectedScale = parseFloat(heightPlatformSizeSelect.value);
+            if (Number.isNaN(selectedScale)) {
+                return;
+            }
+
+            const currentState = stateManager.getState();
+            if (currentState.visual.platformScale === selectedScale) {
+                return;
+            }
+
+            const updatedVisual = {
+                ...currentState.visual,
+                platformScale: selectedScale
+            };
+
+            stateManager.setState({ visual: updatedVisual });
+
+            if (activeVisualModule && typeof activeVisualModule.setPlatformScale === 'function') {
+                activeVisualModule.setPlatformScale(selectedScale);
+            }
+        });
     }
 
     initialize();

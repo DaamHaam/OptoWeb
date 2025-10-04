@@ -16,6 +16,7 @@ let lastFrameTime = 0;
 let currentAltitude = 0;
 let lastReportedAltitude = null;
 let unsubscribeFromState = null;
+let platformScale = 1;
 
 const BASE_ALTITUDE = 1;
 const MIN_ALTITUDE = BASE_ALTITUDE;
@@ -136,6 +137,15 @@ function _createElements() {
     });
 
     sceneEl.appendChild(platformEl);
+    _applyPlatformScale();
+}
+
+function _applyPlatformScale() {
+    if (!platformEl) {
+        return;
+    }
+
+    platformEl.object3D.scale.set(platformScale, 1, platformScale);
 }
 
 function _animate(time) {
@@ -191,6 +201,9 @@ export const heightsModule = {
         // Créer le décor via son module dédié
         heightsDecorModule.create(sceneEl);
 
+        const { visual } = stateManager.getState();
+        platformScale = visual.platformScale ?? platformScale;
+
         skyEl = sceneEl.querySelector('#sky');
         if (skyEl) {
             skyEl.setAttribute('color', '#8dc6ff');
@@ -205,6 +218,7 @@ export const heightsModule = {
         _createElements();
         if (platformEl) {
             platformEl.object3D.position.y = BASE_ALTITUDE;
+            _applyPlatformScale();
         }
         lastFrameTime = performance.now();
         currentAltitude = rigEl ? rigEl.object3D.position.y : BASE_ALTITUDE;
@@ -221,6 +235,11 @@ export const heightsModule = {
     onStateChange(newState) {
         if (newState.visual.speeds.y !== targetSpeed) {
             this.setSpeed(newState.visual.speeds.y);
+        }
+
+        const desiredScale = newState.visual.platformScale ?? 1;
+        if (Math.abs(desiredScale - platformScale) > 0.0001) {
+            this.setPlatformScale(desiredScale);
         }
     },
 
@@ -269,6 +288,20 @@ export const heightsModule = {
     // --- Fonctions pour les contrôles ---
     setSpeed(speed) {
         targetSpeed = parseFloat(speed);
+    },
+
+    setPlatformScale(scale) {
+        if (typeof scale !== 'number' || Number.isNaN(scale)) {
+            return;
+        }
+
+        const clampedScale = Math.max(0.5, Math.min(1.0, scale));
+        if (Math.abs(clampedScale - platformScale) < 0.0001) {
+            return;
+        }
+
+        platformScale = clampedScale;
+        _applyPlatformScale();
     },
     
     // --- Fonctions non utilisées mais requises ---

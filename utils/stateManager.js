@@ -7,6 +7,7 @@ const state = {
         density: 100,             // Densité pour l'optocinétique
         palette: 'default',         // Ambiance de couleur
         altitude: 0,              // Altitude courante (utilisée par l'exercice Hauteurs)
+        platformScale: 1,         // Facteur d'échelle de la plateforme des hauteurs
         speeds: {
             h: 0,                 // Vitesse horizontale (optocinétique)
             v: 0,                 // Vitesse verticale (optocinétique)
