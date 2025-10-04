@@ -70,6 +70,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let activeVisualModule = null;
     const speedIncrement = 1;
     const translationSpeedIncrement = 0.5;
+    const heightSpeedIncrement = 0.2;
 
     const VisualModules = {
         none: null,
@@ -651,10 +652,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             } else if (moduleName === 'heights') {
                 if (key === 'arrowup') {
-                    newSpeeds.y = Math.min(5, newSpeeds.y + 0.5);
+                    newSpeeds.y = Math.min(5, newSpeeds.y + heightSpeedIncrement);
                     speedUpdated = true;
                 } else if (key === 'arrowdown') {
-                    newSpeeds.y = Math.max(-5, newSpeeds.y - 0.5);
+                    newSpeeds.y = Math.max(-5, newSpeeds.y - heightSpeedIncrement);
                     speedUpdated = true;
                 } else if (key === ' ') {
                     newSpeeds.y = 0;

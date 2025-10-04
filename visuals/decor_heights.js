@@ -66,21 +66,26 @@ export const heightsDecorModule = {
         this.decorRoot.appendChild(depthWell);
 
         // Piliers stylisés placés à différentes distances
-        const pillarPositions = [
-            { x: 12, z: -10, height: 12, tone: '#7c8fa3' },
-            { x: -15, z: -6, height: 16, tone: '#6e819a' },
-            { x: 18, z: 8, height: 14, tone: '#899bb0' },
-            { x: -9, z: 14, height: 10, tone: '#7388a0' },
-            { x: 22, z: -18, height: 18, tone: '#5f738f' }
+        const pillarConfigurations = [
+            { x: 12, z: -10, height: 24, width: 2.4, depth: 2.2, tone: '#6f84a3', accentColor: '#a2b9d8', baseColor: '#516482', glowColor: '#f0f6ff' },
+            { x: -18, z: -4, height: 28, width: 2.8, depth: 2.4, tone: '#5f7a9a', accentColor: '#97b0d3', baseColor: '#445b78', glowColor: '#e4efff' },
+            { x: 22, z: 12, height: 26, width: 2.2, depth: 2.8, tone: '#7d90ab', accentColor: '#b1c6e2', baseColor: '#586b88', glowColor: '#f6fbff' },
+            { x: -10, z: 18, height: 22, width: 2.1, depth: 2.1, tone: '#6a809d', accentColor: '#9cb2d1', baseColor: '#4b5f7a', glowColor: '#eff4ff' },
+            { x: 28, z: -22, height: 30, width: 2.6, depth: 2.4, tone: '#567190', accentColor: '#8ea7c9', baseColor: '#40526b', glowColor: '#e8f2ff' },
+            { x: -26, z: -18, height: 32, width: 3.2, depth: 2.6, tone: '#4f6a88', accentColor: '#89a3c4', baseColor: '#384c63', glowColor: '#e2ecff' },
+            { x: 16, z: 26, height: 36, width: 3.4, depth: 3.1, tone: '#627b99', accentColor: '#aac0dc', baseColor: '#495f7a', glowColor: '#f2f7ff' },
+            { x: -30, z: 24, height: 34, width: 2.9, depth: 3.5, tone: '#556f8d', accentColor: '#96b2d3', baseColor: '#3e5169', glowColor: '#e9f3ff' },
+            { x: 32, z: -6, height: 25, width: 2.5, depth: 3, tone: '#6d89a5', accentColor: '#a7bedc', baseColor: '#526680', glowColor: '#edf4ff' },
+            { x: -14, z: 32, height: 29, width: 2.3, depth: 2.6, tone: '#5c7694', accentColor: '#95afd0', baseColor: '#435875', glowColor: '#e6f0ff' }
         ];
 
-        pillarPositions.forEach((pillar, index) => {
+        pillarConfigurations.forEach((pillar, index) => {
             const pillarGroup = document.createElement('a-entity');
             pillarGroup.setAttribute('position', `${pillar.x} -1.2 ${pillar.z - 2}`);
 
             const pillarCore = document.createElement('a-box');
-            pillarCore.setAttribute('width', '2');
-            pillarCore.setAttribute('depth', '2');
+            pillarCore.setAttribute('width', pillar.width.toFixed(2));
+            pillarCore.setAttribute('depth', pillar.depth.toFixed(2));
             pillarCore.setAttribute('height', pillar.height);
             pillarCore.setAttribute('color', pillar.tone);
             pillarCore.setAttribute('position', `0 ${pillar.height / 2} 0`);
@@ -89,54 +94,63 @@ export const heightsDecorModule = {
             pillarGroup.appendChild(pillarCore);
 
             const baseEl = document.createElement('a-cylinder');
-            baseEl.setAttribute('radius', '1.4');
+            const baseRadius = (Math.max(pillar.width, pillar.depth) * 0.65).toFixed(2);
+            baseEl.setAttribute('radius', baseRadius);
             baseEl.setAttribute('height', '0.6');
-            baseEl.setAttribute('color', '#607593');
+            baseEl.setAttribute('color', pillar.baseColor || '#607593');
             baseEl.setAttribute('material', 'shader: flat');
             baseEl.setAttribute('position', '0 0.3 0');
             pillarGroup.appendChild(baseEl);
 
-            const accentHeights = [0.22, 0.55, 0.82];
+            const accentHeights = pillar.accentRatios || [0.18, 0.42, 0.68, 0.92];
             accentHeights.forEach((ratio) => {
                 const accent = document.createElement('a-cylinder');
-                accent.setAttribute('radius', '1.15');
+                const accentRadius = (Math.max(pillar.width, pillar.depth) * (0.42 + ratio * 0.12)).toFixed(2);
+                accent.setAttribute('radius', accentRadius);
                 accent.setAttribute('height', '0.2');
-                accent.setAttribute('color', '#9fb6cf');
-                accent.setAttribute('material', 'shader: flat; opacity: 0.85');
+                accent.setAttribute('color', pillar.accentColor || '#9fb6cf');
+                accent.setAttribute('material', 'shader: flat; opacity: 0.82');
                 accent.setAttribute('position', `0 ${pillar.height * ratio} 0`);
                 pillarGroup.appendChild(accent);
             });
 
+            const halfWidth = pillar.width / 2;
+            const halfDepth = pillar.depth / 2;
+            const ribWidth = Math.max(0.22, pillar.width * 0.22);
+            const ribDepth = Math.max(0.22, pillar.depth * 0.22);
+            const ribHeight = pillar.height * 0.7;
+            const ribYOffset = pillar.height * 0.25 + ribHeight / 2;
             const ribOffsets = [
-                { x: 0.95, z: 0 },
-                { x: -0.95, z: 0 },
-                { x: 0, z: 0.95 },
-                { x: 0, z: -0.95 }
+                { x: halfWidth - ribWidth / 2, z: 0, width: ribWidth, depth: ribDepth * 0.6 },
+                { x: -(halfWidth - ribWidth / 2), z: 0, width: ribWidth, depth: ribDepth * 0.6 },
+                { x: 0, z: halfDepth - ribDepth / 2, width: ribDepth * 0.6, depth: ribDepth },
+                { x: 0, z: -(halfDepth - ribDepth / 2), width: ribDepth * 0.6, depth: ribDepth }
             ];
 
             ribOffsets.forEach((offset) => {
                 const rib = document.createElement('a-box');
-                rib.setAttribute('width', offset.x === 0 ? 0.28 : 0.18);
-                rib.setAttribute('depth', offset.z === 0 ? 0.18 : 0.28);
-                rib.setAttribute('height', pillar.height * 0.65);
-                rib.setAttribute('color', '#4f637e');
-                rib.setAttribute('opacity', '0.85');
-                rib.setAttribute('material', 'shader: flat');
-                rib.setAttribute('position', `${offset.x} ${(pillar.height * 0.65) / 2 + pillar.height * 0.2} ${offset.z}`);
+                rib.setAttribute('width', offset.width.toFixed(2));
+                rib.setAttribute('depth', offset.depth.toFixed(2));
+                rib.setAttribute('height', ribHeight.toFixed(2));
+                rib.setAttribute('color', '#4e6178');
+                rib.setAttribute('material', 'shader: flat; opacity: 0.7');
+                rib.setAttribute('position', `${offset.x.toFixed(2)} ${ribYOffset.toFixed(2)} ${offset.z.toFixed(2)}`);
                 pillarGroup.appendChild(rib);
             });
 
             const capRing = document.createElement('a-cylinder');
-            capRing.setAttribute('radius', '1.3');
+            const capRadius = (Math.max(pillar.width, pillar.depth) * 0.6).toFixed(2);
+            capRing.setAttribute('radius', capRadius);
             capRing.setAttribute('height', '0.25');
-            capRing.setAttribute('color', '#d4e0f2');
+            capRing.setAttribute('color', pillar.accentColor || '#d4e0f2');
             capRing.setAttribute('material', 'shader: flat; opacity: 0.9');
             capRing.setAttribute('position', `0 ${pillar.height - 0.25} 0`);
             pillarGroup.appendChild(capRing);
 
             const capGlow = document.createElement('a-sphere');
-            capGlow.setAttribute('radius', '0.9');
-            capGlow.setAttribute('color', '#e4ebf6');
+            const glowRadius = (Math.max(pillar.width, pillar.depth) * 0.35).toFixed(2);
+            capGlow.setAttribute('radius', glowRadius);
+            capGlow.setAttribute('color', pillar.glowColor || '#e4ebf6');
             capGlow.setAttribute('material', 'shader: flat; opacity: 0.95');
             capGlow.setAttribute('position', `0 ${pillar.height + 0.5} 0`);
             capGlow.setAttribute('animation__pulse', 'property: scale; dir: alternate; dur: 6000; easing: easeInOutSine; loop: true; to: 1.05 1.15 1.05');
@@ -261,10 +275,14 @@ export const heightsDecorModule = {
         });
 
         const stylizedTrees = [
-            { x: 26, z: -14, trunkHeight: 3.2, canopyScale: '2.6 2.8 2.6', sway: 0.18 },
-            { x: -28, z: -10, trunkHeight: 4, canopyScale: '3 3.4 3', sway: 0.24 },
-            { x: 24, z: 18, trunkHeight: 3.6, canopyScale: '2.4 2.6 2.4', sway: 0.16 },
-            { x: -22, z: 22, trunkHeight: 3.8, canopyScale: '2.8 3 2.8', sway: 0.2 }
+            { x: 26, z: -14, trunkHeight: 3.2, canopyScale: '2.6 2.8 2.6', sway: 0.18, canopyColor: '#7ec87c', highlightColor: '#a8e0a2' },
+            { x: -28, z: -10, trunkHeight: 4, canopyScale: '3 3.4 3', sway: 0.24, canopyColor: '#6fc47a', highlightColor: '#97de9f' },
+            { x: 24, z: 18, trunkHeight: 3.6, canopyScale: '2.4 2.6 2.4', sway: 0.16, canopyColor: '#8cd290', highlightColor: '#b6e9b8' },
+            { x: -22, z: 22, trunkHeight: 3.8, canopyScale: '2.8 3 2.8', sway: 0.2, canopyColor: '#75c080', highlightColor: '#a6e0ae' },
+            { x: 30, z: 28, trunkHeight: 4.4, canopyScale: '2.2 2.4 2.2', sway: 0.14, canopyColor: '#82c88a', highlightColor: '#b2e3b7' },
+            { x: -34, z: 18, trunkHeight: 4.8, canopyScale: '2.6 2.9 2.6', sway: 0.22, canopyColor: '#6abd78', highlightColor: '#9ddc9f' },
+            { x: 20, z: -28, trunkHeight: 3.4, canopyScale: '2.3 2.5 2.3', sway: 0.17, canopyColor: '#78c684', highlightColor: '#a7e0b0' },
+            { x: -26, z: -24, trunkHeight: 4.2, canopyScale: '2.9 3.1 2.9', sway: 0.19, canopyColor: '#89ce92', highlightColor: '#bce8c1' }
         ];
 
         stylizedTrees.forEach((tree, index) => {
@@ -282,7 +300,7 @@ export const heightsDecorModule = {
             const canopy = document.createElement('a-sphere');
             canopy.setAttribute('position', `0 ${tree.trunkHeight + 0.8} 0`);
             canopy.setAttribute('scale', tree.canopyScale);
-            canopy.setAttribute('color', '#7ec87c');
+            canopy.setAttribute('color', tree.canopyColor);
             canopy.setAttribute('material', 'shader: flat; roughness: 0.7');
             canopy.setAttribute('animation__sway', `property: rotation; dir: alternate; dur: ${6000 + index * 1200}; easing: easeInOutSine; loop: true; to: ${tree.sway * 60} ${tree.sway * 80} ${tree.sway * -40}`);
             treeGroup.appendChild(canopy);
@@ -290,7 +308,7 @@ export const heightsDecorModule = {
             const canopyHighlight = document.createElement('a-sphere');
             canopyHighlight.setAttribute('position', `0 ${tree.trunkHeight + 0.8} 0`);
             canopyHighlight.setAttribute('scale', '1.2 0.8 1.2');
-            canopyHighlight.setAttribute('color', '#a8e0a2');
+            canopyHighlight.setAttribute('color', tree.highlightColor);
             canopyHighlight.setAttribute('material', 'shader: flat; opacity: 0.4');
             treeGroup.appendChild(canopyHighlight);
 
