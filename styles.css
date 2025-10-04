@@ -366,13 +366,15 @@ body {
 }
 #version-display {
     position: absolute;
-    bottom: 20px;
-    left: 20px;
+    bottom: 8px;
+    left: 8px;
     color: #ffffff;
-    font-weight: 600;
-    font-size: 0.9em;
+    font-weight: 500;
+    font-size: 0.7em;
+    letter-spacing: 0.05em;
     z-index: 11;
     user-select: none;
+    opacity: 0.75;
 }
 #vr-message {
     position: static;
@@ -648,7 +650,9 @@ a-scene[vr-mode-ui] .ui-panel, a-scene[vr-mode-ui] #version-display { display: n
         padding-bottom: calc(env(safe-area-inset-bottom) + clamp(96px, 18vh, 140px));
         gap: clamp(16px, 6vh, 28px);
         min-height: 100vh;
-        overflow-y: visible;
+        overflow-y: auto;
+        overscroll-behavior: contain;
+        -webkit-overflow-scrolling: touch;
         touch-action: pan-y;
         z-index: 12;
     }
@@ -678,9 +682,16 @@ a-scene[vr-mode-ui] .ui-panel, a-scene[vr-mode-ui] #version-display { display: n
     }
 
     .ui-panels-container.is-mobile-tabs {
-        overflow-y: visible;
+        overflow-y: auto;
         gap: clamp(12px, 4vh, 24px);
         transition: opacity 0.25s ease, visibility 0.25s ease, transform 0.25s ease;
+    }
+
+    .ui-panels-container.is-mobile-tabs .panel-section--submenu {
+        flex: 1 1 auto;
+        min-height: 0;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
     }
 
     .ui-panels-container.is-mobile-tabs .mobile-tabbar {
