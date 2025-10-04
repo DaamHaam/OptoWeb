@@ -1,3 +1,9 @@
+## v0.82 (2025-10-19)
+
+* Ajout d'espaces tampons dans les panneaux mobiles pour que les curseurs, sélecteurs et boutons restent visibles au-dessus du bandeau de contrôle Recentrer.
+* Retour à un défilement global des panneaux de stimulation/exercice sur smartphone avec davantage de marge basse pour atteindre l'intégralité des options.
+* Mise à jour des références de version (interface et cache service worker) en 0.82.
+
 ## v0.81 (2025-10-18)
 
 * Rétablissement du défilement sur mobile pour les panneaux Stimulation et Exercice afin d'accéder aux réglages des modules Flux optique et Hauteurs.
