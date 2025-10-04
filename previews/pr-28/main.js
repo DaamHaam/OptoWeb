@@ -91,7 +91,7 @@ document.addEventListener('DOMContentLoaded', () => {
         heightsControls.style.display = (moduleName === 'heights') ? 'flex' : 'none';
 
         const shouldDisplaySubmenu = moduleName && moduleName !== 'none';
-        visualSubmenu.style.display = shouldDisplaySubmenu ? '' : 'none';
+        visualSubmenu.style.display = shouldDisplaySubmenu ? 'flex' : 'none';
 
         if (moduleName !== 'heights' && heightAltitudeValue) {
             heightAltitudeValue.textContent = '0.0';
