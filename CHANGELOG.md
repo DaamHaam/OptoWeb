@@ -1,3 +1,9 @@
+## v0.81 (2025-10-18)
+
+* Rétablissement du défilement sur mobile pour les panneaux Stimulation et Exercice afin d'accéder aux réglages des modules Flux optique et Hauteurs.
+* Suppression de l'ancien exercice "Cube Rotatif" et retrait des contrôles/ressources associés.
+* Mise à jour des références de version (interface et cache service worker) en 0.81.
+
 ## v0.80 (2025-10-17)
 
 * Multiplication et diversification des pylônes du décor des hauteurs : hauteurs doublées en moyenne, variations de largeur/couleur et ajouts d'arbres supplémentaires pour enrichir l'horizon.
