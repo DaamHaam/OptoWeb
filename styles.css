@@ -302,6 +302,10 @@ body {
 .speed-display .arrow-icon {
     font-size: 1.4em;
 }
+.speed-display .speed-unit {
+    color: rgba(31, 45, 61, 0.7);
+    font-size: 0.95em;
+}
 .speed-display--stacked {
     flex-direction: column;
     align-items: flex-start;
@@ -325,7 +329,8 @@ body {
 }
 .speed-value,
 #translation-speed-value,
-#height-speed-value {
+#height-speed-value,
+#height-altitude-value {
     font-size: 1.6em;
     font-weight: 600;
     color: #2aa198;
@@ -361,13 +366,15 @@ body {
 }
 #version-display {
     position: absolute;
-    bottom: 20px;
-    left: 20px;
+    bottom: 8px;
+    left: 8px;
     color: #ffffff;
-    font-weight: 600;
-    font-size: 0.9em;
+    font-weight: 500;
+    font-size: 0.7em;
+    letter-spacing: 0.05em;
     z-index: 11;
     user-select: none;
+    opacity: 0.75;
 }
 #vr-message {
     position: static;
@@ -400,22 +407,15 @@ body {
 }
 a-scene[vr-mode-ui] .ui-panel, a-scene[vr-mode-ui] #version-display { display: none; }
 
-.control-row {
+.heights-control {
     display: flex;
-    align-items: center;
-    gap: 12px;
-}
-
-.control-row-label {
-    display: inline-flex;
-    align-items: center;
+    flex-direction: column;
     gap: 6px;
-    font-weight: 600;
 }
 
-.control-row-unit {
-    color: rgba(31, 45, 61, 0.6);
-    font-size: 0.95em;
+.heights-control-label {
+    font-weight: 600;
+    color: #1f2d3d;
 }
 
 .control-item select,
@@ -425,8 +425,7 @@ a-scene[vr-mode-ui] .ui-panel, a-scene[vr-mode-ui] #version-display { display: n
     margin-top: 4px;
 }
 
-.value-badge,
-#cube-speed-value {
+.value-badge {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -442,11 +441,6 @@ a-scene[vr-mode-ui] .ui-panel, a-scene[vr-mode-ui] #version-display { display: n
     color: #1f2d3d;
 }
 
-.instructions {
-    color: rgba(31, 45, 61, 0.75);
-    font-size: 0.9em;
-    margin: 12px 0 0;
-}
 .ui-panel span {
     display: inline-flex;
     align-items: center;
@@ -656,7 +650,9 @@ a-scene[vr-mode-ui] .ui-panel, a-scene[vr-mode-ui] #version-display { display: n
         padding-bottom: calc(env(safe-area-inset-bottom) + clamp(96px, 18vh, 140px));
         gap: clamp(16px, 6vh, 28px);
         min-height: 100vh;
-        overflow-y: visible;
+        overflow-y: auto;
+        overscroll-behavior: contain;
+        -webkit-overflow-scrolling: touch;
         touch-action: pan-y;
         z-index: 12;
     }
@@ -686,9 +682,16 @@ a-scene[vr-mode-ui] .ui-panel, a-scene[vr-mode-ui] #version-display { display: n
     }
 
     .ui-panels-container.is-mobile-tabs {
-        overflow-y: visible;
+        overflow-y: auto;
         gap: clamp(12px, 4vh, 24px);
         transition: opacity 0.25s ease, visibility 0.25s ease, transform 0.25s ease;
+    }
+
+    .ui-panels-container.is-mobile-tabs .panel-section--submenu {
+        flex: 1 1 auto;
+        min-height: 0;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
     }
 
     .ui-panels-container.is-mobile-tabs .mobile-tabbar {
@@ -729,10 +732,13 @@ a-scene[vr-mode-ui] .ui-panel, a-scene[vr-mode-ui] #version-display { display: n
     .ui-panels-container.is-mobile-tabs .mobile-tabpanes .ui-panel.is-active-mobile {
         display: flex;
         flex-direction: column;
+        flex: 1 1 auto;
+        min-height: 0;
         pointer-events: auto;
         opacity: 1;
         max-height: calc(100vh - clamp(220px, 36vh, 300px));
         overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
     }
 
     .ui-panels-container.is-mobile-tabs.is-mobile-hidden {

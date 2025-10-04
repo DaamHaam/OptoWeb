@@ -24,21 +24,18 @@ export const heightsDecorModule = {
         this.decorRoot.setAttribute('id', 'heights-decor-root');
 
         // Plateau principal sous la plateforme
-        const mainPlate = document.createElement('a-circle');
-        mainPlate.setAttribute('radius', '60');
-        mainPlate.setAttribute('color', '#f0e3c0');
+        const mainPlate = document.createElement('a-entity');
+        mainPlate.setAttribute('geometry', 'primitive: circle; radius: 58; segments: 96');
+        mainPlate.setAttribute('material', 'shader: flat; roughness: 0.8; color: #f0e3c0');
         mainPlate.setAttribute('rotation', '-90 0 0');
         mainPlate.setAttribute('position', '0 -1.2 -2');
-        mainPlate.setAttribute('material', 'shader: flat; roughness: 0.8');
         this.decorRoot.appendChild(mainPlate);
 
-        const plateRim = document.createElement('a-ring');
-        plateRim.setAttribute('radius-inner', '48');
-        plateRim.setAttribute('radius-outer', '60');
-        plateRim.setAttribute('color', '#d7c5a3');
-        plateRim.setAttribute('rotation', '-90 0 0');
-        plateRim.setAttribute('position', '0 -1.19 -2');
-        plateRim.setAttribute('material', 'shader: flat');
+        const plateRim = document.createElement('a-entity');
+        plateRim.setAttribute('geometry', 'primitive: torus; radius: 58; radiusTubular: 0.6; segmentsTubular: 32; segmentsRadial: 12');
+        plateRim.setAttribute('material', 'color: #d7c5a3; shader: flat; metalness: 0.05; roughness: 0.6');
+        plateRim.setAttribute('rotation', '90 0 0');
+        plateRim.setAttribute('position', '0 -1.45 -2');
         this.decorRoot.appendChild(plateRim);
 
         // Terrasses inférieures pour créer de la profondeur
@@ -69,33 +66,111 @@ export const heightsDecorModule = {
         this.decorRoot.appendChild(depthWell);
 
         // Piliers stylisés placés à différentes distances
-        const pillarPositions = [
-            { x: 12, z: -10, height: 12, tone: '#7c8fa3' },
-            { x: -15, z: -6, height: 16, tone: '#6e819a' },
-            { x: 18, z: 8, height: 14, tone: '#899bb0' },
-            { x: -9, z: 14, height: 10, tone: '#7388a0' },
-            { x: 22, z: -18, height: 18, tone: '#5f738f' }
+        const pillarConfigurations = [
+            { x: 12, z: -10, height: 24, width: 2.4, depth: 2.2, tone: '#6f84a3', accentColor: '#a2b9d8', baseColor: '#516482', glowColor: '#f0f6ff' },
+            { x: -18, z: -4, height: 28, width: 2.8, depth: 2.4, tone: '#5f7a9a', accentColor: '#97b0d3', baseColor: '#445b78', glowColor: '#e4efff' },
+            { x: 22, z: 12, height: 26, width: 2.2, depth: 2.8, tone: '#7d90ab', accentColor: '#b1c6e2', baseColor: '#586b88', glowColor: '#f6fbff' },
+            { x: -10, z: 18, height: 22, width: 2.1, depth: 2.1, tone: '#6a809d', accentColor: '#9cb2d1', baseColor: '#4b5f7a', glowColor: '#eff4ff' },
+            { x: 28, z: -22, height: 30, width: 2.6, depth: 2.4, tone: '#567190', accentColor: '#8ea7c9', baseColor: '#40526b', glowColor: '#e8f2ff' },
+            { x: -26, z: -18, height: 32, width: 3.2, depth: 2.6, tone: '#4f6a88', accentColor: '#89a3c4', baseColor: '#384c63', glowColor: '#e2ecff' },
+            { x: 16, z: 26, height: 36, width: 3.4, depth: 3.1, tone: '#627b99', accentColor: '#aac0dc', baseColor: '#495f7a', glowColor: '#f2f7ff' },
+            { x: -30, z: 24, height: 34, width: 2.9, depth: 3.5, tone: '#556f8d', accentColor: '#96b2d3', baseColor: '#3e5169', glowColor: '#e9f3ff' },
+            { x: 32, z: -6, height: 25, width: 2.5, depth: 3, tone: '#6d89a5', accentColor: '#a7bedc', baseColor: '#526680', glowColor: '#edf4ff' },
+            { x: -14, z: 32, height: 29, width: 2.3, depth: 2.6, tone: '#5c7694', accentColor: '#95afd0', baseColor: '#435875', glowColor: '#e6f0ff' }
         ];
 
-        pillarPositions.forEach((pillar, index) => {
-            const pillarEl = document.createElement('a-box');
-            pillarEl.setAttribute('width', '2');
-            pillarEl.setAttribute('depth', '2');
-            pillarEl.setAttribute('height', pillar.height);
-            pillarEl.setAttribute('color', pillar.tone);
-            pillarEl.setAttribute('position', `${pillar.x} ${pillar.height / 2 - 1.2} ${pillar.z - 2}`);
-            pillarEl.setAttribute('material', 'shader: flat');
-            pillarEl.setAttribute('animation__glow', `property: material.color; dir: alternate; dur: ${12000 + index * 1500}; easing: easeInOutSine; loop: true; to: #a0b6d0`);
+        pillarConfigurations.forEach((pillar, index) => {
+            const pillarGroup = document.createElement('a-entity');
+            pillarGroup.setAttribute('position', `${pillar.x} -1.2 ${pillar.z - 2}`);
 
-            const capEl = document.createElement('a-cylinder');
-            capEl.setAttribute('radius', '1.2');
-            capEl.setAttribute('height', '0.6');
-            capEl.setAttribute('color', '#e4ebf6');
-            capEl.setAttribute('position', `${pillar.x} ${pillar.height - 0.9} ${pillar.z - 2}`);
-            capEl.setAttribute('material', 'shader: flat; opacity: 0.9');
+            const pillarCore = document.createElement('a-box');
+            pillarCore.setAttribute('width', pillar.width.toFixed(2));
+            pillarCore.setAttribute('depth', pillar.depth.toFixed(2));
+            pillarCore.setAttribute('height', pillar.height);
+            pillarCore.setAttribute('color', pillar.tone);
+            pillarCore.setAttribute('position', `0 ${pillar.height / 2} 0`);
+            pillarCore.setAttribute('material', 'shader: flat');
+            pillarCore.setAttribute('animation__glow', `property: material.color; dir: alternate; dur: ${12000 + index * 1500}; easing: easeInOutSine; loop: true; to: #a0b6d0`);
+            pillarGroup.appendChild(pillarCore);
 
-            this.decorRoot.appendChild(pillarEl);
-            this.decorRoot.appendChild(capEl);
+            const baseEl = document.createElement('a-cylinder');
+            const baseRadius = (Math.max(pillar.width, pillar.depth) * 0.65).toFixed(2);
+            baseEl.setAttribute('radius', baseRadius);
+            baseEl.setAttribute('height', '0.6');
+            baseEl.setAttribute('color', pillar.baseColor || '#607593');
+            baseEl.setAttribute('material', 'shader: flat');
+            baseEl.setAttribute('position', '0 0.3 0');
+            pillarGroup.appendChild(baseEl);
+
+            const accentHeights = pillar.accentRatios || [0.18, 0.42, 0.68, 0.92];
+            accentHeights.forEach((ratio) => {
+                const accent = document.createElement('a-cylinder');
+                const accentRadius = (Math.max(pillar.width, pillar.depth) * (0.42 + ratio * 0.12)).toFixed(2);
+                accent.setAttribute('radius', accentRadius);
+                accent.setAttribute('height', '0.2');
+                accent.setAttribute('color', pillar.accentColor || '#9fb6cf');
+                accent.setAttribute('material', 'shader: flat; opacity: 0.82');
+                accent.setAttribute('position', `0 ${pillar.height * ratio} 0`);
+                pillarGroup.appendChild(accent);
+            });
+
+            const halfWidth = pillar.width / 2;
+            const halfDepth = pillar.depth / 2;
+            const ribWidth = Math.max(0.22, pillar.width * 0.22);
+            const ribDepth = Math.max(0.22, pillar.depth * 0.22);
+            const ribHeight = pillar.height * 0.7;
+            const ribYOffset = pillar.height * 0.25 + ribHeight / 2;
+            const surfaceInset = 0.04;
+            const ribOffsets = [
+                { axis: 'x', direction: 1, width: ribWidth, depth: ribDepth * 0.6 },
+                { axis: 'x', direction: -1, width: ribWidth, depth: ribDepth * 0.6 },
+                { axis: 'z', direction: 1, width: ribDepth * 0.6, depth: ribDepth },
+                { axis: 'z', direction: -1, width: ribDepth * 0.6, depth: ribDepth }
+            ];
+
+            ribOffsets.forEach((offset) => {
+                const rib = document.createElement('a-box');
+                const ribWidthValue = offset.width;
+                const ribDepthValue = offset.depth;
+                rib.setAttribute('width', ribWidthValue.toFixed(2));
+                rib.setAttribute('depth', ribDepthValue.toFixed(2));
+                rib.setAttribute('height', ribHeight.toFixed(2));
+                rib.setAttribute('color', '#4e6178');
+                rib.setAttribute('material', 'shader: flat; opacity: 0.7; side: double');
+
+                if (offset.axis === 'x') {
+                    const available = Math.max(0, halfWidth - ribWidthValue / 2);
+                    const inset = Math.min(available, surfaceInset);
+                    const positionX = offset.direction * (available - inset);
+                    rib.setAttribute('position', `${positionX.toFixed(2)} ${ribYOffset.toFixed(2)} 0`);
+                } else {
+                    const available = Math.max(0, halfDepth - ribDepthValue / 2);
+                    const inset = Math.min(available, surfaceInset);
+                    const positionZ = offset.direction * (available - inset);
+                    rib.setAttribute('position', `0 ${ribYOffset.toFixed(2)} ${positionZ.toFixed(2)}`);
+                }
+                pillarGroup.appendChild(rib);
+            });
+
+            const capRing = document.createElement('a-cylinder');
+            const capRadius = (Math.max(pillar.width, pillar.depth) * 0.6).toFixed(2);
+            capRing.setAttribute('radius', capRadius);
+            capRing.setAttribute('height', '0.25');
+            capRing.setAttribute('color', pillar.accentColor || '#d4e0f2');
+            capRing.setAttribute('material', 'shader: flat; opacity: 0.9');
+            capRing.setAttribute('position', `0 ${pillar.height - 0.25} 0`);
+            pillarGroup.appendChild(capRing);
+
+            const capGlow = document.createElement('a-sphere');
+            const glowRadius = (Math.max(pillar.width, pillar.depth) * 0.35).toFixed(2);
+            capGlow.setAttribute('radius', glowRadius);
+            capGlow.setAttribute('color', pillar.glowColor || '#e4ebf6');
+            capGlow.setAttribute('material', 'shader: flat; opacity: 0.95');
+            capGlow.setAttribute('position', `0 ${pillar.height + 0.5} 0`);
+            capGlow.setAttribute('animation__pulse', 'property: scale; dir: alternate; dur: 6000; easing: easeInOutSine; loop: true; to: 1.05 1.15 1.05');
+            pillarGroup.appendChild(capGlow);
+
+            this.decorRoot.appendChild(pillarGroup);
         });
 
         // Plates-formes flottantes simples
@@ -118,10 +193,10 @@ export const heightsDecorModule = {
 
         // Nuages stylisés très simples et animés lentement
         const cloudData = [
-            { x: 8, y: 6, z: -12, scale: '3 1.4 1.4', delay: 0, drift: 3 },
-            { x: -10, y: 7, z: 14, scale: '2.5 1.2 1.2', delay: 2000, drift: 2 },
-            { x: -4, y: 5, z: -16, scale: '3.4 1.5 1.5', delay: 4000, drift: 4 },
-            { x: 14, y: 8, z: 22, scale: '4 1.8 1.8', delay: 6000, drift: 5 }
+            { x: 8, y: 9, z: -12, scale: '3.2 1.4 1.4', delay: 0, drift: 3 },
+            { x: -10, y: 10, z: 14, scale: '2.7 1.2 1.2', delay: 2000, drift: 2 },
+            { x: -4, y: 8, z: -16, scale: '3.6 1.5 1.5', delay: 4000, drift: 4 },
+            { x: 14, y: 11, z: 22, scale: '4.2 1.8 1.8', delay: 6000, drift: 5 }
         ];
 
         cloudData.forEach((cloud) => {
@@ -134,6 +209,24 @@ export const heightsDecorModule = {
             cloudEl.setAttribute('animation__float', `property: position; dir: alternate; dur: 12000; easing: easeInOutSine; loop: true; to: ${cloud.x} ${cloud.y + 0.8} ${cloud.z}; delay: ${cloud.delay}`);
             cloudEl.setAttribute('animation__drift', `property: position; dir: alternate; dur: ${18000 + cloud.delay}; easing: easeInOutSine; loop: true; to: ${cloud.x + cloud.drift} ${cloud.y} ${cloud.z}; delay: ${cloud.delay / 2}`);
             this.decorRoot.appendChild(cloudEl);
+        });
+
+        const upperClouds = [
+            { x: -16, y: 15, z: -28, scale: '4.5 1.6 1.6', delay: 1000, drift: 3.5 },
+            { x: 18, y: 16, z: 30, scale: '5.2 1.9 1.9', delay: 2500, drift: 4.5 },
+            { x: 4, y: 14, z: 26, scale: '3.8 1.5 1.5', delay: 4200, drift: 3 }
+        ];
+
+        upperClouds.forEach((cloud) => {
+            const highCloud = document.createElement('a-sphere');
+            highCloud.setAttribute('color', '#ffffff');
+            highCloud.setAttribute('position', `${cloud.x} ${cloud.y} ${cloud.z}`);
+            highCloud.setAttribute('scale', cloud.scale);
+            highCloud.setAttribute('opacity', '0.75');
+            highCloud.setAttribute('material', 'shader: flat');
+            highCloud.setAttribute('animation__float', `property: position; dir: alternate; dur: 16000; easing: easeInOutSine; loop: true; to: ${cloud.x} ${cloud.y + 1.2} ${cloud.z}; delay: ${cloud.delay}`);
+            highCloud.setAttribute('animation__drift', `property: position; dir: alternate; dur: ${22000 + cloud.delay}; easing: easeInOutSine; loop: true; to: ${cloud.x - cloud.drift} ${cloud.y} ${cloud.z + cloud.drift}; delay: ${cloud.delay / 2}`);
+            this.decorRoot.appendChild(highCloud);
         });
 
         // Bandes de nuages lointains pour suggérer un vent doux
@@ -193,6 +286,47 @@ export const heightsDecorModule = {
 
             this.decorRoot.appendChild(balloonEl);
             this.decorRoot.appendChild(tetherEl);
+        });
+
+        const stylizedTrees = [
+            { x: 26, z: -14, trunkHeight: 3.2, canopyScale: '2.6 2.8 2.6', sway: 0.18, canopyColor: '#7ec87c', highlightColor: '#a8e0a2' },
+            { x: -28, z: -10, trunkHeight: 4, canopyScale: '3 3.4 3', sway: 0.24, canopyColor: '#6fc47a', highlightColor: '#97de9f' },
+            { x: 24, z: 18, trunkHeight: 3.6, canopyScale: '2.4 2.6 2.4', sway: 0.16, canopyColor: '#8cd290', highlightColor: '#b6e9b8' },
+            { x: -22, z: 22, trunkHeight: 3.8, canopyScale: '2.8 3 2.8', sway: 0.2, canopyColor: '#75c080', highlightColor: '#a6e0ae' },
+            { x: 30, z: 28, trunkHeight: 4.4, canopyScale: '2.2 2.4 2.2', sway: 0.14, canopyColor: '#82c88a', highlightColor: '#b2e3b7' },
+            { x: -34, z: 18, trunkHeight: 4.8, canopyScale: '2.6 2.9 2.6', sway: 0.22, canopyColor: '#6abd78', highlightColor: '#9ddc9f' },
+            { x: 20, z: -28, trunkHeight: 3.4, canopyScale: '2.3 2.5 2.3', sway: 0.17, canopyColor: '#78c684', highlightColor: '#a7e0b0' },
+            { x: -26, z: -24, trunkHeight: 4.2, canopyScale: '2.9 3.1 2.9', sway: 0.19, canopyColor: '#89ce92', highlightColor: '#bce8c1' }
+        ];
+
+        stylizedTrees.forEach((tree, index) => {
+            const treeGroup = document.createElement('a-entity');
+            treeGroup.setAttribute('position', `${tree.x} -1.2 ${tree.z - 2}`);
+
+            const trunk = document.createElement('a-cylinder');
+            trunk.setAttribute('radius', '0.28');
+            trunk.setAttribute('height', tree.trunkHeight);
+            trunk.setAttribute('position', `0 ${tree.trunkHeight / 2} 0`);
+            trunk.setAttribute('color', '#6b4f2c');
+            trunk.setAttribute('material', 'shader: flat');
+            treeGroup.appendChild(trunk);
+
+            const canopy = document.createElement('a-sphere');
+            canopy.setAttribute('position', `0 ${tree.trunkHeight + 0.8} 0`);
+            canopy.setAttribute('scale', tree.canopyScale);
+            canopy.setAttribute('color', tree.canopyColor);
+            canopy.setAttribute('material', 'shader: flat; roughness: 0.7');
+            canopy.setAttribute('animation__sway', `property: rotation; dir: alternate; dur: ${6000 + index * 1200}; easing: easeInOutSine; loop: true; to: ${tree.sway * 60} ${tree.sway * 80} ${tree.sway * -40}`);
+            treeGroup.appendChild(canopy);
+
+            const canopyHighlight = document.createElement('a-sphere');
+            canopyHighlight.setAttribute('position', `0 ${tree.trunkHeight + 0.8} 0`);
+            canopyHighlight.setAttribute('scale', '1.2 0.8 1.2');
+            canopyHighlight.setAttribute('color', tree.highlightColor);
+            canopyHighlight.setAttribute('material', 'shader: flat; opacity: 0.4');
+            treeGroup.appendChild(canopyHighlight);
+
+            this.decorRoot.appendChild(treeGroup);
         });
 
         sceneEl.appendChild(this.decorRoot);

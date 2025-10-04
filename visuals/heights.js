@@ -16,11 +16,12 @@ let lastFrameTime = 0;
 let currentAltitude = 0;
 let lastReportedAltitude = null;
 let unsubscribeFromState = null;
+let platformScale = 1;
 
-const MIN_ALTITUDE = -5;
+const BASE_ALTITUDE = 1;
+const MIN_ALTITUDE = BASE_ALTITUDE;
 const MAX_ALTITUDE = 25;
 const ALTITUDE_REPORT_THRESHOLD = 0.02;
-let altitudeRangeEl = null;
 
 function _reportAltitude(force = false) {
     if (!force && lastReportedAltitude !== null && Math.abs(currentAltitude - lastReportedAltitude) < ALTITUDE_REPORT_THRESHOLD) {
@@ -30,21 +31,12 @@ function _reportAltitude(force = false) {
     stateManager.setState({ visual: { altitude: currentAltitude } });
 }
 
-function _syncAltitudeRangeLabel() {
-    if (!altitudeRangeEl) {
-        altitudeRangeEl = document.getElementById('height-altitude-range');
-    }
-    if (altitudeRangeEl) {
-        altitudeRangeEl.textContent = `Plage: ${MIN_ALTITUDE.toFixed(0)} m à ${MAX_ALTITUDE.toFixed(0)} m`;
-    }
-}
-
 // --- Core Logic ---
 function _createElements() {
     // Conteneur principal de la plateforme et de ses éléments décoratifs
     platformEl = document.createElement('a-entity');
     platformEl.setAttribute('id', 'height-platform');
-    platformEl.setAttribute('position', '0 0 -2');
+    platformEl.setAttribute('position', `0 ${BASE_ALTITUDE} -2`);
 
     // Socle principal (base large)
     const baseEl = document.createElement('a-cylinder');
@@ -145,6 +137,15 @@ function _createElements() {
     });
 
     sceneEl.appendChild(platformEl);
+    _applyPlatformScale();
+}
+
+function _applyPlatformScale() {
+    if (!platformEl) {
+        return;
+    }
+
+    platformEl.object3D.scale.set(platformScale, 1, platformScale);
 }
 
 function _animate(time) {
@@ -200,6 +201,9 @@ export const heightsModule = {
         // Créer le décor via son module dédié
         heightsDecorModule.create(sceneEl);
 
+        const { visual } = stateManager.getState();
+        platformScale = visual.platformScale ?? platformScale;
+
         skyEl = sceneEl.querySelector('#sky');
         if (skyEl) {
             skyEl.setAttribute('color', '#8dc6ff');
@@ -207,15 +211,18 @@ export const heightsModule = {
 
         // Réinitialiser la position et la rotation du rig pour cet exercice.
         if (rigEl) {
-            rigEl.object3D.position.set(0, 0, -2);
+            rigEl.object3D.position.set(0, BASE_ALTITUDE, -2);
             rigEl.object3D.rotation.set(0, 0, 0);
         }
 
         _createElements();
+        if (platformEl) {
+            platformEl.object3D.position.y = BASE_ALTITUDE;
+            _applyPlatformScale();
+        }
         lastFrameTime = performance.now();
-        currentAltitude = rigEl ? rigEl.object3D.position.y : 0;
+        currentAltitude = rigEl ? rigEl.object3D.position.y : BASE_ALTITUDE;
         lastReportedAltitude = null;
-        _syncAltitudeRangeLabel();
         _reportAltitude(true);
 
         // Lancer correctement la boucle d'animation
@@ -228,6 +235,11 @@ export const heightsModule = {
     onStateChange(newState) {
         if (newState.visual.speeds.y !== targetSpeed) {
             this.setSpeed(newState.visual.speeds.y);
+        }
+
+        const desiredScale = newState.visual.platformScale ?? 1;
+        if (Math.abs(desiredScale - platformScale) > 0.0001) {
+            this.setPlatformScale(desiredScale);
         }
     },
 
@@ -254,10 +266,6 @@ export const heightsModule = {
         if(rigEl) {
             rigEl.object3D.position.y = 0;
         }
-        if (altitudeRangeEl) {
-            altitudeRangeEl.textContent = '';
-        }
-        altitudeRangeEl = null;
         stateManager.setState({ visual: { altitude: 0 } });
         if (skyEl) {
             skyEl.setAttribute('color', '#000000');
@@ -267,20 +275,33 @@ export const heightsModule = {
 
     regenerate() {
         if(rigEl) {
-            rigEl.object3D.position.y = 0;
-            if(platformEl) platformEl.object3D.position.y = 0;
+            rigEl.object3D.position.y = BASE_ALTITUDE;
+            if(platformEl) platformEl.object3D.position.y = BASE_ALTITUDE;
             actualSpeed = 0;
             targetSpeed = 0;
-            currentAltitude = 0;
+            currentAltitude = BASE_ALTITUDE;
             lastReportedAltitude = null;
         }
-        _syncAltitudeRangeLabel();
         _reportAltitude(true);
     },
 
     // --- Fonctions pour les contrôles ---
     setSpeed(speed) {
         targetSpeed = parseFloat(speed);
+    },
+
+    setPlatformScale(scale) {
+        if (typeof scale !== 'number' || Number.isNaN(scale)) {
+            return;
+        }
+
+        const clampedScale = Math.max(0.5, Math.min(1.0, scale));
+        if (Math.abs(clampedScale - platformScale) < 0.0001) {
+            return;
+        }
+
+        platformScale = clampedScale;
+        _applyPlatformScale();
     },
     
     // --- Fonctions non utilisées mais requises ---
