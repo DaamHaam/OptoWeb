@@ -647,7 +647,7 @@ a-scene[vr-mode-ui] .ui-panel, a-scene[vr-mode-ui] #version-display { display: n
         max-width: 360px;
         padding-inline: clamp(8px, 3vw, 14px);
         padding-top: calc(env(safe-area-inset-top) + clamp(12px, 4vh, 24px));
-        padding-bottom: calc(env(safe-area-inset-bottom) + clamp(96px, 18vh, 140px));
+        padding-bottom: calc(env(safe-area-inset-bottom) + clamp(148px, 26vh, 208px));
         gap: clamp(16px, 6vh, 28px);
         min-height: 100vh;
         overflow-y: auto;
@@ -655,6 +655,11 @@ a-scene[vr-mode-ui] .ui-panel, a-scene[vr-mode-ui] #version-display { display: n
         -webkit-overflow-scrolling: touch;
         touch-action: pan-y;
         z-index: 12;
+    }
+
+    .ui-panels-container::after {
+        content: "";
+        flex: 0 0 clamp(128px, 24vh, 180px);
     }
 
     .mobile-tabpanes {
@@ -688,10 +693,10 @@ a-scene[vr-mode-ui] .ui-panel, a-scene[vr-mode-ui] #version-display { display: n
     }
 
     .ui-panels-container.is-mobile-tabs .panel-section--submenu {
-        flex: 1 1 auto;
-        min-height: 0;
-        overflow-y: auto;
-        -webkit-overflow-scrolling: touch;
+        flex: 0 0 auto;
+        min-height: auto;
+        overflow: visible;
+        padding-bottom: clamp(120px, 22vh, 160px);
     }
 
     .ui-panels-container.is-mobile-tabs .mobile-tabbar {
@@ -732,13 +737,13 @@ a-scene[vr-mode-ui] .ui-panel, a-scene[vr-mode-ui] #version-display { display: n
     .ui-panels-container.is-mobile-tabs .mobile-tabpanes .ui-panel.is-active-mobile {
         display: flex;
         flex-direction: column;
-        flex: 1 1 auto;
-        min-height: 0;
+        flex: 0 0 auto;
+        min-height: auto;
         pointer-events: auto;
         opacity: 1;
-        max-height: calc(100vh - clamp(220px, 36vh, 300px));
-        overflow-y: auto;
-        -webkit-overflow-scrolling: touch;
+        max-height: none;
+        overflow: visible;
+        padding-bottom: calc(20px + clamp(120px, 22vh, 160px));
     }
 
     .ui-panels-container.is-mobile-tabs.is-mobile-hidden {
