@@ -440,11 +440,6 @@ a-scene[vr-mode-ui] .ui-panel, a-scene[vr-mode-ui] #version-display { display: n
     color: #1f2d3d;
 }
 
-.instructions {
-    color: rgba(31, 45, 61, 0.75);
-    font-size: 0.9em;
-    margin: 12px 0 0;
-}
 .ui-panel span {
     display: inline-flex;
     align-items: center;

@@ -1,3 +1,9 @@
+## v0.80 (2025-10-17)
+
+* Multiplication et diversification des pylônes du décor des hauteurs : hauteurs doublées en moyenne, variations de largeur/couleur et ajouts d'arbres supplémentaires pour enrichir l'horizon.
+* Réglage plus fin de la vitesse verticale dans l'exercice des hauteurs (pas de 0,2 m/s) et suppression de l'instruction redondante dans l'interface.
+* Mise à jour des références de version (interface et cache service worker) en 0.80.
+
 ## v0.79 (2025-10-16)
 
 * Les trois couches du flux optique génèrent désormais toutes leurs particules très loin en amont et les laissent traverser l'utilisateur avant recyclage pour éviter toute apparition à bout portant.
