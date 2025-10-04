@@ -423,8 +423,7 @@ a-scene[vr-mode-ui] .ui-panel, a-scene[vr-mode-ui] #version-display { display: n
     margin-top: 4px;
 }
 
-.value-badge,
-#cube-speed-value {
+.value-badge {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -722,10 +721,13 @@ a-scene[vr-mode-ui] .ui-panel, a-scene[vr-mode-ui] #version-display { display: n
     .ui-panels-container.is-mobile-tabs .mobile-tabpanes .ui-panel.is-active-mobile {
         display: flex;
         flex-direction: column;
+        flex: 1 1 auto;
+        min-height: 0;
         pointer-events: auto;
         opacity: 1;
         max-height: calc(100vh - clamp(220px, 36vh, 300px));
         overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
     }
 
     .ui-panels-container.is-mobile-tabs.is-mobile-hidden {
