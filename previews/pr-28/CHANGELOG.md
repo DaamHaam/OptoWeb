@@ -3,6 +3,8 @@
 * Multiplication et diversification des pylônes du décor des hauteurs : hauteurs doublées en moyenne, variations de largeur/couleur et ajouts d'arbres supplémentaires pour enrichir l'horizon.
 * Réglage plus fin de la vitesse verticale dans l'exercice des hauteurs (pas de 0,2 m/s) et suppression de l'instruction redondante dans l'interface.
 * Mise à jour des références de version (interface et cache service worker) en 0.80.
+* Correction du scintillement des renforts verticaux des pylônes en reculant légèrement leur géométrie pour éviter le z-fighting.
+* Ajout d'un sélecteur dans les contrôles des hauteurs pour réduire la plateforme de moitié sans déplacer son centre.
 
 ## v0.79 (2025-10-16)
 

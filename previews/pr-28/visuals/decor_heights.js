@@ -120,21 +120,35 @@ export const heightsDecorModule = {
             const ribDepth = Math.max(0.22, pillar.depth * 0.22);
             const ribHeight = pillar.height * 0.7;
             const ribYOffset = pillar.height * 0.25 + ribHeight / 2;
+            const surfaceInset = 0.04;
             const ribOffsets = [
-                { x: halfWidth - ribWidth / 2, z: 0, width: ribWidth, depth: ribDepth * 0.6 },
-                { x: -(halfWidth - ribWidth / 2), z: 0, width: ribWidth, depth: ribDepth * 0.6 },
-                { x: 0, z: halfDepth - ribDepth / 2, width: ribDepth * 0.6, depth: ribDepth },
-                { x: 0, z: -(halfDepth - ribDepth / 2), width: ribDepth * 0.6, depth: ribDepth }
+                { axis: 'x', direction: 1, width: ribWidth, depth: ribDepth * 0.6 },
+                { axis: 'x', direction: -1, width: ribWidth, depth: ribDepth * 0.6 },
+                { axis: 'z', direction: 1, width: ribDepth * 0.6, depth: ribDepth },
+                { axis: 'z', direction: -1, width: ribDepth * 0.6, depth: ribDepth }
             ];
 
             ribOffsets.forEach((offset) => {
                 const rib = document.createElement('a-box');
-                rib.setAttribute('width', offset.width.toFixed(2));
-                rib.setAttribute('depth', offset.depth.toFixed(2));
+                const ribWidthValue = offset.width;
+                const ribDepthValue = offset.depth;
+                rib.setAttribute('width', ribWidthValue.toFixed(2));
+                rib.setAttribute('depth', ribDepthValue.toFixed(2));
                 rib.setAttribute('height', ribHeight.toFixed(2));
                 rib.setAttribute('color', '#4e6178');
-                rib.setAttribute('material', 'shader: flat; opacity: 0.7');
-                rib.setAttribute('position', `${offset.x.toFixed(2)} ${ribYOffset.toFixed(2)} ${offset.z.toFixed(2)}`);
+                rib.setAttribute('material', 'shader: flat; opacity: 0.7; side: double');
+
+                if (offset.axis === 'x') {
+                    const available = Math.max(0, halfWidth - ribWidthValue / 2);
+                    const inset = Math.min(available, surfaceInset);
+                    const positionX = offset.direction * (available - inset);
+                    rib.setAttribute('position', `${positionX.toFixed(2)} ${ribYOffset.toFixed(2)} 0`);
+                } else {
+                    const available = Math.max(0, halfDepth - ribDepthValue / 2);
+                    const inset = Math.min(available, surfaceInset);
+                    const positionZ = offset.direction * (available - inset);
+                    rib.setAttribute('position', `0 ${ribYOffset.toFixed(2)} ${positionZ.toFixed(2)}`);
+                }
                 pillarGroup.appendChild(rib);
             });
 
