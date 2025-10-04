@@ -4,7 +4,6 @@
 import { stateManager } from './utils/stateManager.js';
 import { optokineticModule } from './visuals/optokinetic.js';
 import { opticalFlowModule } from './visuals/opticalFlow.js';
-import { rotatingCubeModule } from './visuals/rotatingCube.js';
 import { heightsModule } from './visuals/heights.js';
 
 // --- A-Frame Component for Exercise Ticking ---
@@ -37,9 +36,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const translationSpeedValue = document.getElementById('translation-speed-value');
     const heightSpeedValue = document.getElementById('height-speed-value');
     const heightAltitudeValue = document.getElementById('height-altitude-value');
-    const heightAltitudeRange = document.getElementById('height-altitude-range');
-    const cubeSpeedSlider = document.getElementById('cube-speed-slider');
-    const cubeSpeedValue = document.getElementById('cube-speed-value');
+    const heightPlatformSizeSelect = document.getElementById('height-platform-size');
     const paletteSelect = document.getElementById('palette-select');
     const opticalFlowPaletteSelect = document.getElementById('optical-flow-palette-select');
     const recenterButton = document.getElementById('recenter-button');
@@ -71,12 +68,12 @@ document.addEventListener('DOMContentLoaded', () => {
     let activeVisualModule = null;
     const speedIncrement = 1;
     const translationSpeedIncrement = 0.5;
+    const heightSpeedIncrement = 0.2;
 
     const VisualModules = {
         none: null,
         optokinetic: optokineticModule,
         opticalFlow: opticalFlowModule,
-        rotatingCube: rotatingCubeModule,
         heights: heightsModule
     };
 
@@ -87,24 +84,22 @@ document.addEventListener('DOMContentLoaded', () => {
         // Cache DOM elements
         const optokineticControls = document.getElementById('optokinetic-controls');
         const opticalFlowControls = document.getElementById('optical-flow-controls');
-        const rotatingCubeControls = document.getElementById('rotating-cube-controls');
         const heightsControls = document.getElementById('heights-controls');
 
         optokineticControls.style.display = (moduleName === 'optokinetic') ? 'flex' : 'none';
         opticalFlowControls.style.display = (moduleName === 'opticalFlow') ? 'flex' : 'none';
-        rotatingCubeControls.style.display = (moduleName === 'rotatingCube') ? 'flex' : 'none';
         heightsControls.style.display = (moduleName === 'heights') ? 'flex' : 'none';
 
         const shouldDisplaySubmenu = moduleName && moduleName !== 'none';
-        visualSubmenu.style.display = shouldDisplaySubmenu ? '' : 'none';
+        visualSubmenu.style.display = shouldDisplaySubmenu ? 'flex' : 'none';
 
-        if (moduleName !== 'heights') {
-            if (heightAltitudeValue) {
-                heightAltitudeValue.textContent = '0.0';
-            }
-            if (heightAltitudeRange) {
-                heightAltitudeRange.textContent = '';
-            }
+        if (moduleName !== 'heights' && heightAltitudeValue) {
+            heightAltitudeValue.textContent = '0.0';
+        }
+
+        if (moduleName === 'heights' && heightPlatformSizeSelect) {
+            const { visual: { platformScale = 1 } } = stateManager.getState();
+            heightPlatformSizeSelect.value = platformScale.toString();
         }
     }
 
@@ -121,6 +116,7 @@ document.addEventListener('DOMContentLoaded', () => {
             ...currentState.visual,
             activeModule: moduleName,
             altitude: moduleName === 'heights' ? (currentState.visual.altitude ?? 0) : 0,
+            platformScale: currentState.visual.platformScale ?? 1,
             speeds: { h: 0, v: 0, t: 0, y: 0 }
         };
 
@@ -135,9 +131,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (heightAltitudeValue) {
                 heightAltitudeValue.textContent = '0.0';
             }
-            if (heightAltitudeRange) {
-                heightAltitudeRange.textContent = '';
-            }
+            
             stateManager.setState({ visual: baseVisualState });
             return;
         }
@@ -146,15 +140,10 @@ document.addEventListener('DOMContentLoaded', () => {
             activeVisualModule.init(sceneEl, rigEl, cameraEl, spheresContainer);
         }
 
-        let newSpeeds = { h: 0, v: 0, t: 0, y: 0 };
-        if (moduleName === 'rotatingCube') {
-            newSpeeds.t = parseFloat(cubeSpeedSlider.value);
-        }
-
         stateManager.setState({
             visual: {
                 ...baseVisualState,
-                speeds: newSpeeds
+                speeds: { h: 0, v: 0, t: 0, y: 0 }
             }
         });
     }
@@ -563,22 +552,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    cubeSpeedSlider.addEventListener('input', (e) => {
-        cubeSpeedValue.textContent = e.target.value;
-        const newSpeed = parseFloat(e.target.value);
-        const currentState = stateManager.getState();
-        stateManager.setState({
-            visual: { 
-                ...currentState.visual, 
-                speeds: { ...currentState.visual.speeds, t: newSpeed } 
-            } 
-        });
-    });
-
-    cubeSpeedSlider.addEventListener('change', (e) => {
-        e.target.blur();
-    });
-
     const blurActiveRange = () => {
         const activeElement = document.activeElement;
         if (activeElement && activeElement.matches('input[type="range"]')) {
@@ -659,10 +632,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             } else if (moduleName === 'heights') {
                 if (key === 'arrowup') {
-                    newSpeeds.y = Math.min(5, newSpeeds.y + 0.5);
+                    newSpeeds.y = Math.min(5, newSpeeds.y + heightSpeedIncrement);
                     speedUpdated = true;
                 } else if (key === 'arrowdown') {
-                    newSpeeds.y = Math.max(-5, newSpeeds.y - 0.5);
+                    newSpeeds.y = Math.max(-5, newSpeeds.y - heightSpeedIncrement);
                     speedUpdated = true;
                 } else if (key === ' ') {
                     newSpeeds.y = 0;
@@ -719,6 +692,10 @@ document.addEventListener('DOMContentLoaded', () => {
         const { visual } = stateManager.getState();
         syncDensityControls(visual.density);
         syncPaletteControls(visual.palette);
+        if (heightPlatformSizeSelect) {
+            const initialScale = visual.platformScale ?? 1;
+            heightPlatformSizeSelect.value = initialScale.toString();
+        }
 
         setActiveVisualModule(visualSelect.value); // This will also call updateUIVisibility
 
@@ -732,6 +709,31 @@ document.addEventListener('DOMContentLoaded', () => {
         handleExerciseChange(exerciseSelect.value);
         
         requestAnimationFrame(updateSpeedDisplay);
+    }
+
+    if (heightPlatformSizeSelect) {
+        heightPlatformSizeSelect.addEventListener('change', () => {
+            const selectedScale = parseFloat(heightPlatformSizeSelect.value);
+            if (Number.isNaN(selectedScale)) {
+                return;
+            }
+
+            const currentState = stateManager.getState();
+            if (currentState.visual.platformScale === selectedScale) {
+                return;
+            }
+
+            const updatedVisual = {
+                ...currentState.visual,
+                platformScale: selectedScale
+            };
+
+            stateManager.setState({ visual: updatedVisual });
+
+            if (activeVisualModule && typeof activeVisualModule.setPlatformScale === 'function') {
+                activeVisualModule.setPlatformScale(selectedScale);
+            }
+        });
     }
 
     initialize();
