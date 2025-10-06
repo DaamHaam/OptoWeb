@@ -690,11 +690,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const triggerRecenter = () => handleControlInput('r');
         const triggerStop = () => handleControlInput(' ');
+        const triggerVerticalIncrease = () => handleControlInput('arrowup');
+        const triggerVerticalDecrease = () => handleControlInput('arrowdown');
 
         controllerEl.addEventListener('abuttondown', triggerRecenter);
-        controllerEl.addEventListener('xbuttondown', triggerRecenter);
         controllerEl.addEventListener('bbuttondown', triggerStop);
-        controllerEl.addEventListener('ybuttondown', triggerStop);
+        controllerEl.addEventListener('ybuttondown', triggerVerticalIncrease);
+        controllerEl.addEventListener('xbuttondown', triggerVerticalDecrease);
+
+        if (controllerEl.id === 'right-controller') {
+            controllerEl.addEventListener('thumbstickdown', triggerRecenter);
+        }
     };
 
     const setupVRControllers = () => {
