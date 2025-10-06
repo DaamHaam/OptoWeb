@@ -1,21 +1,10 @@
 // /modules/smoothChase.js
-// Exercice : poursuite aléatoire avec trajectoire fluide autour de la position initiale du patient.
-// Inspiré du fonctionnement général de handleExerciseChange et des modules existants (ex. targetPointer).
+// Exercice : poursuite aléatoire avec trajectoire fluide sur un plan face à l'utilisateur.
+// La cible reste toujours à la même distance le long de l'axe de vue et change de couleur
+// (vert clair / rouge) selon que le pointeur la suit ou non.
 
-const COLOR_OPTIONS = [
-    { label: 'Bleu', value: '#3B82F6' },
-    { label: 'Vert', value: '#22C55E' },
-    { label: 'Orange', value: '#F97316' },
-    { label: 'Rose', value: '#EC4899' }
-];
-
-function computeDimmedColor(hex) {
-    const r = parseInt(hex.slice(1, 3), 16);
-    const g = parseInt(hex.slice(3, 5), 16);
-    const b = parseInt(hex.slice(5, 7), 16);
-    const mix = (component) => Math.round(component * 0.35 + 0x44 * 0.65);
-    return `#${mix(r).toString(16).padStart(2, '0')}${mix(g).toString(16).padStart(2, '0')}${mix(b).toString(16).padStart(2, '0')}`;
-}
+const TARGET_COLOR_TRACKING = '#86EFAC';
+const TARGET_COLOR_LOST = '#EF4444';
 
 export const exerciseModule = {
     // --- DOM Elements (passés depuis main.js) ---
@@ -30,8 +19,7 @@ export const exerciseModule = {
     amplitude: 2,
     speed: 0.75,
     targetSize: 0.25,
-    colorOptions: COLOR_OPTIONS,
-    activeColorIndex: 0,
+    targetDistance: 3.75, // distance fixe en profondeur (identique au pointeur)
 
     // --- Références DOM ---
     amplitudeSlider: null,
@@ -40,19 +28,22 @@ export const exerciseModule = {
     speedValueLabel: null,
     sizeSlider: null,
     sizeValueLabel: null,
-    colorButtons: [],
     startButton: null,
 
     // --- État interne ---
     isActive: false,
     referenceQuaternion: null,
     originPosition: null,
-    offset: null,
-    velocity: null,
-    targetVelocity: null,
+    offset2D: null,
+    velocity2D: null,
+    targetVelocity2D: null,
     directionChangeInterval: 1.5,
     timeSinceDirectionChange: 0,
     targetRadius: 0.25,
+    planeCenter: null,
+    forwardVector: null,
+    rightVector: null,
+    upVector: null,
 
     // --- Entités A-Frame ---
     pointerEl: null,
@@ -73,7 +64,6 @@ export const exerciseModule = {
         this.renderSubmenu();
         this.bindUIEvents();
         this.updateDisplayedValues();
-        this.setActiveColorButton(this.activeColorIndex);
     },
 
     cleanup: function() {
@@ -100,6 +90,11 @@ export const exerciseModule = {
             this.originPosition = new THREE.Vector3();
         }
         this.cameraEl.object3D.getWorldPosition(this.originPosition);
+
+        this.refreshPlaneFrame();
+        if (this.isActive) {
+            this.updateTargetTransform();
+        }
     },
 
     start: function() {
@@ -115,9 +110,9 @@ export const exerciseModule = {
 
         this.recenter({ getHorizontalForwardQuaternion: this.getHorizontalForwardQuaternion });
 
-        this.offset = new THREE.Vector3();
-        this.velocity = new THREE.Vector3();
-        this.targetVelocity = new THREE.Vector3();
+        this.offset2D = new THREE.Vector2();
+        this.velocity2D = new THREE.Vector2();
+        this.targetVelocity2D = new THREE.Vector2();
         this.timeSinceDirectionChange = 0;
         this.directionChangeInterval = 1 + Math.random();
 
@@ -128,6 +123,7 @@ export const exerciseModule = {
 
         this.createPointer();
         this.createTarget();
+        this.updateTargetTransform();
         this.pickNewDirection();
         this.setControlsDisabled(true);
         this.updateStartButtonLabel();
@@ -147,11 +143,15 @@ export const exerciseModule = {
         this.destroyTarget();
         this.referenceQuaternion = null;
         this.originPosition = null;
-        this.offset = null;
-        this.velocity = null;
-        this.targetVelocity = null;
+        this.offset2D = null;
+        this.velocity2D = null;
+        this.targetVelocity2D = null;
         this.timeSinceDirectionChange = 0;
         this.directionChangeInterval = 1.5;
+        this.planeCenter = null;
+        this.forwardVector = null;
+        this.rightVector = null;
+        this.upVector = null;
         this.setControlsDisabled(false);
         this.updateStartButtonLabel();
     },
@@ -171,54 +171,30 @@ export const exerciseModule = {
         }
 
         const smoothingFactor = 1 - Math.exp(-deltaSeconds * 4);
-        this.velocity.lerp(this.targetVelocity, smoothingFactor);
-        this.offset.addScaledVector(this.velocity, deltaSeconds);
+        this.velocity2D.lerp(this.targetVelocity2D, smoothingFactor);
+        this.offset2D.addScaledVector(this.velocity2D, deltaSeconds);
 
         const amplitude = this.amplitude;
-        const offsetLength = this.offset.length();
+        const offsetLength = this.offset2D.length();
         if (offsetLength > amplitude && offsetLength > 0) {
-            this.offset.setLength(amplitude);
-            const correctionDirection = this.offset.clone().multiplyScalar(-1).normalize();
+            this.offset2D.setLength(amplitude);
+            const correctionDirection = this.offset2D.clone().multiplyScalar(-1).normalize();
             const correctionVelocity = correctionDirection.multiplyScalar(this.speed);
             const correctionFactor = 1 - Math.exp(-deltaSeconds * 6);
-            this.velocity.lerp(correctionVelocity, correctionFactor);
+            this.velocity2D.lerp(correctionVelocity, correctionFactor);
         }
 
-        const worldOffset = this.worldOffsetHelper;
-        worldOffset.copy(this.offset).applyQuaternion(this.referenceQuaternion);
+        this.updateTargetTransform();
 
-        const targetWorldPosition = this.targetWorldHelper;
-        targetWorldPosition.copy(this.originPosition).add(worldOffset);
-
-        const localPosition = this.localPositionHelper;
-        localPosition.copy(targetWorldPosition);
-        this.rigEl.object3D.worldToLocal(localPosition);
-
-        this.targetEl.object3D.position.copy(localPosition);
-        this.targetEl.object3D.matrixWorldNeedsUpdate = true;
-
-        const pointerWorld = this.pointerWorldHelper;
-        this.pointerEl.object3D.getWorldPosition(pointerWorld);
-        this.targetEl.object3D.getWorldPosition(targetWorldPosition);
-        const distance = pointerWorld.distanceTo(targetWorldPosition);
+        this.pointerEl.object3D.getWorldPosition(this.pointerWorldHelper);
+        this.targetEl.object3D.getWorldPosition(this.targetWorldHelper);
+        const distance = this.pointerWorldHelper.distanceTo(this.targetWorldHelper);
         const trackingThreshold = this.targetRadius + 0.05;
         this.updateTargetColor(distance <= trackingThreshold);
     },
 
     // --- Helpers internes ---
     renderSubmenu: function() {
-        const colorButtonsHtml = this.colorOptions
-            .map((color, index) => `
-                <button
-                    type="button"
-                    class="smooth-chase-color"
-                    data-color-index="${index}"
-                    title="${color.label}"
-                    style="background:${color.value};width:2.4rem;height:2.4rem;border-radius:999px;border:2px solid rgba(255,255,255,0.5);margin-right:0.5rem;"
-                ></button>
-            `)
-            .join('');
-
         this.exerciseSubmenu.innerHTML = `
             <div class="submenu-item">
                 <label for="smooth-chase-amplitude">Amplitude</label>
@@ -235,12 +211,6 @@ export const exerciseModule = {
                 <input type="range" id="smooth-chase-size" min="0.1" max="0.4" step="0.01" value="${this.targetSize}">
                 <span id="smooth-chase-size-value"></span>
             </div>
-            <div class="submenu-item smooth-chase-colors">
-                <span>Couleur</span>
-                <div class="smooth-chase-color-buttons" role="group" aria-label="Couleur de la cible">
-                    ${colorButtonsHtml}
-                </div>
-            </div>
             <button type="button" id="smooth-chase-toggle">Démarrer</button>
         `;
 
@@ -251,7 +221,6 @@ export const exerciseModule = {
         this.sizeSlider = document.getElementById('smooth-chase-size');
         this.sizeValueLabel = document.getElementById('smooth-chase-size-value');
         this.startButton = document.getElementById('smooth-chase-toggle');
-        this.colorButtons = Array.from(this.exerciseSubmenu.querySelectorAll('.smooth-chase-color'));
     },
 
     bindUIEvents: function() {
@@ -275,13 +244,6 @@ export const exerciseModule = {
             if (this.targetEl) {
                 this.targetEl.setAttribute('radius', this.targetRadius);
             }
-        });
-
-        this.colorButtons.forEach((button) => {
-            button.addEventListener('click', () => {
-                const index = Number(button.dataset.colorIndex);
-                this.setActiveColorButton(index);
-            });
         });
 
         this.startButton.addEventListener('click', () => {
@@ -329,50 +291,21 @@ export const exerciseModule = {
         if (this.amplitudeSlider) this.amplitudeSlider.disabled = disabled;
         if (this.speedSlider) this.speedSlider.disabled = disabled;
         if (this.sizeSlider) this.sizeSlider.disabled = disabled;
-        this.colorButtons.forEach((button) => {
-            button.disabled = disabled;
-        });
-    },
-
-    setActiveColorButton: function(index) {
-        if (Number.isNaN(index) || index < 0 || index >= this.colorOptions.length) {
-            return;
-        }
-        this.activeColorIndex = index;
-        this.colorButtons.forEach((button, i) => {
-            button.classList.toggle('is-active', i === index);
-            button.setAttribute('aria-pressed', i === index ? 'true' : 'false');
-            button.style.boxShadow = i === index
-                ? '0 0 0 2px #ffffff, 0 0 0 4px rgba(0, 0, 0, 0.4)'
-                : 'none';
-        });
-        if (this.targetEl) {
-            this.updateTargetColor(true);
-        }
     },
 
     updateTargetColor: function(isTracking) {
         if (!this.targetEl) {
             return;
         }
-        const baseColor = this.colorOptions[this.activeColorIndex].value;
-        const dimmedColor = computeDimmedColor(baseColor);
-        this.targetEl.setAttribute('color', isTracking ? baseColor : dimmedColor);
+        this.targetEl.setAttribute('color', isTracking ? TARGET_COLOR_TRACKING : TARGET_COLOR_LOST);
     },
 
     pickNewDirection: function() {
-        if (!this.targetVelocity) {
-            this.targetVelocity = new THREE.Vector3();
+        if (!this.targetVelocity2D) {
+            this.targetVelocity2D = new THREE.Vector2();
         }
-        const u = Math.random() * 2 - 1;
         const theta = Math.random() * Math.PI * 2;
-        const sqrtOneMinusUSquared = Math.sqrt(Math.max(0, 1 - u * u));
-        const direction = new THREE.Vector3(
-            sqrtOneMinusUSquared * Math.cos(theta),
-            u,
-            sqrtOneMinusUSquared * Math.sin(theta)
-        );
-        this.targetVelocity.copy(direction.multiplyScalar(this.speed));
+        this.targetVelocity2D.set(Math.cos(theta), Math.sin(theta)).multiplyScalar(this.speed);
         this.timeSinceDirectionChange = 0;
         this.directionChangeInterval = 1 + Math.random();
     },
@@ -396,19 +329,9 @@ export const exerciseModule = {
     createTarget: function() {
         this.destroyTarget();
         this.targetEl = document.createElement('a-sphere');
-        this.targetEl.setAttribute('radius', this.targetRadius.toString());
+        this.targetEl.setAttribute('radius', this.targetRadius);
         this.updateTargetColor(true);
         this.rigEl.appendChild(this.targetEl);
-
-        if (this.originPosition) {
-            const initialWorldPosition = this.targetWorldHelper || new THREE.Vector3();
-            initialWorldPosition.copy(this.originPosition);
-            const localPosition = this.localPositionHelper || new THREE.Vector3();
-            localPosition.copy(initialWorldPosition);
-            this.rigEl.object3D.worldToLocal(localPosition);
-            this.targetEl.object3D.position.copy(localPosition);
-            this.targetEl.object3D.matrixWorldNeedsUpdate = true;
-        }
     },
 
     destroyTarget: function() {
@@ -425,7 +348,54 @@ export const exerciseModule = {
         this.speedValueLabel = null;
         this.sizeSlider = null;
         this.sizeValueLabel = null;
-        this.colorButtons = [];
         this.startButton = null;
+    },
+
+    refreshPlaneFrame: function() {
+        if (!this.referenceQuaternion || !this.originPosition) {
+            return;
+        }
+
+        if (!this.forwardVector) this.forwardVector = new THREE.Vector3();
+        if (!this.rightVector) this.rightVector = new THREE.Vector3();
+        if (!this.upVector) this.upVector = new THREE.Vector3();
+        if (!this.planeCenter) this.planeCenter = new THREE.Vector3();
+
+        this.forwardVector.set(0, 0, -1).applyQuaternion(this.referenceQuaternion).normalize();
+        this.rightVector.set(1, 0, 0).applyQuaternion(this.referenceQuaternion).normalize();
+        this.upVector.set(0, 1, 0).applyQuaternion(this.referenceQuaternion).normalize();
+
+        this.planeCenter.copy(this.originPosition).addScaledVector(this.forwardVector, this.targetDistance);
+    },
+
+    updateTargetTransform: function() {
+        if (!this.targetEl || !this.rigEl) {
+            return;
+        }
+        if (!this.offset2D) {
+            return;
+        }
+        if (!this.planeCenter || !this.rightVector || !this.upVector) {
+            this.refreshPlaneFrame();
+            if (!this.planeCenter || !this.rightVector || !this.upVector) {
+                return;
+            }
+        }
+
+        if (!this.worldOffsetHelper) this.worldOffsetHelper = new THREE.Vector3();
+        if (!this.targetWorldHelper) this.targetWorldHelper = new THREE.Vector3();
+        if (!this.localPositionHelper) this.localPositionHelper = new THREE.Vector3();
+
+        this.worldOffsetHelper.set(0, 0, 0);
+        this.worldOffsetHelper.addScaledVector(this.rightVector, this.offset2D.x);
+        this.worldOffsetHelper.addScaledVector(this.upVector, this.offset2D.y);
+
+        this.targetWorldHelper.copy(this.planeCenter).add(this.worldOffsetHelper);
+
+        this.localPositionHelper.copy(this.targetWorldHelper);
+        this.rigEl.object3D.worldToLocal(this.localPositionHelper);
+
+        this.targetEl.object3D.position.copy(this.localPositionHelper);
+        this.targetEl.object3D.matrixWorldNeedsUpdate = true;
     }
 };
