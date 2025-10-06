@@ -4,15 +4,15 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <title>OW v0.82</title>
+    <title>OW v0.84</title>
     <meta name="description" content="Application de rééducation vestibulaire en réalité virtuelle.">
     <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
-    <link rel="stylesheet" href="styles.css?v=0.82">
+    <link rel="stylesheet" href="styles.css?v=0.84">
         <link rel="manifest" href="manifest.json">
     </head>
     <body>
 
-        <div id="version-display">v0.82</div>
+        <div id="version-display">v0.84</div>
 
     <div class="ui-panels-container has-mobile-tabs">
         <div class="mobile-tabbar" role="tablist" aria-label="Panneaux de configuration">
@@ -211,10 +211,14 @@
 
         <a-sky id="sky" color="#000000"></a-sky>
         <a-entity id="spheres"></a-entity>
-        <a-entity id="rig" position="0 0 0"><a-camera look-controls-enabled="true" wasd-controls-enabled="false"></a-camera></a-entity>
+        <a-entity id="rig" position="0 0 0">
+            <a-camera look-controls-enabled="true" wasd-controls-enabled="false"></a-camera>
+            <a-entity id="left-controller" laser-controls="hand: left"></a-entity>
+            <a-entity id="right-controller" laser-controls="hand: right"></a-entity>
+        </a-entity>
     </a-scene>
 
-    <script type="module" src="main.js?v=0.82"></script>
+    <script type="module" src="main.js?v=0.84"></script>
     <script>
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {

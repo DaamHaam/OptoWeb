@@ -657,6 +657,111 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
+    const vrControllerStates = new WeakMap();
+    const thumbstickThreshold = 0.4;
+    const thumbstickRepeatInterval = 220;
+
+    const getControllerHand = (controllerEl) => {
+        if (!controllerEl) {
+            return undefined;
+        }
+        const laserControlsData = controllerEl.getAttribute('laser-controls');
+        if (laserControlsData && laserControlsData.hand) {
+            return laserControlsData.hand;
+        }
+        if (controllerEl.id) {
+            if (controllerEl.id.includes('left')) {
+                return 'left';
+            }
+            if (controllerEl.id.includes('right')) {
+                return 'right';
+            }
+        }
+        return undefined;
+    };
+
+    const bindVRController = (controllerEl) => {
+        if (!controllerEl || vrControllerStates.has(controllerEl)) {
+            return;
+        }
+
+        const controllerState = {
+            hand: getControllerHand(controllerEl),
+            horizontal: null,
+            vertical: null,
+            lastHorizontalEmit: 0,
+            lastVerticalEmit: 0
+        };
+        vrControllerStates.set(controllerEl, controllerState);
+
+        controllerEl.addEventListener('thumbstickmoved', (event) => {
+            const { x = 0, y = 0 } = event.detail || {};
+            const now = (typeof performance !== 'undefined' && typeof performance.now === 'function') ? performance.now() : Date.now();
+            const nextHorizontal = Math.abs(x) > thumbstickThreshold ? (x > 0 ? 'arrowright' : 'arrowleft') : null;
+            const nextVertical = Math.abs(y) > thumbstickThreshold ? (y < 0 ? 'arrowup' : 'arrowdown') : null;
+
+            if (nextHorizontal !== controllerState.horizontal) {
+                controllerState.horizontal = nextHorizontal;
+                controllerState.lastHorizontalEmit = 0;
+                if (nextHorizontal) {
+                    handleControlInput(nextHorizontal);
+                    controllerState.lastHorizontalEmit = now;
+                }
+            } else if (nextHorizontal && (now - controllerState.lastHorizontalEmit) >= thumbstickRepeatInterval) {
+                handleControlInput(nextHorizontal);
+                controllerState.lastHorizontalEmit = now;
+            }
+
+            if (nextVertical !== controllerState.vertical) {
+                controllerState.vertical = nextVertical;
+                controllerState.lastVerticalEmit = 0;
+                if (nextVertical) {
+                    handleControlInput(nextVertical);
+                    controllerState.lastVerticalEmit = now;
+                }
+            } else if (nextVertical && (now - controllerState.lastVerticalEmit) >= thumbstickRepeatInterval) {
+                handleControlInput(nextVertical);
+                controllerState.lastVerticalEmit = now;
+            }
+        });
+
+        controllerEl.addEventListener('thumbstickup', () => {
+            controllerState.horizontal = null;
+            controllerState.vertical = null;
+            controllerState.lastHorizontalEmit = 0;
+            controllerState.lastVerticalEmit = 0;
+        });
+
+        const triggerRecenter = () => handleControlInput('r');
+        const triggerStop = () => handleControlInput(' ');
+        const triggerVerticalUp = () => handleControlInput('arrowup');
+        const triggerVerticalDown = () => handleControlInput('arrowdown');
+
+        controllerEl.addEventListener('abuttondown', triggerRecenter);
+        controllerEl.addEventListener('bbuttondown', triggerStop);
+        controllerEl.addEventListener('ybuttondown', triggerVerticalUp);
+        controllerEl.addEventListener('xbuttondown', triggerVerticalDown);
+
+        controllerEl.addEventListener('thumbstickdown', () => {
+            if (controllerState.hand === 'right') {
+                triggerRecenter();
+            }
+        });
+    };
+
+    const setupVRControllers = () => {
+        const controllerSelector = '#rig [laser-controls]';
+        const existingControllers = document.querySelectorAll(controllerSelector);
+        existingControllers.forEach((controllerEl) => bindVRController(controllerEl));
+
+        sceneEl.addEventListener('controllerconnected', (event) => {
+            const controllerEl = event.target;
+            if (controllerEl && controllerEl.matches && controllerEl.matches(controllerSelector)) {
+                bindVRController(controllerEl);
+            }
+        });
+    };
+
     document.addEventListener('keydown', (event) => {
         handleControlInput(event.key);
     });
@@ -680,7 +785,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     sceneEl.addEventListener('enter-vr', () => {
         vrMessage.style.display = 'flex';
-        handleRecenter(); 
+        handleRecenter();
     });
 
     sceneEl.addEventListener('exit-vr', () => { 
@@ -737,4 +842,5 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     initialize();
+    setupVRControllers();
 });
