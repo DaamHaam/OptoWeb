@@ -657,6 +657,59 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
+    const vrControllerStates = new WeakMap();
+    const thumbstickThreshold = 0.4;
+
+    const bindVRController = (controllerEl) => {
+        if (!controllerEl || vrControllerStates.has(controllerEl)) {
+            return;
+        }
+
+        const controllerState = { horizontal: null, vertical: null };
+        vrControllerStates.set(controllerEl, controllerState);
+
+        controllerEl.addEventListener('thumbstickmoved', (event) => {
+            const { x = 0, y = 0 } = event.detail || {};
+            const nextHorizontal = Math.abs(x) > thumbstickThreshold ? (x > 0 ? 'arrowright' : 'arrowleft') : null;
+            const nextVertical = Math.abs(y) > thumbstickThreshold ? (y < 0 ? 'arrowup' : 'arrowdown') : null;
+
+            if (nextHorizontal !== controllerState.horizontal) {
+                controllerState.horizontal = nextHorizontal;
+                if (nextHorizontal) {
+                    handleControlInput(nextHorizontal);
+                }
+            }
+
+            if (nextVertical !== controllerState.vertical) {
+                controllerState.vertical = nextVertical;
+                if (nextVertical) {
+                    handleControlInput(nextVertical);
+                }
+            }
+        });
+
+        const triggerRecenter = () => handleControlInput('r');
+        const triggerStop = () => handleControlInput(' ');
+
+        controllerEl.addEventListener('abuttondown', triggerRecenter);
+        controllerEl.addEventListener('xbuttondown', triggerRecenter);
+        controllerEl.addEventListener('bbuttondown', triggerStop);
+        controllerEl.addEventListener('ybuttondown', triggerStop);
+    };
+
+    const setupVRControllers = () => {
+        const controllerSelector = '#rig [laser-controls]';
+        const existingControllers = document.querySelectorAll(controllerSelector);
+        existingControllers.forEach((controllerEl) => bindVRController(controllerEl));
+
+        sceneEl.addEventListener('controllerconnected', (event) => {
+            const controllerEl = event.target;
+            if (controllerEl && controllerEl.matches && controllerEl.matches(controllerSelector)) {
+                bindVRController(controllerEl);
+            }
+        });
+    };
+
     document.addEventListener('keydown', (event) => {
         handleControlInput(event.key);
     });
@@ -680,7 +733,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     sceneEl.addEventListener('enter-vr', () => {
         vrMessage.style.display = 'flex';
-        handleRecenter(); 
+        handleRecenter();
     });
 
     sceneEl.addEventListener('exit-vr', () => { 
@@ -737,4 +790,5 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     initialize();
+    setupVRControllers();
 });

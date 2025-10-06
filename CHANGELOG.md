@@ -1,3 +1,8 @@
+## v0.83 (2025-10-20)
+
+* Ajout du mapping des manettes Oculus Touch : le joystick ajuste les vitesses de l'optocinétique et les boutons A/X recentrent tandis que B/Y arrêtent la rotation.
+* Mise à jour des références de version (interface et cache service worker) en 0.83.
+
 ## v0.82 (2025-10-19)
 
 * Ajout d'espaces tampons dans les panneaux mobiles pour que les curseurs, sélecteurs et boutons restent visibles au-dessus du bandeau de contrôle Recentrer.
