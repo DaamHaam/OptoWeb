@@ -660,6 +660,25 @@ document.addEventListener('DOMContentLoaded', () => {
     const vrControllerStates = new WeakMap();
     const thumbstickThreshold = 0.4;
 
+    const processControllerAxes = (controllerState, x = 0, y = 0) => {
+        const nextHorizontal = Math.abs(x) > thumbstickThreshold ? (x > 0 ? 'arrowright' : 'arrowleft') : null;
+        const nextVertical = Math.abs(y) > thumbstickThreshold ? (y < 0 ? 'arrowup' : 'arrowdown') : null;
+
+        if (nextHorizontal !== controllerState.horizontal) {
+            controllerState.horizontal = nextHorizontal;
+            if (nextHorizontal) {
+                handleControlInput(nextHorizontal);
+            }
+        }
+
+        if (nextVertical !== controllerState.vertical) {
+            controllerState.vertical = nextVertical;
+            if (nextVertical) {
+                handleControlInput(nextVertical);
+            }
+        }
+    };
+
     const bindVRController = (controllerEl) => {
         if (!controllerEl || vrControllerStates.has(controllerEl)) {
             return;
@@ -670,31 +689,52 @@ document.addEventListener('DOMContentLoaded', () => {
 
         controllerEl.addEventListener('thumbstickmoved', (event) => {
             const { x = 0, y = 0 } = event.detail || {};
-            const nextHorizontal = Math.abs(x) > thumbstickThreshold ? (x > 0 ? 'arrowright' : 'arrowleft') : null;
-            const nextVertical = Math.abs(y) > thumbstickThreshold ? (y < 0 ? 'arrowup' : 'arrowdown') : null;
+            processControllerAxes(controllerState, x, y);
+        });
 
-            if (nextHorizontal !== controllerState.horizontal) {
-                controllerState.horizontal = nextHorizontal;
-                if (nextHorizontal) {
-                    handleControlInput(nextHorizontal);
-                }
-            }
-
-            if (nextVertical !== controllerState.vertical) {
-                controllerState.vertical = nextVertical;
-                if (nextVertical) {
-                    handleControlInput(nextVertical);
-                }
-            }
+        controllerEl.addEventListener('axismove', (event) => {
+            const [x = 0, y = 0] = event.detail && Array.isArray(event.detail.axis) ? event.detail.axis : [];
+            processControllerAxes(controllerState, x, y);
         });
 
         const triggerRecenter = () => handleControlInput('r');
         const triggerStop = () => handleControlInput(' ');
+        const triggerVerticalIncrease = () => handleControlInput('arrowup');
+        const triggerVerticalDecrease = () => handleControlInput('arrowdown');
 
         controllerEl.addEventListener('abuttondown', triggerRecenter);
-        controllerEl.addEventListener('xbuttondown', triggerRecenter);
         controllerEl.addEventListener('bbuttondown', triggerStop);
-        controllerEl.addEventListener('ybuttondown', triggerStop);
+        controllerEl.addEventListener('ybuttondown', triggerVerticalIncrease);
+        controllerEl.addEventListener('xbuttondown', triggerVerticalDecrease);
+
+        controllerEl.addEventListener('buttondown', (event) => {
+            const buttonId = event.detail && event.detail.id;
+            switch (buttonId) {
+                case 'a':
+                    triggerRecenter();
+                    break;
+                case 'b':
+                    triggerStop();
+                    break;
+                case 'y':
+                    triggerVerticalIncrease();
+                    break;
+                case 'x':
+                    triggerVerticalDecrease();
+                    break;
+                case 'thumbstick':
+                    if (controllerEl.id === 'right-controller') {
+                        triggerRecenter();
+                    }
+                    break;
+                default:
+                    break;
+            }
+        });
+
+        if (controllerEl.id === 'right-controller') {
+            controllerEl.addEventListener('thumbstickdown', triggerRecenter);
+        }
     };
 
     const setupVRControllers = () => {

@@ -32,6 +32,7 @@ let unsubscribeFromState = null;
 const tempCameraQuat = new THREE.Quaternion();
 const tempCameraRight = new THREE.Vector3(1, 0, 0);
 const tempCameraUp = new THREE.Vector3(0, 1, 0);
+const tempCameraDirection = new THREE.Vector3(0, 0, -1);
 
 const palettesUniformTemplate = Array.from({ length: MAX_PALETTE_COLORS }, () => new THREE.Color(0, 0, 0));
 
@@ -273,14 +274,25 @@ function _fade(direction, callback) {
 
 
 // --- Animation Logic (from main.js) ---
+function _getActiveThreeCamera() {
+    if (sceneEl && sceneEl.camera) {
+        return sceneEl.camera;
+    }
+    if (cameraEl) {
+        return cameraEl.getObject3D('camera') || cameraEl.object3D;
+    }
+    return null;
+}
+
 function _animate(time) {
     animationFrameId = requestAnimationFrame(_animate);
     frameCounter++;
     const dt = (time - lastFrameTime) / 1000;
     lastFrameTime = time;
 
-    if (instancedMaterial && cameraEl) {
-        cameraEl.object3D.getWorldQuaternion(tempCameraQuat);
+    const activeCamera = _getActiveThreeCamera();
+    if (instancedMaterial && activeCamera) {
+        activeCamera.getWorldQuaternion(tempCameraQuat);
         tempCameraRight.set(1, 0, 0).applyQuaternion(tempCameraQuat);
         tempCameraUp.set(0, 1, 0).applyQuaternion(tempCameraQuat);
         instancedMaterial.uniforms.cameraRight.value.copy(tempCameraRight);
@@ -360,10 +372,14 @@ function _stopAutoColorCycle() {
 
 function _updateRotationAxes() {
     rigEl.object3D.quaternion.identity();
-    const cameraDirection = new THREE.Vector3();
-    cameraEl.object3D.getWorldDirection(cameraDirection);
+    const activeCamera = _getActiveThreeCamera();
+    if (activeCamera) {
+        activeCamera.getWorldDirection(tempCameraDirection);
+    } else {
+        tempCameraDirection.set(0, 0, -1);
+    }
     rotationAxisY.set(0, 1, 0);
-    rotationAxisX.crossVectors(cameraDirection, rotationAxisY).normalize();
+    rotationAxisX.crossVectors(tempCameraDirection, rotationAxisY).normalize();
 }
 
 
@@ -388,6 +404,8 @@ export const optokineticModule = {
         currentPalette = colorPalettes[currentPaletteKey] || colorPalettes.default;
 
         _generateSpheres(density, currentPalette);
+
+        _updateRotationAxes();
 
         if (animationFrameId) {
             cancelAnimationFrame(animationFrameId);
