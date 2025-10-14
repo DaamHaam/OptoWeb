@@ -707,31 +707,6 @@ document.addEventListener('DOMContentLoaded', () => {
         controllerEl.addEventListener('ybuttondown', triggerVerticalIncrease);
         controllerEl.addEventListener('xbuttondown', triggerVerticalDecrease);
 
-        controllerEl.addEventListener('buttondown', (event) => {
-            const buttonId = event.detail && event.detail.id;
-            switch (buttonId) {
-                case 'a':
-                    triggerRecenter();
-                    break;
-                case 'b':
-                    triggerStop();
-                    break;
-                case 'y':
-                    triggerVerticalIncrease();
-                    break;
-                case 'x':
-                    triggerVerticalDecrease();
-                    break;
-                case 'thumbstick':
-                    if (controllerEl.id === 'right-controller') {
-                        triggerRecenter();
-                    }
-                    break;
-                default:
-                    break;
-            }
-        });
-
         if (controllerEl.id === 'right-controller') {
             controllerEl.addEventListener('thumbstickdown', triggerRecenter);
         }

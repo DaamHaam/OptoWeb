@@ -1,9 +1,3 @@
-## v0.86 (2025-10-24)
-
-* Correction de la prise en compte des manettes VR : prise en charge des événements `axismove`/`buttondown` pour fiabiliser les commandes A/B/X/Y et le joystick sur Quest.
-* Alignement des halos optocinétiques sur la caméra WebXR pour éviter l'effet de disques visibles uniquement de face.
-* Mise à jour des références de version (interface et cache service worker) en 0.86.
-
 ## v0.85 (2025-10-21)
 
 * Refonte du mapping des manettes Oculus Touch : A et clic joystick droit recentrent, B stoppe la rotation et X/Y ajustent la vitesse verticale.
