@@ -660,6 +660,25 @@ document.addEventListener('DOMContentLoaded', () => {
     const vrControllerStates = new WeakMap();
     const thumbstickThreshold = 0.4;
 
+    const processControllerAxes = (controllerState, x = 0, y = 0) => {
+        const nextHorizontal = Math.abs(x) > thumbstickThreshold ? (x > 0 ? 'arrowright' : 'arrowleft') : null;
+        const nextVertical = Math.abs(y) > thumbstickThreshold ? (y < 0 ? 'arrowup' : 'arrowdown') : null;
+
+        if (nextHorizontal !== controllerState.horizontal) {
+            controllerState.horizontal = nextHorizontal;
+            if (nextHorizontal) {
+                handleControlInput(nextHorizontal);
+            }
+        }
+
+        if (nextVertical !== controllerState.vertical) {
+            controllerState.vertical = nextVertical;
+            if (nextVertical) {
+                handleControlInput(nextVertical);
+            }
+        }
+    };
+
     const bindVRController = (controllerEl) => {
         if (!controllerEl || vrControllerStates.has(controllerEl)) {
             return;
@@ -670,22 +689,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
         controllerEl.addEventListener('thumbstickmoved', (event) => {
             const { x = 0, y = 0 } = event.detail || {};
-            const nextHorizontal = Math.abs(x) > thumbstickThreshold ? (x > 0 ? 'arrowright' : 'arrowleft') : null;
-            const nextVertical = Math.abs(y) > thumbstickThreshold ? (y < 0 ? 'arrowup' : 'arrowdown') : null;
+            processControllerAxes(controllerState, x, y);
+        });
 
-            if (nextHorizontal !== controllerState.horizontal) {
-                controllerState.horizontal = nextHorizontal;
-                if (nextHorizontal) {
-                    handleControlInput(nextHorizontal);
-                }
-            }
-
-            if (nextVertical !== controllerState.vertical) {
-                controllerState.vertical = nextVertical;
-                if (nextVertical) {
-                    handleControlInput(nextVertical);
-                }
-            }
+        controllerEl.addEventListener('axismove', (event) => {
+            const [x = 0, y = 0] = event.detail && Array.isArray(event.detail.axis) ? event.detail.axis : [];
+            processControllerAxes(controllerState, x, y);
         });
 
         const triggerRecenter = () => handleControlInput('r');
