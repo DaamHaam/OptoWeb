@@ -161,8 +161,12 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function handleRecenter() {
-        if (activeVisualModule && typeof activeVisualModule.regenerate === 'function') {
-            activeVisualModule.regenerate();
+        if (activeVisualModule) {
+            if (typeof activeVisualModule.recenter === 'function') {
+                activeVisualModule.recenter({ regenerate: false });
+            } else if (typeof activeVisualModule.regenerate === 'function') {
+                activeVisualModule.regenerate();
+            }
         }
         if (activeExerciseModule && typeof activeExerciseModule.recenter === 'function') {
             activeExerciseModule.recenter({ getHorizontalForwardQuaternion });
