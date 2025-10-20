@@ -8,7 +8,7 @@ import { colorPalettes } from '../utils/colorPalettes.js';
 let sceneEl, container, rigEl, cameraEl;
 let targetSpeed = 0; // La vitesse que l'on veut atteindre
 let currentSpeed = 0; // La vitesse actuelle des particules
-const smoothingFactor = 0.05; // Contrôle la fluidité du mouvement (plus c'est petit, plus c'est fluide)
+const smoothingFactor = 0.12; // Contrôle la fluidité du mouvement (plus c'est petit, plus c'est fluide)
 let density = 100;
 let animationFrameId;
 let stars = [];
@@ -30,11 +30,13 @@ const layerConfigs = [
         radiusRange: [0.18, 0.32],
         horizontalSpread: 24,
         verticalSpread: 18,
-        spawnDepth: { min: -240, max: -140 },
-        recycleNear: 1,
+        spawnDepth: { min: -260, max: -160 },
+        frontSpawnDepth: { min: -60, max: -18 },
+        frontLoadRatio: 0.4,
+        recycleNear: 8.2,
         recycleFar: -260,
-        spawnBiasPower: 3.4,
-        fadeRange: { start: -6, end: 1.2 },
+        spawnBiasPower: 3.2,
+        fadeRange: { start: 1.2, end: 7.5 },
         emissiveIntensity: 2.2
     },
     {
@@ -44,11 +46,13 @@ const layerConfigs = [
         radiusRange: [0.11, 0.22],
         horizontalSpread: 36,
         verticalSpread: 26,
-        spawnDepth: { min: -320, max: -200 },
-        recycleNear: 1,
+        spawnDepth: { min: -360, max: -240 },
+        frontSpawnDepth: { min: -110, max: -40 },
+        frontLoadRatio: 0.28,
+        recycleNear: 9,
         recycleFar: -340,
-        spawnBiasPower: 2.6,
-        fadeRange: { start: -4.5, end: 1.2 },
+        spawnBiasPower: 2.4,
+        fadeRange: { start: 1.5, end: 8.4 },
         emissiveIntensity: 1.8
     },
     {
@@ -58,11 +62,13 @@ const layerConfigs = [
         radiusRange: [0.06, 0.15],
         horizontalSpread: 50,
         verticalSpread: 34,
-        spawnDepth: { min: -520, max: -320 },
-        recycleNear: 1,
+        spawnDepth: { min: -560, max: -360 },
+        frontSpawnDepth: { min: -160, max: -70 },
+        frontLoadRatio: 0.18,
+        recycleNear: 10,
         recycleFar: -540,
         spawnBiasPower: 2.2,
-        fadeRange: { start: -3.5, end: 1.2 },
+        fadeRange: { start: 2, end: 9.5 },
         emissiveIntensity: 1.3
     }
 ];
@@ -139,6 +145,19 @@ function _randomPositionForLayer(layer, direction = 0) {
     const z = minZ + (maxZ - minZ) * randomValue;
     const x = (Math.random() - 0.5) * horizontalSpread;
     const y = (Math.random() - 0.5) * verticalSpread;
+
+    return { x, y, z };
+}
+
+function _randomFrontPositionForLayer(layer) {
+    const { horizontalSpread, verticalSpread, frontSpawnDepth } = layer;
+    const spawnRange = frontSpawnDepth
+        ? _getSpawnRange({ spawnDepth: frontSpawnDepth })
+        : { min: -80, max: -20 };
+
+    const z = _randomInRange(spawnRange.min, spawnRange.max);
+    const x = (Math.random() - 0.5) * horizontalSpread * 0.65;
+    const y = (Math.random() - 0.5) * verticalSpread * 0.65;
 
     return { x, y, z };
 }
@@ -244,13 +263,13 @@ function _applyPaletteToStars(forceNewIndex = false) {
 }
 
 // --- Core Logic ---
-function _createStar(layer) {
+function _createStar(layer, initialPosition = null) {
     const star = document.createElement('a-sphere');
     const radius = _pickRadius(layer.radiusRange);
     star.setAttribute('radius', radius);
 
-    const initialPosition = _randomPositionForLayer(layer, 0);
-    star.setAttribute('position', `${initialPosition.x} ${initialPosition.y} ${initialPosition.z}`);
+    const spawnPosition = initialPosition || _randomPositionForLayer(layer, 0);
+    star.setAttribute('position', `${spawnPosition.x} ${spawnPosition.y} ${spawnPosition.z}`);
 
     container.appendChild(star);
 
@@ -312,8 +331,15 @@ function _generateStars() {
 
     layerConfigs.forEach((layer, index) => {
         const count = counts[index];
+        const frontLoadRatio = Math.max(0, Math.min(1, layer.frontLoadRatio || 0));
+        const frontCount = frontLoadRatio > 0
+            ? Math.min(count, Math.max(1, Math.round(count * frontLoadRatio)))
+            : 0;
+
         for (let i = 0; i < count; i += 1) {
-            stars.push(_createStar(layer));
+            const shouldSpawnFront = i < frontCount;
+            const spawnPosition = shouldSpawnFront ? _randomFrontPositionForLayer(layer) : null;
+            stars.push(_createStar(layer, spawnPosition));
         }
     });
 
@@ -431,6 +457,15 @@ export const opticalFlowModule = {
 
     regenerate() {
         _generateStars();
+    },
+
+    recenter({ regenerate = false } = {}) {
+        if (regenerate) {
+            _generateStars();
+            return;
+        }
+
+        _alignContainerToCamera();
     },
 
     setSpeed(newSpeed) {

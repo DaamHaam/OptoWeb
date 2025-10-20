@@ -1,3 +1,10 @@
+## v0.86 (2025-10-22)
+
+* Le flux optique affiche désormais un paquet de particules proches dès le lancement et ne recycle les points qu'une fois passés derrière l'utilisateur, pour que la direction soit immédiatement lisible.
+* L'accélération lors des changements de vitesse du flux optique devient plus vive afin de répondre plus rapidement aux commandes.
+* Le bouton « Recentrer » aligne le flux optique sur l'orientation actuelle du casque tout en conservant la vitesse du mouvement.
+* Mise à jour des références de version (interface et cache service worker) en 0.86.
+
 ## v0.85 (2025-10-21)
 
 * Refonte du mapping des manettes Oculus Touch : A et clic joystick droit recentrent, B stoppe la rotation et X/Y ajustent la vitesse verticale.
