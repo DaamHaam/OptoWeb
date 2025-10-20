@@ -7,6 +7,14 @@ import { heightsDecorModule } from './decor_heights.js';
 // --- Private State ---
 let sceneEl, rigEl;
 let platformEl;
+const platformElements = {
+    base: null,
+    top: null,
+    marker: null,
+    stripes: [],
+    posts: [],
+    rails: []
+};
 let skyEl;
 let animationFrameId;
 let actualSpeed = 0;
@@ -18,6 +26,7 @@ let lastReportedAltitude = null;
 let unsubscribeFromState = null;
 let platformScale = 1;
 let decorDensityLevel = 'immersive';
+let currentPaletteKey = 'default';
 
 const BASE_ALTITUDE = 1;
 const MIN_ALTITUDE = BASE_ALTITUDE;
@@ -33,37 +42,88 @@ function _reportAltitude(force = false) {
 }
 
 // --- Core Logic ---
+function _resetPlatformElements() {
+    platformElements.base = null;
+    platformElements.top = null;
+    platformElements.marker = null;
+    platformElements.stripes = [];
+    platformElements.posts = [];
+    platformElements.rails = [];
+}
+
+function _applyPlatformTheme() {
+    if (!platformEl) {
+        return;
+    }
+
+    const theme = heightsDecorModule.getCurrentTheme();
+
+    if (platformElements.base) {
+        platformElements.base.setAttribute('color', theme.platformBaseColor);
+    }
+
+    if (platformElements.top) {
+        platformElements.top.setAttribute('color', theme.platformTopColor);
+    }
+
+    if (platformElements.marker) {
+        platformElements.marker.setAttribute('color', theme.platformMarkerColor);
+    }
+
+    platformElements.stripes.forEach((stripe) => {
+        stripe.setAttribute('color', theme.platformStripeColor);
+    });
+
+    platformElements.posts.forEach((post) => {
+        post.setAttribute('color', theme.platformPostColor);
+    });
+
+    platformElements.rails.forEach((rail) => {
+        rail.setAttribute('color', theme.platformRailColor);
+    });
+
+    if (skyEl) {
+        skyEl.setAttribute('color', theme.skyColor);
+    }
+}
+
 function _createElements() {
     // Conteneur principal de la plateforme et de ses éléments décoratifs
     platformEl = document.createElement('a-entity');
     platformEl.setAttribute('id', 'height-platform');
     platformEl.setAttribute('position', `0 ${BASE_ALTITUDE} -2`);
 
+    _resetPlatformElements();
+    const theme = heightsDecorModule.getCurrentTheme();
+
     // Socle principal (base large)
     const baseEl = document.createElement('a-cylinder');
     baseEl.setAttribute('radius', '2.2');
     baseEl.setAttribute('height', '0.3');
-    baseEl.setAttribute('color', '#2c3e50');
+    baseEl.setAttribute('color', theme.platformBaseColor);
     baseEl.setAttribute('position', '0 -0.15 0');
     baseEl.setAttribute('segments-radial', '24');
     platformEl.appendChild(baseEl);
+    platformElements.base = baseEl;
 
     // Plateau supérieur avec une teinte plus claire
     const topSurfaceEl = document.createElement('a-cylinder');
     topSurfaceEl.setAttribute('radius', '2');
     topSurfaceEl.setAttribute('height', '0.08');
-    topSurfaceEl.setAttribute('color', '#4A90E2');
+    topSurfaceEl.setAttribute('color', theme.platformTopColor);
     topSurfaceEl.setAttribute('position', '0 0 0');
     topSurfaceEl.setAttribute('material', 'shader: flat; metalness: 0.1; roughness: 0.4');
     platformEl.appendChild(topSurfaceEl);
+    platformElements.top = topSurfaceEl;
 
     // Marqueur central pour aider à se positionner
     const centerMarker = document.createElement('a-cylinder');
     centerMarker.setAttribute('radius', '0.35');
     centerMarker.setAttribute('height', '0.01');
-    centerMarker.setAttribute('color', '#f8f9fa');
+    centerMarker.setAttribute('color', theme.platformMarkerColor);
     centerMarker.setAttribute('position', '0 0.045 0');
     platformEl.appendChild(centerMarker);
+    platformElements.marker = centerMarker;
 
     // Bandes directionnelles (N, S, E, O)
     const stripeData = [
@@ -78,11 +138,12 @@ function _createElements() {
         stripeEl.setAttribute('depth', '0.2');
         stripeEl.setAttribute('height', '0.01');
         stripeEl.setAttribute('width', '0.5');
-        stripeEl.setAttribute('color', '#d9e8ff');
+        stripeEl.setAttribute('color', theme.platformStripeColor);
         stripeEl.setAttribute('opacity', '0.9');
         stripeEl.setAttribute('position', `${stripe.x} 0.045 ${stripe.z}`);
         stripeEl.setAttribute('rotation', stripe.rotation);
         platformEl.appendChild(stripeEl);
+        platformElements.stripes.push(stripeEl);
     });
 
     // Potelets de sécurité aux quatre coins
@@ -97,9 +158,10 @@ function _createElements() {
         const postEl = document.createElement('a-cylinder');
         postEl.setAttribute('radius', '0.05');
         postEl.setAttribute('height', '1.1');
-        postEl.setAttribute('color', '#cfd9e8');
+        postEl.setAttribute('color', theme.platformPostColor);
         postEl.setAttribute('position', `${pos.x} 0.55 ${pos.z}`);
         platformEl.appendChild(postEl);
+        platformElements.posts.push(postEl);
     });
 
     // Rubans de sécurité semi-transparents
@@ -113,11 +175,12 @@ function _createElements() {
         railEl.setAttribute('width', '3.2');
         railEl.setAttribute('height', '0.06');
         railEl.setAttribute('depth', '0.02');
-        railEl.setAttribute('color', '#b3c4e0');
+        railEl.setAttribute('color', theme.platformRailColor);
         railEl.setAttribute('opacity', '0.55');
         railEl.setAttribute('position', rail.position);
         railEl.setAttribute('rotation', rail.rotation);
         platformEl.appendChild(railEl);
+        platformElements.rails.push(railEl);
     });
 
     const verticalRails = [
@@ -130,15 +193,17 @@ function _createElements() {
         railEl.setAttribute('width', '3.2');
         railEl.setAttribute('height', '0.06');
         railEl.setAttribute('depth', '0.02');
-        railEl.setAttribute('color', '#b3c4e0');
+        railEl.setAttribute('color', theme.platformRailColor);
         railEl.setAttribute('opacity', '0.55');
         railEl.setAttribute('position', rail.position);
         railEl.setAttribute('rotation', rail.rotation);
         platformEl.appendChild(railEl);
+        platformElements.rails.push(railEl);
     });
 
     sceneEl.appendChild(platformEl);
     _applyPlatformScale();
+    _applyPlatformTheme();
 }
 
 function _applyPlatformScale() {
@@ -202,14 +267,12 @@ export const heightsModule = {
         const { visual } = stateManager.getState();
         platformScale = visual.platformScale ?? platformScale;
         decorDensityLevel = visual.heightsDecorDensity ?? decorDensityLevel;
+        currentPaletteKey = visual.palette ?? currentPaletteKey;
 
         // Créer le décor via son module dédié
-        heightsDecorModule.create(sceneEl, decorDensityLevel);
+        heightsDecorModule.create(sceneEl, decorDensityLevel, currentPaletteKey);
 
         skyEl = sceneEl.querySelector('#sky');
-        if (skyEl) {
-            skyEl.setAttribute('color', '#8dc6ff');
-        }
 
         // Réinitialiser la position et la rotation du rig pour cet exercice.
         if (rigEl) {
@@ -222,6 +285,7 @@ export const heightsModule = {
             platformEl.object3D.position.y = BASE_ALTITUDE;
             _applyPlatformScale();
         }
+        _applyPlatformTheme();
         lastFrameTime = performance.now();
         currentAltitude = rigEl ? rigEl.object3D.position.y : BASE_ALTITUDE;
         lastReportedAltitude = null;
@@ -248,6 +312,11 @@ export const heightsModule = {
         if (desiredDensity !== decorDensityLevel) {
             this.setDecorDensity(desiredDensity);
         }
+
+        const desiredPalette = newState.visual.palette ?? currentPaletteKey;
+        if (desiredPalette !== currentPaletteKey) {
+            this.setPalette(desiredPalette);
+        }
     },
 
     cleanup() {
@@ -265,11 +334,13 @@ export const heightsModule = {
             platformEl.parentNode.removeChild(platformEl);
         }
         platformEl = null;
+        _resetPlatformElements();
         actualSpeed = 0;
         targetSpeed = 0;
         currentAltitude = 0;
         lastReportedAltitude = null;
         decorDensityLevel = 'immersive';
+        currentPaletteKey = 'default';
         // Réinitialiser la position du rig
         if(rigEl) {
             rigEl.object3D.position.y = 0;
@@ -319,10 +390,17 @@ export const heightsModule = {
 
         decorDensityLevel = densityLevel;
         heightsDecorModule.updateDensity(densityLevel);
+        _applyPlatformTheme();
     },
-    
+
+    setPalette(paletteKey) {
+        const normalizedKey = paletteKey === 'auto' ? 'default' : (paletteKey || 'default');
+        currentPaletteKey = normalizedKey;
+        heightsDecorModule.updatePalette(normalizedKey);
+        _applyPlatformTheme();
+    },
+
     // --- Fonctions non utilisées mais requises ---
     setDensity() {},
-    setPalette() {},
     getActualSpeed() { return { v: actualSpeed }; }
 };

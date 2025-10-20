@@ -1,3 +1,8 @@
+## v0.87 (2025-10-22)
+
+* Harmonisation complète des couleurs des hauteurs avec les palettes optocinétiques et recoloration dynamique de la plateforme.
+* Ajout de nouvelles tours proches/lointaines, de montagnes agrandies et d'éléments éloignés plus variés pour renforcer la sensation d'ascension.
+
 ## v0.86 (2025-10-22)
 
 * Le flux optique affiche désormais un paquet de particules proches dès le lancement et ne recycle les points qu'une fois passés derrière l'utilisateur, pour que la direction soit immédiatement lisible.
