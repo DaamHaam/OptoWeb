@@ -17,6 +17,7 @@ let currentAltitude = 0;
 let lastReportedAltitude = null;
 let unsubscribeFromState = null;
 let platformScale = 1;
+let decorDensityLevel = 'immersive';
 
 const BASE_ALTITUDE = 1;
 const MIN_ALTITUDE = BASE_ALTITUDE;
@@ -198,11 +199,12 @@ export const heightsModule = {
         }
         unsubscribeFromState = stateManager.subscribe(this.onStateChange.bind(this));
 
-        // Créer le décor via son module dédié
-        heightsDecorModule.create(sceneEl);
-
         const { visual } = stateManager.getState();
         platformScale = visual.platformScale ?? platformScale;
+        decorDensityLevel = visual.heightsDecorDensity ?? decorDensityLevel;
+
+        // Créer le décor via son module dédié
+        heightsDecorModule.create(sceneEl, decorDensityLevel);
 
         skyEl = sceneEl.querySelector('#sky');
         if (skyEl) {
@@ -241,6 +243,11 @@ export const heightsModule = {
         if (Math.abs(desiredScale - platformScale) > 0.0001) {
             this.setPlatformScale(desiredScale);
         }
+
+        const desiredDensity = newState.visual.heightsDecorDensity ?? decorDensityLevel;
+        if (desiredDensity !== decorDensityLevel) {
+            this.setDecorDensity(desiredDensity);
+        }
     },
 
     cleanup() {
@@ -262,6 +269,7 @@ export const heightsModule = {
         targetSpeed = 0;
         currentAltitude = 0;
         lastReportedAltitude = null;
+        decorDensityLevel = 'immersive';
         // Réinitialiser la position du rig
         if(rigEl) {
             rigEl.object3D.position.y = 0;
@@ -295,13 +303,22 @@ export const heightsModule = {
             return;
         }
 
-        const clampedScale = Math.max(0.5, Math.min(1.0, scale));
+        const clampedScale = Math.max(0.25, Math.min(1.0, scale));
         if (Math.abs(clampedScale - platformScale) < 0.0001) {
             return;
         }
 
         platformScale = clampedScale;
         _applyPlatformScale();
+    },
+
+    setDecorDensity(densityLevel) {
+        if (typeof densityLevel !== 'string') {
+            return;
+        }
+
+        decorDensityLevel = densityLevel;
+        heightsDecorModule.updateDensity(densityLevel);
     },
     
     // --- Fonctions non utilisées mais requises ---
