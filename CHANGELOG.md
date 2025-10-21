@@ -1,3 +1,23 @@
+## v0.91 (2025-10-26)
+
+* Remplacement des `requestAnimationFrame` locaux par un composant A-Frame dédié afin que l'optocinétique, le flux optique et les hauteurs continuent d'animer en session WebXR (Quest inclus).
+* Harmonisation des manettes Quest : suppression du rayon laser forcé, mêmes actions sur les deux mains (A/B/X/Y, joystick, clic) et sélection élargie des entités contrôleur.
+* Mise à jour des références de version de l'application et du service worker en 0.91.
+
+## v0.90 (2025-10-25)
+
+* Correction de l'orientation des halos optocinétiques en VR en récupérant explicitement la caméra WebXR active (sous-caméra Quest incluse).
+* Nouveau mapping des manettes : bouton B accélère la vitesse principale, bouton A la réduit et le clic joystick droit revient à la fonction Recentrer.
+* Affichage automatique du pavé de raccourcis fléchés sur Quest pour préparer les réglages sans manette active.
+* Mise à jour des références de version de l'application et du service worker en 0.90.
+
+## v0.89 (2025-10-24)
+
+* Détection automatique de l'Oculus Quest avec affichage du statut dans la console et vitesse optocinétique initialisée à 5°/s pour faciliter les tests sur casque autonome.
+* Remappage des contrôleurs : le clic du joystick droit passe à la stimulation suivante, les boutons B/X/Y et le joystick gauche restent disponibles avec un seuil réduit pour déclencher plus facilement les déplacements.
+* Mise en double face des halos optocinétiques afin de vérifier l'affichage à 360° pendant l'investigation des soucis de billboard sur Quest.
+* Mise à jour des références de version de l'application et du service worker en 0.89.
+
 ## v0.88 (2025-10-23)
 
 * Horizon des hauteurs élargi avec un disque de sol plus vaste et des terrasses étagées plus larges pour accentuer la sensation de profondeur.

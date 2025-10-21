@@ -16,11 +16,11 @@ const platformElements = {
     rails: []
 };
 let skyEl;
-let animationFrameId;
 let actualSpeed = 0;
 let targetSpeed = 0;
 const smoothingFactor = 2.0; // Facteur de lissage pour une décélération douce
-let lastFrameTime = 0;
+let isTicking = false;
+let lastTickTime = null;
 let currentAltitude = 0;
 let lastReportedAltitude = null;
 let unsubscribeFromState = null;
@@ -214,9 +214,16 @@ function _applyPlatformScale() {
     platformEl.object3D.scale.set(platformScale, 1, platformScale);
 }
 
-function _animate(time) {
-    const dt = (time - lastFrameTime) / 1000;
-    lastFrameTime = time;
+function _updateFrame(time = performance.now(), timeDelta = 16.6667) {
+    if (!isTicking) {
+        return;
+    }
+
+    const deltaMs = (typeof timeDelta === 'number' && timeDelta > 0)
+        ? timeDelta
+        : (lastTickTime !== null ? time - lastTickTime : 16.6667);
+    lastTickTime = time;
+    const dt = Math.max(deltaMs, 0) / 1000;
 
     // Lisser la vitesse actuelle vers la vitesse cible
     actualSpeed += (targetSpeed - actualSpeed) * (1 - Math.exp(-dt * smoothingFactor));
@@ -226,7 +233,7 @@ function _animate(time) {
         actualSpeed = 0;
     }
 
-    if (rigEl && platformEl && Math.abs(actualSpeed) > 0) {
+    if (rigEl && platformEl && Math.abs(actualSpeed) > 0 && dt > 0) {
         const desiredY = rigEl.object3D.position.y + actualSpeed * dt; // Vitesse par seconde
         const clampedY = Math.min(MAX_ALTITUDE, Math.max(MIN_ALTITUDE, desiredY));
 
@@ -249,8 +256,6 @@ function _animate(time) {
             _reportAltitude(true);
         }
     }
-
-    animationFrameId = requestAnimationFrame(_animate);
 }
 
 // --- Public Interface ---
@@ -286,16 +291,12 @@ export const heightsModule = {
             _applyPlatformScale();
         }
         _applyPlatformTheme();
-        lastFrameTime = performance.now();
+        lastTickTime = null;
         currentAltitude = rigEl ? rigEl.object3D.position.y : BASE_ALTITUDE;
         lastReportedAltitude = null;
         _reportAltitude(true);
 
-        // Lancer correctement la boucle d'animation
-        if (animationFrameId) {
-            cancelAnimationFrame(animationFrameId);
-        }
-        animationFrameId = requestAnimationFrame(_animate);
+        isTicking = true;
     },
 
     onStateChange(newState) {
@@ -327,9 +328,8 @@ export const heightsModule = {
         // Nettoyer le décor via son module dédié
         heightsDecorModule.cleanup();
 
-        if (animationFrameId) {
-            cancelAnimationFrame(animationFrameId);
-        }
+        isTicking = false;
+        lastTickTime = null;
         if (platformEl && platformEl.parentNode) {
             platformEl.parentNode.removeChild(platformEl);
         }
@@ -362,6 +362,10 @@ export const heightsModule = {
             lastReportedAltitude = null;
         }
         _reportAltitude(true);
+    },
+
+    tick(time, timeDelta) {
+        _updateFrame(time, timeDelta);
     },
 
     // --- Fonctions pour les contrôles ---
