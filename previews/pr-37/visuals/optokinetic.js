@@ -9,8 +9,6 @@ let sceneEl, spheresContainer, rigEl, cameraEl;
 let currentPaletteKey = 'default';
 let currentPalette = colorPalettes.default;
 let density = 150;
-let animationFrameId;
-
 let targetSpeedX = 0, targetSpeedY = 0, actualSpeedX = 0, actualSpeedY = 0;
 const smoothingFactor = 1.5;
 let rotationAxisX = new THREE.Vector3(1, 0, 0), rotationAxisY = new THREE.Vector3(0, 1, 0);
@@ -18,14 +16,11 @@ let rotationAxisX = new THREE.Vector3(1, 0, 0), rotationAxisY = new THREE.Vector
 let isRegenerating = false;
 let colorTransition = { isActive: false, duration: 500, startTime: 0, from: [], to: [] };
 let autoCycleInterval = null;
-let lastFrameTime = performance.now();
-let frameCounter = 0;
 
 let instancedMesh = null;
 let instancedGeometry = null;
 let instancedMaterial = null;
 let haloTexture = null;
-let fadeAnimationId = null;
 const MAX_PALETTE_COLORS = 8;
 let unsubscribeFromState = null;
 
@@ -35,6 +30,17 @@ const tempCameraUp = new THREE.Vector3(0, 1, 0);
 const tempCameraDirection = new THREE.Vector3(0, 0, -1);
 
 const palettesUniformTemplate = Array.from({ length: MAX_PALETTE_COLORS }, () => new THREE.Color(0, 0, 0));
+
+let isTicking = false;
+let lastTickTime = null;
+const fadeState = {
+    active: false,
+    startTime: 0,
+    startOpacity: 1,
+    endOpacity: 1,
+    duration: 300,
+    callback: null
+};
 
 
 function _ensureHaloTexture() {
@@ -137,10 +143,8 @@ function _createInstancedMaterial() {
 }
 
 function _disposeInstancedResources() {
-    if (fadeAnimationId) {
-        cancelAnimationFrame(fadeAnimationId);
-        fadeAnimationId = null;
-    }
+    fadeState.active = false;
+    fadeState.callback = null;
     if (instancedMesh && spheresContainer) {
         spheresContainer.object3D.remove(instancedMesh);
     }
@@ -246,31 +250,12 @@ function _fade(direction, callback) {
         return;
     }
 
-    if (fadeAnimationId) {
-        cancelAnimationFrame(fadeAnimationId);
-        fadeAnimationId = null;
-    }
-
-    const duration = 300;
-    const startOpacity = instancedMaterial.uniforms.globalOpacity.value;
-    const endOpacity = direction === 'out' ? 0 : 1;
-    let startTime = null;
-
-    function fadeAnimation(time) {
-        if (!startTime) startTime = time;
-        const elapsed = time - startTime;
-        const progress = Math.min(elapsed / duration, 1);
-        const opacity = THREE.MathUtils.lerp(startOpacity, endOpacity, progress);
-        instancedMaterial.uniforms.globalOpacity.value = opacity;
-
-        if (progress < 1) {
-            fadeAnimationId = requestAnimationFrame(fadeAnimation);
-        } else {
-            fadeAnimationId = null;
-            if (callback) callback();
-        }
-    }
-    fadeAnimationId = requestAnimationFrame(fadeAnimation);
+    fadeState.active = true;
+    fadeState.startTime = performance.now();
+    fadeState.startOpacity = instancedMaterial.uniforms.globalOpacity.value;
+    fadeState.endOpacity = direction === 'out' ? 0 : 1;
+    fadeState.duration = 300;
+    fadeState.callback = typeof callback === 'function' ? callback : null;
 }
 
 
@@ -311,11 +296,36 @@ function _getActiveThreeCamera() {
     return null;
 }
 
-function _animate(time) {
-    animationFrameId = requestAnimationFrame(_animate);
-    frameCounter++;
-    const dt = (time - lastFrameTime) / 1000;
-    lastFrameTime = time;
+function _updateFade(time) {
+    if (!fadeState.active || !instancedMaterial) {
+        return;
+    }
+
+    const elapsed = time - fadeState.startTime;
+    const progress = Math.min(elapsed / fadeState.duration, 1);
+    const opacity = THREE.MathUtils.lerp(fadeState.startOpacity, fadeState.endOpacity, progress);
+    instancedMaterial.uniforms.globalOpacity.value = opacity;
+
+    if (progress >= 1) {
+        fadeState.active = false;
+        const callback = fadeState.callback;
+        fadeState.callback = null;
+        if (typeof callback === 'function') {
+            callback();
+        }
+    }
+}
+
+function _updateFrame(time = performance.now(), timeDelta = 16.6667) {
+    if (!isTicking) {
+        return;
+    }
+
+    const deltaMs = (typeof timeDelta === 'number' && timeDelta > 0)
+        ? timeDelta
+        : (lastTickTime !== null ? time - lastTickTime : 16.6667);
+    lastTickTime = time;
+    const dt = Math.max(deltaMs, 0) / 1000;
 
     const activeCamera = _getActiveThreeCamera();
     if (instancedMaterial && activeCamera) {
@@ -340,7 +350,9 @@ function _animate(time) {
         }
     }
 
-    if (isRegenerating) return;
+    _updateFade(time);
+
+    if (isRegenerating || dt <= 0) return;
 
     actualSpeedX += (targetSpeedX - actualSpeedX) * (1 - Math.exp(-dt * smoothingFactor));
     actualSpeedY += (targetSpeedY - actualSpeedY) * (1 - Math.exp(-dt * smoothingFactor));
@@ -358,7 +370,7 @@ function _animate(time) {
         r.quaternion.premultiply(dy);
         rotationAxisX.applyQuaternion(dy);
     }
-    
+
     // Note: UI update is now handled by main.js
 }
 
@@ -434,10 +446,8 @@ export const optokineticModule = {
 
         _updateRotationAxes();
 
-        if (animationFrameId) {
-            cancelAnimationFrame(animationFrameId);
-        }
-        animationFrameId = requestAnimationFrame(_animate);
+        isTicking = true;
+        lastTickTime = null;
 
         if (currentPaletteKey === 'none') {
             spheresContainer.setAttribute('visible', 'false');
@@ -463,10 +473,8 @@ export const optokineticModule = {
                 colorTransition.isActive = false;
                 currentPalette = colorPalettes.none;
                 currentPaletteKey = 'none';
-                if (fadeAnimationId) {
-                    cancelAnimationFrame(fadeAnimationId);
-                    fadeAnimationId = null;
-                }
+                fadeState.active = false;
+                fadeState.callback = null;
                 if (instancedMaterial) {
                     instancedMaterial.uniforms.globalOpacity.value = 0.0;
                     instancedMaterial.uniforms.mixFactor.value = 0.0;
@@ -526,15 +534,16 @@ export const optokineticModule = {
         // DEPRECATED: La logique est maintenant dans onStateChange
     },
 
+    tick(time, timeDelta) {
+        _updateFrame(time, timeDelta);
+    },
+
     cleanup() {
         if (unsubscribeFromState) {
             unsubscribeFromState();
             unsubscribeFromState = null;
         }
-        if (animationFrameId) {
-            cancelAnimationFrame(animationFrameId);
-            animationFrameId = null;
-        }
+        isTicking = false;
         _stopAutoColorCycle();
         _disposeInstancedResources();
     }

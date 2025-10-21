@@ -46,6 +46,20 @@ AFRAME.registerComponent('exercise-ticker', {
     }
 });
 
+AFRAME.registerComponent('visuals-ticker', {
+    init: function () {
+        this.activeVisualModule = null;
+    },
+    tick: function (time, timeDelta) {
+        if (this.activeVisualModule && typeof this.activeVisualModule.tick === 'function') {
+            this.activeVisualModule.tick(time, timeDelta);
+        }
+    },
+    setActiveModule: function (module) {
+        this.activeVisualModule = module || null;
+    }
+});
+
 document.addEventListener('DOMContentLoaded', () => {
     // --- DOM Elements ---
     const sceneEl = document.querySelector('a-scene');
@@ -89,6 +103,8 @@ document.addEventListener('DOMContentLoaded', () => {
     };
     const mobileMediaQuery = window.matchMedia('(max-width: 768px)');
     let activeMobileTabId = 'visual-panel';
+
+    sceneEl.setAttribute('visuals-ticker', '');
 
     const isQuestPlatform = detectQuestHeadset();
     if (isQuestPlatform) {
@@ -168,7 +184,15 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    const updateVisualTickerModule = (moduleInstance) => {
+        const tickerComponent = sceneEl.components['visuals-ticker'];
+        if (tickerComponent && typeof tickerComponent.setActiveModule === 'function') {
+            tickerComponent.setActiveModule(moduleInstance);
+        }
+    };
+
     function setActiveVisualModule(moduleName) {
+        updateVisualTickerModule(null);
         if (activeVisualModule && typeof activeVisualModule.cleanup === 'function') {
             activeVisualModule.cleanup();
         }
@@ -212,6 +236,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         stateManager.setState({ visual: baseVisualState });
+        updateVisualTickerModule(activeVisualModule);
     }
 
     function getHorizontalForwardQuaternion() {
@@ -776,11 +801,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const controllerState = { horizontal: null, vertical: null };
         vrControllerStates.set(controllerEl, controllerState);
 
-        controllerEl.setAttribute('raycaster', {
-            showLine: true,
-            far: 12
-        });
-
         controllerEl.addEventListener('thumbstickmoved', (event) => {
             const { x = 0, y = 0 } = event.detail || {};
             processControllerAxes(controllerState, x, y);
@@ -802,13 +822,11 @@ document.addEventListener('DOMContentLoaded', () => {
         controllerEl.addEventListener('ybuttondown', triggerVerticalIncrease);
         controllerEl.addEventListener('xbuttondown', triggerVerticalDecrease);
 
-        if (controllerEl.id === 'right-controller') {
-            controllerEl.addEventListener('thumbstickdown', triggerRecenter);
-        }
+        controllerEl.addEventListener('thumbstickdown', triggerRecenter);
     };
 
     const setupVRControllers = () => {
-        const controllerSelector = '#rig [laser-controls]';
+        const controllerSelector = '#rig [laser-controls], #rig [oculus-touch-controls], #rig [tracked-controls]';
         const existingControllers = document.querySelectorAll(controllerSelector);
         existingControllers.forEach((controllerEl) => bindVRController(controllerEl));
 
