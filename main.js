@@ -6,6 +6,31 @@ import { optokineticModule } from './visuals/optokinetic.js';
 import { opticalFlowModule } from './visuals/opticalFlow.js';
 import { heightsModule } from './visuals/heights.js';
 
+const detectQuestHeadset = () => {
+    if (typeof navigator === 'undefined') {
+        return false;
+    }
+
+    const ua = navigator.userAgent || '';
+    if (/OculusBrowser/i.test(ua)) {
+        return true;
+    }
+
+    const uaDataPlatform = navigator.userAgentData && navigator.userAgentData.platform;
+    if (uaDataPlatform && /oculus/i.test(uaDataPlatform)) {
+        return true;
+    }
+
+    const isStandalone = Boolean(AFRAME?.utils?.device?.isStandaloneVR && AFRAME.utils.device.isStandaloneVR());
+    const isMobileVR = Boolean(AFRAME?.utils?.device?.isMobileVR && AFRAME.utils.device.isMobileVR());
+
+    if ((isStandalone || isMobileVR) && /Quest/i.test(ua)) {
+        return true;
+    }
+
+    return false;
+};
+
 // --- A-Frame Component for Exercise Ticking ---
 AFRAME.registerComponent('exercise-ticker', {
     init: function () {
@@ -65,6 +90,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const mobileMediaQuery = window.matchMedia('(max-width: 768px)');
     let activeMobileTabId = 'visual-panel';
 
+    const isQuestPlatform = detectQuestHeadset();
+    if (isQuestPlatform) {
+        document.body.dataset.vrPlatform = 'quest';
+        console.info('[OptoWeb] Plateforme Quest détectée : vitesse optocinétique par défaut fixée à 5 deg/s.');
+    }
+
     // --- State Variables ---
     let activeExerciseModule = null;
     let activeVisualModule = null;
@@ -78,6 +109,8 @@ document.addEventListener('DOMContentLoaded', () => {
         opticalFlow: opticalFlowModule,
         heights: heightsModule
     };
+
+    const visualModuleCycle = ['optokinetic', 'opticalFlow', 'heights'];
 
     // --- Core Functions ---
 
@@ -122,27 +155,32 @@ document.addEventListener('DOMContentLoaded', () => {
         updateUIVisibility(moduleName);
 
         const currentState = stateManager.getState();
+        const initialSpeeds = { h: 0, v: 0, t: 0, y: 0 };
+        if (moduleName === 'optokinetic' && isQuestPlatform) {
+            initialSpeeds.h = 5;
+        }
+
         const baseVisualState = {
             ...currentState.visual,
             activeModule: moduleName,
             altitude: moduleName === 'heights' ? (currentState.visual.altitude ?? 0) : 0,
             platformScale: currentState.visual.platformScale ?? 1,
             heightsDecorDensity: currentState.visual.heightsDecorDensity ?? 'immersive',
-            speeds: { h: 0, v: 0, t: 0, y: 0 }
+            speeds: initialSpeeds
         };
 
         if (!activeVisualModule) {
             if (skyEl) {
                 skyEl.setAttribute('color', '#000000');
             }
-            horizontalSpeedValue.textContent = '0';
-            verticalSpeedValue.textContent = '0';
-            translationSpeedValue.textContent = '0.0';
-            heightSpeedValue.textContent = '0.0';
+            horizontalSpeedValue.textContent = Math.round(initialSpeeds.h);
+            verticalSpeedValue.textContent = Math.round(initialSpeeds.v);
+            translationSpeedValue.textContent = Number(initialSpeeds.t).toFixed(1);
+            heightSpeedValue.textContent = Number(initialSpeeds.y).toFixed(1);
             if (heightAltitudeValue) {
                 heightAltitudeValue.textContent = '0.0';
             }
-            
+
             stateManager.setState({ visual: baseVisualState });
             return;
         }
@@ -151,13 +189,21 @@ document.addEventListener('DOMContentLoaded', () => {
             activeVisualModule.init(sceneEl, rigEl, cameraEl, spheresContainer);
         }
 
-        stateManager.setState({
-            visual: {
-                ...baseVisualState,
-                speeds: { h: 0, v: 0, t: 0, y: 0 }
-            }
-        });
+        stateManager.setState({ visual: baseVisualState });
     }
+
+    const activateNextVisualModule = () => {
+        const currentValue = visualSelect.value;
+        const currentIndex = visualModuleCycle.indexOf(currentValue);
+        const nextIndex = currentIndex === -1 ? 0 : (currentIndex + 1) % visualModuleCycle.length;
+        const nextModule = visualModuleCycle[nextIndex];
+
+        if (nextModule !== currentValue) {
+            visualSelect.value = nextModule;
+        }
+
+        setActiveVisualModule(nextModule);
+    };
 
     function getHorizontalForwardQuaternion() {
         const cameraQuaternion = new THREE.Quaternion();
@@ -682,7 +728,7 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     const vrControllerStates = new WeakMap();
-    const thumbstickThreshold = 0.4;
+    const thumbstickThreshold = 0.25;
 
     const processControllerAxes = (controllerState, x = 0, y = 0) => {
         const nextHorizontal = Math.abs(x) > thumbstickThreshold ? (x > 0 ? 'arrowright' : 'arrowleft') : null;
@@ -732,7 +778,9 @@ document.addEventListener('DOMContentLoaded', () => {
         controllerEl.addEventListener('xbuttondown', triggerVerticalDecrease);
 
         if (controllerEl.id === 'right-controller') {
-            controllerEl.addEventListener('thumbstickdown', triggerRecenter);
+            controllerEl.addEventListener('thumbstickdown', () => {
+                activateNextVisualModule();
+            });
         }
     };
 

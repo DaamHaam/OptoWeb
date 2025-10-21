@@ -1,3 +1,10 @@
+## v0.89 (2025-10-24)
+
+* Détection automatique de l'Oculus Quest avec affichage du statut dans la console et vitesse optocinétique initialisée à 5°/s pour faciliter les tests sur casque autonome.
+* Remappage des contrôleurs : le clic du joystick droit passe à la stimulation suivante, les boutons B/X/Y et le joystick gauche restent disponibles avec un seuil réduit pour déclencher plus facilement les déplacements.
+* Mise en double face des halos optocinétiques afin de vérifier l'affichage à 360° pendant l'investigation des soucis de billboard sur Quest.
+* Mise à jour des références de version de l'application et du service worker en 0.89.
+
 ## v0.88 (2025-10-23)
 
 * Horizon des hauteurs élargi avec un disque de sol plus vaste et des terrasses étagées plus larges pour accentuer la sensation de profondeur.

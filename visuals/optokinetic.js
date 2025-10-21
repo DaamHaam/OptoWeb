@@ -63,6 +63,7 @@ function _createInstancedMaterial() {
     instancedMaterial = new THREE.ShaderMaterial({
         transparent: true,
         depthWrite: false,
+        side: THREE.DoubleSide,
         blending: THREE.AdditiveBlending,
         uniforms: {
             haloTexture: { value: _ensureHaloTexture() },
