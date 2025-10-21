@@ -1,3 +1,9 @@
+## v0.91 (2025-10-26)
+
+* Remplacement des `requestAnimationFrame` locaux par un composant A-Frame dédié afin que l'optocinétique, le flux optique et les hauteurs continuent d'animer en session WebXR (Quest inclus).
+* Harmonisation des manettes Quest : suppression du rayon laser forcé, mêmes actions sur les deux mains (A/B/X/Y, joystick, clic) et sélection élargie des entités contrôleur.
+* Mise à jour des références de version de l'application et du service worker en 0.91.
+
 ## v0.90 (2025-10-25)
 
 * Correction de l'orientation des halos optocinétiques en VR en récupérant explicitement la caméra WebXR active (sous-caméra Quest incluse).

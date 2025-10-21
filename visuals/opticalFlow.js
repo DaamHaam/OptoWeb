@@ -10,9 +10,9 @@ let targetSpeed = 0; // La vitesse que l'on veut atteindre
 let currentSpeed = 0; // La vitesse actuelle des particules
 const smoothingFactor = 0.12; // Contrôle la fluidité du mouvement (plus c'est petit, plus c'est fluide)
 let density = 100;
-let animationFrameId;
 let stars = [];
-let lastTime = 0; // Pour calculer le timeDelta
+let isTicking = false;
+let lastTickTime = null;
 let selectedPaletteId = 'default';
 let activePaletteColors = colorPalettes.default;
 let autoPaletteInterval = null;
@@ -347,12 +347,16 @@ function _generateStars() {
 }
 
 // --- Animation Logic ---
-function _animate(time) {
-    if (lastTime === 0) {
-        lastTime = time;
+function _updateFrame(time = performance.now(), timeDelta = 16.6667) {
+    if (!isTicking) {
+        return;
     }
-    const timeDelta = time - lastTime;
-    lastTime = time;
+
+    const deltaMs = (typeof timeDelta === 'number' && timeDelta > 0)
+        ? timeDelta
+        : (lastTickTime !== null ? time - lastTickTime : 16.6667);
+    lastTickTime = time;
+    const deltaSeconds = Math.max(deltaMs, 0) / 1000;
 
     currentSpeed += (targetSpeed - currentSpeed) * smoothingFactor;
 
@@ -360,8 +364,7 @@ function _animate(time) {
         currentSpeed = 0;
     }
 
-    if (currentSpeed !== 0 && timeDelta > 0) {
-        const deltaSeconds = timeDelta / 1000;
+    if (currentSpeed !== 0 && deltaSeconds > 0) {
         for (const starData of stars) {
             const position = starData.element.object3D.position;
             position.z += currentSpeed * deltaSeconds * starData.speedFactor;
@@ -406,8 +409,6 @@ function _animate(time) {
             }
         }
     }
-
-    animationFrameId = requestAnimationFrame(_animate);
 }
 
 // --- Public Interface ---
@@ -429,11 +430,8 @@ export const opticalFlowModule = {
 
         _generateStars();
 
-        if (animationFrameId) {
-            cancelAnimationFrame(animationFrameId);
-        }
-        lastTime = 0; // Réinitialiser le temps pour le calcul du delta
-        animationFrameId = requestAnimationFrame(_animate);
+        isTicking = true;
+        lastTickTime = null;
     },
 
     onStateChange(newState) {
@@ -503,15 +501,17 @@ export const opticalFlowModule = {
         _applyPaletteToStars(true);
     },
 
+    tick(time, timeDelta) {
+        _updateFrame(time, timeDelta);
+    },
+
     cleanup() {
         if (unsubscribeFromState) {
             unsubscribeFromState();
             unsubscribeFromState = null;
         }
-        if (animationFrameId) {
-            cancelAnimationFrame(animationFrameId);
-            animationFrameId = null;
-        }
+        isTicking = false;
+        lastTickTime = null;
         _stopAutoPalette();
         if (container) {
             _clearContainerChildren();
@@ -519,6 +519,5 @@ export const opticalFlowModule = {
         stars = [];
         currentSpeed = 0;
         targetSpeed = 0;
-        lastTime = 0;
     }
 };
