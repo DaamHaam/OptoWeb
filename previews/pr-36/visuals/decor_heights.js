@@ -9,6 +9,8 @@ const CLOSE_TOWER_CONFIGS = [
     { x: -3.0, z: -5.4, height: 19, baseRadius: 0.75, width: 1.05, depth: 1.05, minDensity: 'minimal' },
     { x: 4.8, z: -2.8, height: 17, baseRadius: 0.72, width: 0.95, depth: 1.0, minDensity: 'minimal' },
     { x: -5.1, z: -2.6, height: 17.5, baseRadius: 0.72, width: 1.0, depth: 1.05, minDensity: 'minimal' },
+    { x: 2.8, z: 4.6, height: 18.5, baseRadius: 0.7, width: 1.05, depth: 1.0, minDensity: 'minimal' },
+    { x: -3.2, z: 4.4, height: 18.2, baseRadius: 0.7, width: 1.05, depth: 1.0, minDensity: 'minimal' },
     { x: 2.4, z: -6.8, height: 20, baseRadius: 0.82, width: 1.15, depth: 1.15, minDensity: 'standard' },
     { x: -2.2, z: -7.2, height: 21, baseRadius: 0.85, width: 1.2, depth: 1.2, minDensity: 'standard' },
     { x: 0.8, z: -3.6, height: 22, baseRadius: 0.9, width: 1.35, depth: 1.1, minDensity: 'rich' },
@@ -45,6 +47,7 @@ const ARCH_CONFIGS = [
 const PILLAR_CONFIGS = [
     { x: 12, z: -10, height: 24, width: 2.4, depth: 2.2, minDensity: 'minimal' },
     { x: -18, z: -4, height: 28, width: 2.8, depth: 2.4, minDensity: 'minimal' },
+    { x: 10, z: 16, height: 25, width: 2.2, depth: 2.4, minDensity: 'minimal' },
     { x: 22, z: 12, height: 26, width: 2.2, depth: 2.8, minDensity: 'standard' },
     { x: -10, z: 18, height: 22, width: 2.1, depth: 2.1, minDensity: 'standard' },
     { x: 28, z: -22, height: 30, width: 2.6, depth: 2.4, minDensity: 'rich' },
@@ -100,6 +103,7 @@ const BALLOON_CONFIGS = [
 const TREE_CONFIGS = [
     { x: 26, z: -14, trunkHeight: 3.2, canopyScale: '2.6 2.8 2.6', sway: 0.18, minDensity: 'minimal' },
     { x: -28, z: -10, trunkHeight: 4, canopyScale: '3 3.4 3', sway: 0.24, minDensity: 'minimal' },
+    { x: 20, z: 20, trunkHeight: 3.4, canopyScale: '2.4 2.6 2.4', sway: 0.16, minDensity: 'minimal' },
     { x: 24, z: 18, trunkHeight: 3.6, canopyScale: '2.4 2.6 2.4', sway: 0.16, minDensity: 'standard' },
     { x: -22, z: 22, trunkHeight: 3.8, canopyScale: '2.8 3 2.8', sway: 0.2, minDensity: 'standard' },
     { x: 30, z: 28, trunkHeight: 4.4, canopyScale: '2.2 2.4 2.2', sway: 0.14, minDensity: 'rich' },
@@ -111,15 +115,20 @@ const TREE_CONFIGS = [
 ];
 
 const MOUNTAIN_CONFIGS = [
-    { x: 18, z: -32, height: 22, radius: 12, minDensity: 'standard' },
-    { x: -14, z: -36, height: 26, radius: 13, minDensity: 'standard' },
-    { x: 26, z: 40, height: 28, radius: 14, minDensity: 'rich' },
-    { x: -30, z: 36, height: 30, radius: 16, minDensity: 'rich' },
-    { x: 10, z: 48, height: 24, radius: 11, minDensity: 'rich' },
-    { x: -6, z: -46, height: 30, radius: 14, minDensity: 'immersive' },
-    { x: 36, z: -32, height: 32, radius: 15, minDensity: 'immersive' },
-    { x: -38, z: 30, height: 34, radius: 16, minDensity: 'immersive' },
-    { x: 42, z: 44, height: 36, radius: 18, minDensity: 'immersive' }
+    { x: 16, z: -46, height: 30, radius: 14, snowHeightRatio: 0.28, snowRadiusRatio: 0.42, minDensity: 'minimal' },
+    { x: -18, z: 50, height: 32, radius: 15, snowHeightRatio: 0.3, snowRadiusRatio: 0.44, minDensity: 'minimal' },
+    { x: 18, z: -32, height: 22, radius: 12, snowHeightRatio: 0.25, snowRadiusRatio: 0.38, minDensity: 'standard' },
+    { x: -14, z: -36, height: 26, radius: 13, snowHeightRatio: 0.28, snowRadiusRatio: 0.4, minDensity: 'standard' },
+    { x: 0, z: -72, height: 46, radius: 20, snowHeightRatio: 0.34, snowRadiusRatio: 0.46, minDensity: 'standard' },
+    { x: 26, z: 40, height: 28, radius: 14, snowHeightRatio: 0.27, snowRadiusRatio: 0.42, minDensity: 'rich' },
+    { x: -30, z: 36, height: 30, radius: 16, snowHeightRatio: 0.28, snowRadiusRatio: 0.44, minDensity: 'rich' },
+    { x: 48, z: 68, height: 50, radius: 22, snowHeightRatio: 0.36, snowRadiusRatio: 0.48, minDensity: 'rich' },
+    { x: 10, z: 48, height: 24, radius: 11, snowHeightRatio: 0.24, snowRadiusRatio: 0.36, minDensity: 'rich' },
+    { x: -6, z: -46, height: 30, radius: 14, snowHeightRatio: 0.28, snowRadiusRatio: 0.4, minDensity: 'immersive' },
+    { x: 36, z: -32, height: 32, radius: 15, snowHeightRatio: 0.3, snowRadiusRatio: 0.42, minDensity: 'immersive' },
+    { x: -38, z: 30, height: 34, radius: 16, snowHeightRatio: 0.3, snowRadiusRatio: 0.45, minDensity: 'immersive' },
+    { x: 42, z: 44, height: 36, radius: 18, snowHeightRatio: 0.32, snowRadiusRatio: 0.46, minDensity: 'immersive' },
+    { x: -52, z: 64, height: 52, radius: 23, snowHeightRatio: 0.38, snowRadiusRatio: 0.5, minDensity: 'immersive' }
 ];
 
 const LANTERN_CONFIGS = [
@@ -182,6 +191,7 @@ function getDefaultTheme() {
         mountainMainColors: ['#7286a0', '#6b7c96', '#7088a8', '#677d96', '#8097b2', '#647791', '#5f7087', '#5a6c82', '#6d7c95'],
         mountainSecondaryColors: ['#7f93ad', '#7a8fa8', '#7d9ab4', '#7489a1', '#8499b7', '#72839b'],
         mountainHighlightColor: '#d9e6f5',
+        mountainSnowColor: '#f9fcff',
         lanternColors: ['#ffe08a', '#ffd1ff', '#b5f0ff']
     };
 }
@@ -230,6 +240,7 @@ function getMonochromeTheme() {
     theme.mountainMainColors = [mixColors(base, mid, 0.45), mixColors(base, mid, 0.5), mixColors(base, mid, 0.55)];
     theme.mountainSecondaryColors = [mixColors(base, mid, 0.35), mixColors(base, mid, 0.4)];
     theme.mountainHighlightColor = mixColors(accent, highlight, 0.5);
+    theme.mountainSnowColor = mixColors(highlight, '#ffffff', 0.5);
     theme.lanternColors = [mixColors(accent, highlight, 0.5), mixColors(mid, highlight, 0.5), mixColors(base, accent, 0.5)];
 
     return theme;
@@ -342,6 +353,7 @@ function buildThemeFromPalette(palette) {
         darken(quaternary, 0.25)
     ];
     theme.mountainHighlightColor = lighten(quinary, 0.7);
+    theme.mountainSnowColor = lighten(quinary, 0.92);
 
     theme.lanternColors = [
         lighten(accent, 0.85),
@@ -393,21 +405,21 @@ function selectColor(colors, index) {
 
 function addBaseStructures(root, theme) {
     createEntity('a-entity', {
-        geometry: 'primitive: circle; radius: 58; segments: 96',
+        geometry: 'primitive: circle; radius: 90; segments: 96',
         material: `shader: flat; roughness: 0.8; color: ${theme.groundPlaneColor}`,
         rotation: '-90 0 0',
         position: '0 -1.2 -2'
     }, root);
 
     createEntity('a-entity', {
-        geometry: 'primitive: torus; radius: 58; radiusTubular: 0.6; segmentsTubular: 32; segmentsRadial: 12',
+        geometry: 'primitive: torus; radius: 90; radiusTubular: 0.8; segmentsTubular: 48; segmentsRadial: 12',
         material: `color: ${theme.groundRingColor}; shader: flat; metalness: 0.05; roughness: 0.6`,
         rotation: '90 0 0',
         position: '0 -1.45 -2'
     }, root);
 
     theme.terracesColors.forEach((color, index) => {
-        const radius = [25, 18, 12][index] || 10;
+        const radius = [32, 24, 16][index] || 12;
         const y = [-4, -6.5, -9][index] || -11;
         createEntity('a-cylinder', {
             radius: radius.toString(),
@@ -804,6 +816,11 @@ function addMountainSilhouettes(root, densityLevel, theme) {
         const mainColor = selectColor(theme.mountainMainColors, index);
         const secondaryColor = selectColor(theme.mountainSecondaryColors, index);
         const highlightColor = theme.mountainHighlightColor;
+        const snowColor = theme.mountainSnowColor;
+        const snowHeightRatio = clamp01(mountain.snowHeightRatio ?? 0.28);
+        const snowRadiusRatio = clamp01(mountain.snowRadiusRatio ?? 0.4);
+        const snowHeight = Math.max(2, Math.min(mountain.height * 0.6, mountain.height * snowHeightRatio));
+        const snowRadius = Math.max(1.2, Math.min(mountain.radius * 0.7, mountain.radius * snowRadiusRatio));
 
         createEntity('a-entity', {
             geometry: `primitive: cone; radiusBottom: ${mountain.radius}; radiusTop: 0.5; height: ${mountain.height}`,
@@ -815,6 +832,12 @@ function addMountainSilhouettes(root, densityLevel, theme) {
             geometry: `primitive: cone; radiusBottom: ${(mountain.radius * 0.6).toFixed(2)}; radiusTop: 0.2; height: ${(mountain.height * 0.8).toFixed(2)}`,
             position: `${mountain.x + 2} ${(mountain.height * 0.8) / 2 - 1.8} ${mountain.z - 5}`,
             material: `shader: flat; color: ${secondaryColor}; opacity: 0.78`
+        }, root);
+
+        createEntity('a-entity', {
+            geometry: `primitive: cone; radiusBottom: ${snowRadius.toFixed(2)}; radiusTop: 0.05; height: ${snowHeight.toFixed(2)}`,
+            position: `${mountain.x} ${(mountain.height - (snowHeight / 2)) - 2} ${mountain.z - 2}`,
+            material: `shader: flat; color: ${snowColor}; opacity: 0.92`
         }, root);
 
         if (isLevelAtLeast(densityLevel, 'immersive')) {

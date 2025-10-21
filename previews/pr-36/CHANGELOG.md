@@ -1,3 +1,10 @@
+## v0.88 (2025-10-23)
+
+* Horizon des hauteurs élargi avec un disque de sol plus vaste et des terrasses étagées plus larges pour accentuer la sensation de profondeur.
+* Ajout de chaînes montagneuses lointaines plus hautes avec sommets enneigés et nouveaux reliefs visibles même en décor épuré.
+* Meilleure répartition des éléments en mode épuré grâce à des tours, arbres et piliers supplémentaires autour de la plateforme.
+* Nouveau sélecteur d'ambiance de couleur directement dans les réglages des hauteurs.
+
 ## v0.87 (2025-10-22)
 
 * Harmonisation complète des couleurs des hauteurs avec les palettes optocinétiques et recoloration dynamique de la plateforme.

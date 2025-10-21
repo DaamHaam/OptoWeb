@@ -38,6 +38,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const heightAltitudeValue = document.getElementById('height-altitude-value');
     const heightPlatformSizeSelect = document.getElementById('height-platform-size');
     const heightDecorDensitySelect = document.getElementById('height-decor-density');
+    const heightPaletteSelect = document.getElementById('height-palette-select');
     const paletteSelect = document.getElementById('palette-select');
     const opticalFlowPaletteSelect = document.getElementById('optical-flow-palette-select');
     const recenterButton = document.getElementById('recenter-button');
@@ -99,12 +100,15 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         if (moduleName === 'heights') {
-            const { visual: { platformScale = 1, heightsDecorDensity = 'immersive' } } = stateManager.getState();
+            const { visual: { platformScale = 1, heightsDecorDensity = 'immersive', palette = 'default' } } = stateManager.getState();
             if (heightPlatformSizeSelect) {
                 heightPlatformSizeSelect.value = platformScale.toString();
             }
             if (heightDecorDensitySelect) {
                 heightDecorDensitySelect.value = heightsDecorDensity;
+            }
+            if (heightPaletteSelect) {
+                heightPaletteSelect.value = palette;
             }
         }
     }
@@ -509,6 +513,9 @@ document.addEventListener('DOMContentLoaded', () => {
         if (opticalFlowPaletteSelect && opticalFlowPaletteSelect.value !== value) {
             opticalFlowPaletteSelect.value = value;
         }
+        if (heightPaletteSelect && heightPaletteSelect.value !== value) {
+            heightPaletteSelect.value = value;
+        }
     };
 
     const updatePaletteState = (value, target) => {
@@ -536,6 +543,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (opticalFlowPaletteSelect) {
         opticalFlowPaletteSelect.addEventListener('change', (e) => {
+            updatePaletteState(e.target.value, e.target);
+        });
+    }
+
+    if (heightPaletteSelect) {
+        heightPaletteSelect.addEventListener('change', (e) => {
             updatePaletteState(e.target.value, e.target);
         });
     }
@@ -778,6 +791,9 @@ document.addEventListener('DOMContentLoaded', () => {
         if (heightDecorDensitySelect) {
             const initialDensity = visual.heightsDecorDensity ?? 'immersive';
             heightDecorDensitySelect.value = initialDensity;
+        }
+        if (heightPaletteSelect) {
+            heightPaletteSelect.value = visual.palette ?? 'default';
         }
 
         setActiveVisualModule(visualSelect.value); // This will also call updateUIVisibility
