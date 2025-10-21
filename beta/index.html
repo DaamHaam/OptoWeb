@@ -4,15 +4,15 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <title>OW v0.86</title>
+    <title>OW v0.88</title>
     <meta name="description" content="Application de rééducation vestibulaire en réalité virtuelle.">
     <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
-    <link rel="stylesheet" href="styles.css?v=0.86">
+    <link rel="stylesheet" href="styles.css?v=0.88">
         <link rel="manifest" href="manifest.json">
     </head>
     <body>
 
-        <div id="version-display">v0.86</div>
+        <div id="version-display">v0.88</div>
 
     <div class="ui-panels-container has-mobile-tabs">
         <div class="mobile-tabbar" role="tablist" aria-label="Panneaux de configuration">
@@ -139,7 +139,36 @@
                             <label class="heights-control-label" for="height-platform-size">Plateforme</label>
                             <select id="height-platform-size">
                                 <option value="1">Taille normale</option>
+                                <option value="0.75">Taille réduite (75&nbsp;%)</option>
                                 <option value="0.5">Taille réduite (50&nbsp;%)</option>
+                                <option value="0.35">Taille compacte (35&nbsp;%)</option>
+                                <option value="0.25">Taille minimale (25&nbsp;%)</option>
+                            </select>
+                        </div>
+                        <div class="control-item heights-control">
+                            <label class="heights-control-label" for="height-palette-select">Ambiance</label>
+                            <select id="height-palette-select">
+                                <option value="default">Défaut (Blanc)</option>
+                                <option value="none">Aucun (Noir)</option>
+                                <option value="forest">Forêt Mystique</option>
+                                <option value="sunset">Coucher de Soleil</option>
+                                <option value="ocean">Océan Profond</option>
+                                <option value="retro">Néon Rétro</option>
+                                <option value="pastel">Tons Pastel</option>
+                                <option value="autumn">Épices d'Automne</option>
+                                <option value="aurora">Aurore Boréale</option>
+                                <option value="volcanic">Volcanique</option>
+                                <option value="cyberpunk">Cyberpunk</option>
+                                <option value="auto">Changement Automatique</option>
+                            </select>
+                        </div>
+                        <div class="control-item heights-control">
+                            <label class="heights-control-label" for="height-decor-density">Décor</label>
+                            <select id="height-decor-density">
+                                <option value="minimal">Épuré</option>
+                                <option value="standard">Standard</option>
+                                <option value="rich">Riche</option>
+                                <option value="immersive" selected>Immersif</option>
                             </select>
                         </div>
                     </div>
@@ -218,7 +247,7 @@
         </a-entity>
     </a-scene>
 
-    <script type="module" src="main.js?v=0.86"></script>
+    <script type="module" src="main.js?v=0.88"></script>
     <script>
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {

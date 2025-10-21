@@ -8,6 +8,7 @@ const state = {
         palette: 'default',         // Ambiance de couleur
         altitude: 0,              // Altitude courante (utilisée par l'exercice Hauteurs)
         platformScale: 1,         // Facteur d'échelle de la plateforme des hauteurs
+        heightsDecorDensity: 'immersive', // Niveau de richesse du décor pour l'exercice Hauteurs
         speeds: {
             h: 0,                 // Vitesse horizontale (optocinétique)
             v: 0,                 // Vitesse verticale (optocinétique)
