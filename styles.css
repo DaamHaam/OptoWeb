@@ -177,6 +177,21 @@ body {
     touch-action: manipulation;
 }
 
+body[data-vr-platform="quest"] .mobile-keypad {
+    display: grid;
+    grid-template-columns: repeat(3, 32px);
+    grid-auto-rows: 32px;
+    justify-content: center;
+    justify-items: center;
+    align-items: center;
+}
+
+body[data-vr-platform="quest"] .mobile-keypad-button {
+    width: 32px;
+    height: 32px;
+    font-size: 0.9em;
+}
+
 .mobile-keypad-button:active {
     background-color: #e4f0ee;
     border-color: #b6d8d4;

@@ -103,14 +103,36 @@ document.addEventListener('DOMContentLoaded', () => {
     const translationSpeedIncrement = 0.5;
     const heightSpeedIncrement = 0.2;
 
+    const adjustPrimarySpeed = (currentState, step) => {
+        const moduleName = visualSelect.value;
+        const newSpeeds = { ...currentState.visual.speeds };
+        let hasUpdated = false;
+
+        if (moduleName === 'optokinetic') {
+            newSpeeds.h += speedIncrement * step;
+            hasUpdated = true;
+        } else if (moduleName === 'opticalFlow') {
+            newSpeeds.t += translationSpeedIncrement * step;
+            hasUpdated = true;
+        } else if (moduleName === 'heights') {
+            const nextValue = newSpeeds.y + heightSpeedIncrement * step;
+            newSpeeds.y = Math.max(-5, Math.min(5, nextValue));
+            hasUpdated = true;
+        }
+
+        if (hasUpdated) {
+            stateManager.setState({ visual: { ...currentState.visual, speeds: newSpeeds } });
+        }
+
+        return hasUpdated;
+    };
+
     const VisualModules = {
         none: null,
         optokinetic: optokineticModule,
         opticalFlow: opticalFlowModule,
         heights: heightsModule
     };
-
-    const visualModuleCycle = ['optokinetic', 'opticalFlow', 'heights'];
 
     // --- Core Functions ---
 
@@ -191,19 +213,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
         stateManager.setState({ visual: baseVisualState });
     }
-
-    const activateNextVisualModule = () => {
-        const currentValue = visualSelect.value;
-        const currentIndex = visualModuleCycle.indexOf(currentValue);
-        const nextIndex = currentIndex === -1 ? 0 : (currentIndex + 1) % visualModuleCycle.length;
-        const nextModule = visualModuleCycle[nextIndex];
-
-        if (nextModule !== currentValue) {
-            visualSelect.value = nextModule;
-        }
-
-        setActiveVisualModule(nextModule);
-    };
 
     function getHorizontalForwardQuaternion() {
         const cameraQuaternion = new THREE.Quaternion();
@@ -672,6 +681,16 @@ document.addEventListener('DOMContentLoaded', () => {
         let newSpeeds = { ...currentState.visual.speeds };
         let speedUpdated = false;
 
+        if (key === 'quest-speed-increase') {
+            if (adjustPrimarySpeed(currentState, 1)) {
+                return;
+            }
+        } else if (key === 'quest-speed-decrease') {
+            if (adjustPrimarySpeed(currentState, -1)) {
+                return;
+            }
+        }
+
         if (activeVisualModule) {
             if (moduleName === 'optokinetic') {
                 switch (key) {
@@ -757,6 +776,11 @@ document.addEventListener('DOMContentLoaded', () => {
         const controllerState = { horizontal: null, vertical: null };
         vrControllerStates.set(controllerEl, controllerState);
 
+        controllerEl.setAttribute('raycaster', {
+            showLine: true,
+            far: 12
+        });
+
         controllerEl.addEventListener('thumbstickmoved', (event) => {
             const { x = 0, y = 0 } = event.detail || {};
             processControllerAxes(controllerState, x, y);
@@ -768,19 +792,18 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         const triggerRecenter = () => handleControlInput('r');
-        const triggerStop = () => handleControlInput(' ');
+        const triggerPrimaryIncrease = () => handleControlInput('quest-speed-increase');
+        const triggerPrimaryDecrease = () => handleControlInput('quest-speed-decrease');
         const triggerVerticalIncrease = () => handleControlInput('arrowup');
         const triggerVerticalDecrease = () => handleControlInput('arrowdown');
 
-        controllerEl.addEventListener('abuttondown', triggerRecenter);
-        controllerEl.addEventListener('bbuttondown', triggerStop);
+        controllerEl.addEventListener('abuttondown', triggerPrimaryDecrease);
+        controllerEl.addEventListener('bbuttondown', triggerPrimaryIncrease);
         controllerEl.addEventListener('ybuttondown', triggerVerticalIncrease);
         controllerEl.addEventListener('xbuttondown', triggerVerticalDecrease);
 
         if (controllerEl.id === 'right-controller') {
-            controllerEl.addEventListener('thumbstickdown', () => {
-                activateNextVisualModule();
-            });
+            controllerEl.addEventListener('thumbstickdown', triggerRecenter);
         }
     };
 
