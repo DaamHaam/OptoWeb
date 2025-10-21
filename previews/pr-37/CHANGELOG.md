@@ -1,3 +1,10 @@
+## v0.90 (2025-10-25)
+
+* Correction de l'orientation des halos optocinétiques en VR en récupérant explicitement la caméra WebXR active (sous-caméra Quest incluse).
+* Nouveau mapping des manettes : bouton B accélère la vitesse principale, bouton A la réduit et le clic joystick droit revient à la fonction Recentrer.
+* Affichage automatique du pavé de raccourcis fléchés sur Quest pour préparer les réglages sans manette active.
+* Mise à jour des références de version de l'application et du service worker en 0.90.
+
 ## v0.89 (2025-10-24)
 
 * Détection automatique de l'Oculus Quest avec affichage du statut dans la console et vitesse optocinétique initialisée à 5°/s pour faciliter les tests sur casque autonome.

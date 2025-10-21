@@ -276,12 +276,38 @@ function _fade(direction, callback) {
 
 // --- Animation Logic (from main.js) ---
 function _getActiveThreeCamera() {
-    if (sceneEl && sceneEl.camera) {
-        return sceneEl.camera;
+    if (sceneEl) {
+        const renderer = sceneEl.renderer;
+        if (renderer && renderer.xr && typeof renderer.xr.getCamera === 'function' && sceneEl.camera) {
+            const xrCamera = renderer.xr.getCamera(sceneEl.camera);
+            if (xrCamera) {
+                if (xrCamera.isArrayCamera && Array.isArray(xrCamera.cameras) && xrCamera.cameras.length > 0) {
+                    return xrCamera.cameras[0];
+                }
+                return xrCamera;
+            }
+        }
+
+        if (sceneEl.camera) {
+            const baseCamera = sceneEl.camera;
+            if (baseCamera.isArrayCamera && Array.isArray(baseCamera.cameras) && baseCamera.cameras.length > 0) {
+                return baseCamera.cameras[0];
+            }
+            return baseCamera;
+        }
     }
+
     if (cameraEl) {
-        return cameraEl.getObject3D('camera') || cameraEl.object3D;
+        const embeddedCamera = cameraEl.getObject3D('camera');
+        if (embeddedCamera) {
+            if (embeddedCamera.isArrayCamera && Array.isArray(embeddedCamera.cameras) && embeddedCamera.cameras.length > 0) {
+                return embeddedCamera.cameras[0];
+            }
+            return embeddedCamera;
+        }
+        return cameraEl.object3D;
     }
+
     return null;
 }
 
